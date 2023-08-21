@@ -3,6 +3,9 @@ from lsprotocol.types import CompletionParams, CompletionList, CompletionItem
 
 class Completer:
 
+    # TODO: Add trigger characters.
+    trigger_characters = ['.']
+
     def __init__(self, ls):
         self.ls = ls
 
