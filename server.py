@@ -1,7 +1,9 @@
 import logging
+import re
 from pygls.server import LanguageServer
 
 from completer import Completer
+from highlighter import Highlighter
 from hoverer import Hoverer
 from linter import Linter
 from parser import parse_source
@@ -11,7 +13,8 @@ from lsprotocol.types import (
     CompletionParams, TEXT_DOCUMENT_HOVER, TextDocumentPositionParams,
     DidOpenTextDocumentParams, DidChangeTextDocumentParams, TEXT_DOCUMENT_DID_OPEN, TEXT_DOCUMENT_DID_CHANGE,
     CompletionOptions, INITIALIZED, TEXT_DOCUMENT_DEFINITION, Location, Position, Range, TEXT_DOCUMENT_DID_SAVE,
-    DidSaveTextDocumentParams
+    DidSaveTextDocumentParams, TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL, SemanticTokensParams, SemanticTokens,
+    SemanticTokensLegend
 )
 
 # TODO: Setup logging better.
@@ -31,6 +34,7 @@ class WooWooLanguageServer(LanguageServer):
         self.linter = Linter(self)
         self.completer = Completer(self)
         self.hoverer = Hoverer(self)
+        self.highlighter = Highlighter(self)
 
 
 SERVER = WooWooLanguageServer('woowoo-language-SERVER', 'v0.1')
@@ -50,6 +54,7 @@ def did_open(ls: WooWooLanguageServer, params: DidOpenTextDocumentParams):
 
     ls.linter.diagnose(doc)
 
+
 @SERVER.feature(TEXT_DOCUMENT_DID_SAVE)
 def did_save(ls: WooWooLanguageServer, params: DidSaveTextDocumentParams) -> None:
     logger.debug("SERVER.feature called: TEXT_DOCUMENT_DID_SAVE")
@@ -57,6 +62,7 @@ def did_save(ls: WooWooLanguageServer, params: DidSaveTextDocumentParams) -> Non
     uri = params.text_document.uri
     doc = ls.workspace.get_document(uri)
     ls.linter.diagnose(doc)
+
 
 @SERVER.feature(TEXT_DOCUMENT_DID_CHANGE)
 def did_change(ls: WooWooLanguageServer, params: DidChangeTextDocumentParams):
@@ -79,6 +85,17 @@ def completions(ls: WooWooLanguageServer, params: CompletionParams):
 def on_hover(ls: WooWooLanguageServer, params: TextDocumentPositionParams):
     logger.debug("SERVER.feature called: TEXT_DOCUMENT_HOVER")
     return ls.hoverer.hover(params)
+
+
+@SERVER.feature(TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
+                SemanticTokensLegend(token_types=Highlighter.token_types,
+                                     token_modifiers=Highlighter.token_modifiers))
+def semantic_tokens(ls: WooWooLanguageServer, params: SemanticTokensParams):
+    logger.debug("SERVER.feature called: TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL")
+
+    # NOTE: At this time, this function is used to full-scale highlighting.
+    # That means no syntax highlighting is needed on the client side.
+    return ls.highlighter.semantic_tokens()
 
 
 """

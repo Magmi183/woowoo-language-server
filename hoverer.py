@@ -1,6 +1,7 @@
 from lsprotocol.types import TextDocumentPositionParams, MarkupContent, MarkupKind, Hover
 from parser import WOOWOO_LANGUAGE
 from tree_sitter import Tree, Node
+from tree_utils import build_query_string_from_list
 
 
 class Hoverer:
@@ -10,17 +11,10 @@ class Hoverer:
     def __init__(self, ls):
         self.ls = ls
 
-    def build_hoverable_nodes_query(self):
-        formatted_nodes = [f"({node})" for node in self.hoverable_nodes]
-        query_string = f"[ {' '.join(formatted_nodes)} ] @type"
-
-        query = WOOWOO_LANGUAGE.query(query_string)
-        return query
-
     def hover(self, params: TextDocumentPositionParams):
         position = params.position
         line, col = position.line, position.character
-        query = self.build_hoverable_nodes_query()
+        query = WOOWOO_LANGUAGE.query(build_query_string_from_list(self.hoverable_nodes, "type"))
 
         captures = query.captures(self.ls.tree.root_node, start_point=(line, col), end_point=(line, col + 1))
 
