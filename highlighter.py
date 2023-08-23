@@ -77,6 +77,10 @@ class Highlighter:
             start_point = woowoo_document.utf8_to_utf16_offset(node.start_point)
             end_point = woowoo_document.utf8_to_utf16_offset(node.end_point)
 
+            # this adjustment is needed because vscode does not support overlapping tokens ('include' token in this case)
+            # the tree-sitter grammar would have to be changed (named node would have to be introduced) to get rid of this
+            start_point, end_point = self.adjust_bounds(start_point, end_point, node)
+
             data += [start_point[0] - last_line,  # token line number, relative to the previous token
                      start_point[1] - last_start,  # token start character, relative to the previous token
                      end_point[1] - start_point[1],  # the length of the token.
@@ -87,3 +91,10 @@ class Highlighter:
             last_line, last_start = start_point
 
         return SemanticTokens(data=data)
+
+    def adjust_bounds(self, start, end, node):
+
+        if node.type == 'include':
+            return start, (end[0], start[1] + len('.include'))
+        else:
+            return start, end
