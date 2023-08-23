@@ -1,7 +1,8 @@
 import re
 
-from lsprotocol.types import SemanticTokens
+from lsprotocol.types import SemanticTokens, SemanticTokensParams
 
+import utils
 from parser import WOOWOO_LANGUAGE
 
 
@@ -50,11 +51,12 @@ class Highlighter:
         with open('queries/highlights.scm', 'r') as file:
             return file.read()
 
-    def semantic_tokens(self):
+    def semantic_tokens(self, params: SemanticTokensParams):
+        woowoo_document = self.ls.docs[utils.uri_to_path(params.text_document.uri)]
         data = []
 
         # execute all queries from the highlights.scm file
-        nodes = WOOWOO_LANGUAGE.query(self.highlight_queries).captures(self.ls.tree.root_node)
+        nodes = WOOWOO_LANGUAGE.query(self.highlight_queries).captures(woowoo_document.tree.root_node)
 
         last_line, last_start = 0, 0
         for node in nodes:
@@ -63,8 +65,8 @@ class Highlighter:
             # restart char position index when current token is on different line than the previous one
             last_start = last_start if node.start_point[0] == last_line else 0
 
-            start_point = self.ls.utf8_to_utf16_offset(node.start_point)
-            end_point = self.ls.utf8_to_utf16_offset(node.end_point)
+            start_point = woowoo_document.utf8_to_utf16_offset(node.start_point)
+            end_point = woowoo_document.utf8_to_utf16_offset(node.end_point)
 
             data += [start_point[0] - last_line,  # token line number, relative to the previous token
                      start_point[1] - last_start,  # token start character, relative to the previous token

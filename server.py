@@ -2,6 +2,7 @@ import logging
 import re
 from pygls.server import LanguageServer
 
+import utils
 from completer import Completer
 from highlighter import Highlighter
 from hoverer import Hoverer
@@ -14,8 +15,11 @@ from lsprotocol.types import (
     DidOpenTextDocumentParams, DidChangeTextDocumentParams, TEXT_DOCUMENT_DID_OPEN, TEXT_DOCUMENT_DID_CHANGE,
     CompletionOptions, INITIALIZED, TEXT_DOCUMENT_DEFINITION, Location, Position, Range, TEXT_DOCUMENT_DID_SAVE,
     DidSaveTextDocumentParams, TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL, SemanticTokensParams, SemanticTokens,
-    SemanticTokensLegend, InitializedParams, InitializeParams, InitializeResult, ServerCapabilities, INITIALIZE
+    SemanticTokensLegend, InitializedParams, InitializeParams, InitializeResult, ServerCapabilities, INITIALIZE,
+    WorkspaceFolder
 )
+
+from woowoodocument import WooWooDocument
 
 # TODO: Setup logging better.
 logging.basicConfig()
@@ -29,61 +33,30 @@ class WooWooLanguageServer(LanguageServer):
         logger.debug("Constructing WooWooLanguageServer.")
         super().__init__(name, version)
 
-        self.tree = None
-        self.utf8_to_utf16_mappings = None
-
         self.linter = Linter(self)
         self.completer = Completer(self)
         self.hoverer = Hoverer(self)
         self.highlighter = Highlighter(self)
 
-    def utf8_char_len(self, first_byte):
-        """Determine UTF-8 character length based on the first byte."""
-        if first_byte < 0b10000000:
-            return 1
-        elif first_byte < 0b11100000:
-            return 2
-        elif first_byte < 0b11110000:
-            return 3
-        else:
-            return 4
+        self.docs = {}
 
-    def build_utf8_to_utf16_mapping(self, source):
-        lines = source.splitlines()
-        mappings = []
-
-        for line in lines:
-            utf8_offset = 0
-            utf16_position = 0
-            line_mapping = {}
-
-            utf8_bytes = line.encode('utf-8')
-
-            while utf8_offset < len(utf8_bytes):
-                # Decode one character at a time
-                char_len = self.utf8_char_len(utf8_bytes[utf8_offset])
-
-                # Directly compute the length of the character in UTF-16 units
-                utf16_len = len(utf8_bytes[utf8_offset:utf8_offset + char_len].decode('utf-8').encode('utf-16-le')) // 2
-                utf16_position += utf16_len
-
-                # Record the mapping
-                for i in range(char_len):
-                    line_mapping[utf8_offset + i] = utf16_position - (utf16_len - i)
-
-                utf8_offset += char_len
-
-            mappings.append(line_mapping)
-
-        self.utf8_to_utf16_mappings = mappings
-
-    def utf8_to_utf16_offset(self, coords):
-        """Converts a line's utf8 offset to its utf16 offset using the mapping"""
-        line_num, utf8_offset = coords
-        return line_num, self.utf8_to_utf16_mappings[line_num].get(utf8_offset, utf8_offset)
+    def load_workspace(self, workspace: WorkspaceFolder):
+        root_path = utils.uri_to_path(workspace.uri)
+        for woo_file in root_path.rglob('*.woo'):
+            self.docs[woo_file] = WooWooDocument(woo_file)
 
 
 SERVER = WooWooLanguageServer('woowoo-language-SERVER', 'v0.1')
+
+
+@SERVER.feature(INITIALIZE)
+def initiliaze(ls: WooWooLanguageServer, params: InitializeParams) -> None:
+    logger.debug("[INITIALIZE]")
+
+    if len(params.workspace_folders) != 1:
+        logger.error("Exactly one workspace has to be opened. No other options are supported for now.")
+
+    ls.load_workspace(params.workspace_folders[0])
 
 
 @SERVER.feature(INITIALIZED)
@@ -94,12 +67,9 @@ def initiliazed(_ls: WooWooLanguageServer, params: InitializedParams) -> None:
 @SERVER.feature(TEXT_DOCUMENT_DID_OPEN)
 def did_open(ls: WooWooLanguageServer, params: DidOpenTextDocumentParams):
     logger.debug("SERVER.feature called: TEXT_DOCUMENT_DID_OPEN")
+
     uri = params.text_document.uri
     doc = ls.workspace.get_document(uri)
-
-    ls.tree = parse_source(doc.source)
-    ls.build_utf8_to_utf16_mapping(doc.source)
-
     ls.linter.diagnose(doc)
 
 
@@ -116,11 +86,12 @@ def did_save(ls: WooWooLanguageServer, params: DidSaveTextDocumentParams) -> Non
 def did_change(ls: WooWooLanguageServer, params: DidChangeTextDocumentParams):
     logger.debug("SERVER.feature called: TEXT_DOCUMENT_DID_CHANGE")
     uri = params.text_document.uri
+    path = utils.uri_to_path(uri)
+
+    # NOTE: As of now, re-parsing the whole file on every change.
+    ls.docs[path] = WooWooDocument(path)
+
     doc = ls.workspace.get_document(uri)
-
-    ls.tree = parse_source(doc.source)
-    ls.build_utf8_to_utf16_mapping(doc.source)
-
     ls.linter.diagnose(doc)
 
 
@@ -145,7 +116,8 @@ def semantic_tokens(ls: WooWooLanguageServer, params: SemanticTokensParams):
 
     # NOTE: At this time, this function is used to full-scale highlighting.
     # That means no syntax highlighting is needed on the client side.
-    return ls.highlighter.semantic_tokens()
+
+    return ls.highlighter.semantic_tokens(params)
 
 
 """
