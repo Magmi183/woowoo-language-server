@@ -4,6 +4,7 @@ from lsprotocol.types import SemanticTokens
 
 from parser import WOOWOO_LANGUAGE
 
+
 class Highlighter:
     # the token types/modifiers used by the highlighter
     token_types = [
@@ -62,13 +63,16 @@ class Highlighter:
             # restart char position index when current token is on different line than the previous one
             last_start = last_start if node.start_point[0] == last_line else 0
 
-            data += [node.start_point[0] - last_line,  # token line number, relative to the previous token
-                     node.start_point[1] - last_start,  # token start character, relative to the previous token
-                     node.end_point[1] - node.start_point[1],  # the length of the token.
+            start_point = self.ls.utf8_to_utf16_offset(node.start_point)
+            end_point = self.ls.utf8_to_utf16_offset(node.end_point)
+
+            data += [start_point[0] - last_line,  # token line number, relative to the previous token
+                     start_point[1] - last_start,  # token start character, relative to the previous token
+                     end_point[1] - start_point[1],  # the length of the token.
                      Highlighter.token_types.index(type),  # type
                      0  # modifiers (bit encoding)
                      ]
 
-            last_line, last_start = node.start_point
+            last_line, last_start = start_point
 
         return SemanticTokens(data=data)
