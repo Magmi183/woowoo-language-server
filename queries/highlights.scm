@@ -31,7 +31,7 @@
 
 ;  - Verbose Inner Environment
 
-(verbose_inner_environment (_ "\"" @string.delimiter))
+(verbose_inner_environment (_ "\"" @string))
 (verbose_inner_environment (_ ["." "@" "#"] @operator))
 (verbose_inner_environment_type) @type
 (verbose_inner_environment_at_type) @type
@@ -45,4 +45,4 @@
 ;  - Math
 
 (math_environment "$" @function)
-(math_environment_body ) @constant
+(math_environment_body ) @variable

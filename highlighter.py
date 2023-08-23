@@ -7,35 +7,44 @@ from parser import WOOWOO_LANGUAGE
 
 
 class Highlighter:
-    # the token types/modifiers used by the highlighter
+    # the token types recognized by VSCode client
     token_types = [
-        "comment",
-        "string",
-        "string.delimiter",
-        "keyword",
-        "number",
-        "regexp",
-        "operator",
-        "namespace",
-        "type",
-        "struct",
-        "class",
-        "interface",
-        "enum",
-        "typeParameter",
-        "function",
-        "member",
-        "macro",
-        "variable",
-        "parameter",
-        "label",
-        "property",
-        "enumMember",
-        "event",
-        "operator.overloaded",
-        "constant"
+        'namespace',
+        'type',
+        'class',
+        'enum',
+        'interface',
+        'struct',
+        'typeParameter',
+        'parameter',
+        'variable',
+        'property',
+        'enumMember',
+        'event',
+        'function',
+        'method',
+        'macro',
+        'keyword',
+        'modifier',
+        'comment',
+        'string',
+        'number',
+        'regexp',
+        'operator',
+        'decorator',
     ]
-    token_modifiers = []
+    token_modifiers = [
+        'declaration',
+        'definition',
+        'readonly',
+        'static',
+        'deprecated',
+        'abstract',
+        'async',
+        'modification',
+        'documentation',
+        'defaultLibrary'
+    ]
 
     def __init__(self, ls):
         self.ls = ls
