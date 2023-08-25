@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from parser import Parser
 from parser import parse_source
 
@@ -10,12 +11,14 @@ class WooWooDocument:
         self.utf8_to_utf16_mappings = None
         self._load()
 
+    def update_source(self, source: str):
+        self.tree = parse_source(source)
+        self.build_utf8_to_utf16_mapping(source)
+
     def _load(self):
         with self.path.open('r') as f:
             source = f.read()
-            self.tree = parse_source(source)
-
-            self.build_utf8_to_utf16_mapping(source)
+            self.update_source(source)
 
 
     def build_utf8_to_utf16_mapping(self, source):

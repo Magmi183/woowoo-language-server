@@ -61,7 +61,7 @@ class Highlighter:
             return file.read()
 
     def semantic_tokens(self, params: SemanticTokensParams):
-        woowoo_document = self.ls.docs[utils.uri_to_path(params.text_document.uri)]
+        woowoo_document = self.ls.get_document(params)
         data = []
 
         # execute all queries from the highlights.scm file
