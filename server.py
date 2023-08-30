@@ -42,7 +42,8 @@ class WooWooLanguageServer(LanguageServer):
 
     def load_workspace(self, workspace: WorkspaceFolder):
         root_path = utils.uri_to_path(workspace.uri)
-        for woo_file in root_path.rglob('*.woo'):
+        woo_files = root_path.rglob('*.woo')
+        for woo_file in woo_files:
             self.docs[woo_file] = WooWooDocument(woo_file)
 
     def get_document(self, params):
