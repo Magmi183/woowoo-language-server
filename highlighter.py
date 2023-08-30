@@ -1,9 +1,7 @@
-import re
-
 from lsprotocol.types import SemanticTokens, SemanticTokensParams
+from tree_sitter import Node
 
-import utils
-from parser import WOOWOO_LANGUAGE
+from parser import WOOWOO_LANGUAGE, YAML_LANGUAGE
 
 
 class Highlighter:
@@ -48,16 +46,12 @@ class Highlighter:
 
     def __init__(self, ls):
         self.ls = ls
-        self.highlight_queries = self.read_highlights()
+        self.woo_highlight_queries = self.read_highlights('queries/highlights.scm')
+        self.yaml_highlight_queries = self.read_highlights('queries/yaml-highlights.scm')
 
-    def read_highlights(self) -> str:
-        """
-        Reads the contents of the 'queries/highlights.scm' file. This is the same file used by tree-sitter.
-        It can be used to make one big capture-all query.
+    def read_highlights(self, file_path) -> str:
 
-        :return: A string containing the contents of the 'queries/highlights.scm' file.
-        """
-        with open('queries/highlights.scm', 'r') as file:
+        with open(file_path, 'r') as file:
             return file.read()
 
     def semantic_tokens(self, params: SemanticTokensParams):
@@ -65,32 +59,80 @@ class Highlighter:
         data = []
 
         # execute all queries from the highlights.scm file
-        nodes = WOOWOO_LANGUAGE.query(self.highlight_queries).captures(woowoo_document.tree.root_node)
+        nodes = WOOWOO_LANGUAGE.query(self.woo_highlight_queries).captures(woowoo_document.tree.root_node)
+
+        meta_blocks_nodes = []
+        for line_offset, meta_block_tree in woowoo_document.meta_block_trees:
+            meta_block_nodes = YAML_LANGUAGE.query(self.yaml_highlight_queries).captures(
+                meta_block_tree.root_node)
+            meta_blocks_nodes.append((line_offset, meta_block_nodes))
+
+        # line offset of the first metablock
+
+        current_meta_block_index = 0
+        next_meta_block_start = float('inf')
+        if current_meta_block_index < len(meta_blocks_nodes):
+            next_meta_block_start = meta_blocks_nodes[current_meta_block_index][0]
 
         last_line, last_start = 0, 0
         for node in nodes:
-            node, type = node
 
-            # restart char position index when current token is on different line than the previous one
-            last_start = last_start if node.start_point[0] == last_line else 0
+            while node[0].start_point[0] > next_meta_block_start:
+                # node is after meta-block which has NOT been processed yet, now is the time
+                for meta_block_node in meta_blocks_nodes[current_meta_block_index][1]:
+                    data, last_line, last_start = self.add_node_for_highlight(woowoo_document, data,
+                                                                                   meta_block_node,
+                                                                                   last_line, last_start,
+                                                                                   next_meta_block_start)
 
-            start_point = woowoo_document.utf8_to_utf16_offset(node.start_point)
-            end_point = woowoo_document.utf8_to_utf16_offset(node.end_point)
+                current_meta_block_index += 1
+                next_meta_block_start = float('inf')
+                if current_meta_block_index < len(meta_blocks_nodes):
+                    next_meta_block_start = meta_blocks_nodes[current_meta_block_index][0]
 
-            # this adjustment is needed because vscode does not support overlapping tokens ('include' token in this case)
-            # the tree-sitter grammar would have to be changed (named node would have to be introduced) to get rid of this
-            start_point, end_point = self.adjust_bounds(start_point, end_point, node)
+            data, last_line, last_start = self.add_node_for_highlight(woowoo_document, data, node, last_line,
+                                                                           last_start)
 
-            data += [start_point[0] - last_line,  # token line number, relative to the previous token
-                     start_point[1] - last_start,  # token start character, relative to the previous token
-                     end_point[1] - start_point[1],  # the length of the token.
-                     Highlighter.token_types.index(type),  # type
-                     0  # modifiers (bit encoding)
-                     ]
+        while current_meta_block_index < len(meta_blocks_nodes):
+            for meta_block_node in meta_blocks_nodes[current_meta_block_index][1]:
+                data, last_line, last_start = self.add_node_for_highlight(woowoo_document, data,
+                                                                                meta_block_node,
+                                                                                last_line, last_start,
+                                                                                next_meta_block_start)
 
-            last_line, last_start = start_point
+            current_meta_block_index += 1
+            next_meta_block_start = float('inf')
+            if current_meta_block_index < len(meta_blocks_nodes):
+                next_meta_block_start = meta_blocks_nodes[current_meta_block_index][0]
 
         return SemanticTokens(data=data)
+
+    def add_node_for_highlight(self, woowoo_document, data, node, last_line, last_start, line_offset=0):
+        # TODO: Inspect why YAML parser does sometimes return just Nodes, not tuples
+        if isinstance(node, Node): return data, node, last_line, last_start
+
+        node, type = node
+
+        # restart char position index when current token is on different line than the previous one
+        last_start = last_start if node.start_point[0] + line_offset == last_line else 0
+
+        start_point = woowoo_document.utf8_to_utf16_offset((node.start_point[0] + line_offset, node.start_point[1]))
+        end_point = woowoo_document.utf8_to_utf16_offset((node.end_point[0] + line_offset, node.end_point[1]))
+
+        # this adjustment is needed because vscode does not support overlapping tokens ('include' token in this case)
+        # the tree-sitter grammar would have to be changed (named node would have to be introduced) to get rid of this
+        start_point, end_point = self.adjust_bounds(start_point, end_point, node)
+
+        data += [start_point[0] - last_line,  # token line number, relative to the previous token
+                 start_point[1] - last_start,  # token start character, relative to the previous token (or start of the line)
+                 end_point[1] - start_point[1],  # the length of the token.
+                 Highlighter.token_types.index(type),  # type
+                 0  # modifiers (bit encoding)
+                 ]
+
+        last_line, last_start = start_point
+
+        return data, last_line, last_start
 
     def adjust_bounds(self, start, end, node):
 

@@ -8,11 +8,12 @@ class WooWooDocument:
     def __init__(self, path: Path):
         self.path = path
         self.tree = None
+        self.meta_block_trees = []
         self.utf8_to_utf16_mappings = None
         self._load()
 
     def update_source(self, source: str):
-        self.tree = parse_source(source)
+        self.tree, self.meta_block_trees = parse_source(source)
         self.build_utf8_to_utf16_mapping(source)
 
     def _load(self):
