@@ -8,7 +8,7 @@ class WooWooDocument:
     def __init__(self, path: Path):
         self.path = path
         self.tree = None
-        self.meta_block_trees = []
+        self.meta_block_trees = [] # [(line offset, tree)]
         self.utf8_to_utf16_mappings = None
         self._load()
 

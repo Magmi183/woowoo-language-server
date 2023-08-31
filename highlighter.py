@@ -58,19 +58,19 @@ class Highlighter:
         woowoo_document = self.ls.get_document(params)
         data = []
 
-        # execute all queries from the highlights.scm file
+        # execute all queries from the highlights.scm file (non-metablock nodes to highlight)
         nodes = WOOWOO_LANGUAGE.query(self.woo_highlight_queries).captures(woowoo_document.tree.root_node)
 
-        meta_blocks_nodes = []
+        # get nodes to highlight in every meta-block of the file
+        meta_blocks_nodes = [] # [(metablock line offset from file start, [(Node, type)])]
         for line_offset, meta_block_tree in woowoo_document.meta_block_trees:
             meta_block_nodes = YAML_LANGUAGE.query(self.yaml_highlight_queries).captures(
                 meta_block_tree.root_node)
             meta_blocks_nodes.append((line_offset, meta_block_nodes))
 
-        # line offset of the first metablock
 
         current_meta_block_index = 0
-        next_meta_block_start = float('inf')
+        next_meta_block_start = float('inf') # line offset of the first metablock
         if current_meta_block_index < len(meta_blocks_nodes):
             next_meta_block_start = meta_blocks_nodes[current_meta_block_index][0]
 
@@ -93,6 +93,7 @@ class Highlighter:
             data, last_line, last_start = self.add_node_for_highlight(woowoo_document, data, node, last_line,
                                                                            last_start)
 
+        # all non-meta block processed, but meta-block could still remain (if they are last nodes of the file)
         while current_meta_block_index < len(meta_blocks_nodes):
             for meta_block_node in meta_blocks_nodes[current_meta_block_index][1]:
                 data, last_line, last_start = self.add_node_for_highlight(woowoo_document, data,

@@ -22,10 +22,9 @@ def parse_source(src: str) -> (Tree, [(int, Tree)]):
     query = WOOWOO_LANGUAGE.query("(meta_block) @yaml")
     meta_blocks = query.captures(tree.root_node)
 
-    yaml_trees = [] # (line offset, tree)
+    yaml_trees = [] # [(line offset, tree)]
     for meta_block in meta_blocks:
         yaml_tree = yaml_parser.parse(meta_block[0].text)
-        yaml_trees.append((meta_block[0].start_point[0],yaml_tree))
-
+        yaml_trees.append((meta_block[0].start_point[0], yaml_tree))
 
     return tree, yaml_trees
