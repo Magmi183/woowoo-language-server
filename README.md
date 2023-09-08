@@ -46,10 +46,10 @@ See `queries/highlights.scm` (WooWoo without metablocks) and `queries/yaml-highl
 
 ### Code Folding
 
-1. `Document part` folding 🔲
-2. `Object` folding 🔲
-3. `Block` folding 🔲
-4. `Outer environment` folding 🔲
+1. `Document part` folding ✅
+2. `Object` folding ✅
+3. `Block` folding ✅
+4. `Outer environment` folding ✅
 
 ### Find References
 

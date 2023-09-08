@@ -3,6 +3,7 @@ from pygls.server import LanguageServer
 
 import utils
 from completer import Completer
+from folder import Folder
 from highlighter import Highlighter
 from hoverer import Hoverer
 from linter import Linter
@@ -15,7 +16,7 @@ from lsprotocol.types import (
     CompletionOptions, INITIALIZED, TEXT_DOCUMENT_DEFINITION, Location, Position, Range, TEXT_DOCUMENT_DID_SAVE,
     DidSaveTextDocumentParams, TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL, SemanticTokensParams, SemanticTokens,
     SemanticTokensLegend, InitializedParams, InitializeParams, InitializeResult, ServerCapabilities, INITIALIZE,
-    WorkspaceFolder, DefinitionParams
+    WorkspaceFolder, DefinitionParams, TEXT_DOCUMENT_FOLDING_RANGE, FoldingRangeParams
 )
 
 from woowoodocument import WooWooDocument
@@ -37,6 +38,7 @@ class WooWooLanguageServer(LanguageServer):
         self.hoverer = Hoverer(self)
         self.highlighter = Highlighter(self)
         self.navigator = Navigator(self)
+        self.folder = Folder(self)
 
         self.docs = {}
 
@@ -129,5 +131,13 @@ def definition(ls: WooWooLanguageServer, params: DefinitionParams):
     logger.debug("[TEXT_DOCUMENT_DEFINITION] SERVER.feature called")
 
     return ls.navigator.go_to_definition(params)
+
+
+@SERVER.feature(TEXT_DOCUMENT_FOLDING_RANGE)
+def folding_range(ls: WooWooLanguageServer, params: FoldingRangeParams):
+    logger.debug("[TEXT_DOCUMENT_FOLDING_RANGE] SERVER.feature called")
+
+    return ls.folder.folding_ranges(params)
+
 
 SERVER.start_tcp('127.0.0.1', 8080)
