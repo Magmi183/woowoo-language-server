@@ -140,4 +140,9 @@ def folding_range(ls: WooWooLanguageServer, params: FoldingRangeParams):
     return ls.folder.folding_ranges(params)
 
 
-SERVER.start_io()
+def start() -> None:
+    SERVER.start_io()
+
+
+if __name__ == "__main__":
+    start()
