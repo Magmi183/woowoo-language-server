@@ -1,0 +1,31 @@
+==================
+Nested inner environment
+==================
+.Chapter Test
+  label: nested-inner
+
+
+"Bold text "bold and italic".italic and just bold again.".bold
+
+---
+
+(source_file
+  (document_part
+    (document_part_type )
+    (document_part_title )
+    (meta_block )
+    (document_part_body
+      (block
+        (text_block
+          (verbose_inner_environment
+            (verbose_inner_environment_classic
+              (verbose_inner_environment_body
+                (text )
+                (verbose_inner_environment
+                  (verbose_inner_environment_classic
+                    (verbose_inner_environment_body
+                      (text ))
+                    (verbose_inner_environment_type )))
+                (text ))
+              (verbose_inner_environment_type ))))))))
+

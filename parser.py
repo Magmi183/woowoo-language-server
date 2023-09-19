@@ -1,14 +1,22 @@
 from tree_sitter import Language, Parser, Tree
 from pathlib import Path
 
-ls_path = Path(__file__).resolve().parent
-WOOWOO_LANGUAGE = Language(
-    library_path=Path.joinpath(ls_path, Path("woowoo-parser.so")).as_posix(), name="woowoo"
+from utils import get_absolute_path
+
+# Use the function to get the absolute paths
+woowoo_path = get_absolute_path('tree-sitter/tree-sitter-woowoo')
+yaml_path = get_absolute_path('tree-sitter/tree-sitter-yaml')
+
+# Build the library
+Language.build_library(
+    get_absolute_path('build/my-languages.so'),
+    [woowoo_path, yaml_path]
 )
 
-YAML_LANGUAGE = Language(
-    library_path=Path.joinpath(ls_path, Path("yaml-parser.so")).as_posix(), name="yaml"
-)
+# Initialize languages
+WOOWOO_LANGUAGE = Language(get_absolute_path('build/my-languages.so'), 'woowoo')
+YAML_LANGUAGE = Language(get_absolute_path('build/my-languages.so'), 'yaml')
+
 
 woowoo_parser = Parser()
 woowoo_parser.set_language(WOOWOO_LANGUAGE)

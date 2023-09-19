@@ -1,0 +1,33 @@
+==================
+Nested shorthanded inner environment - # ending
+==================
+.Chapter Test
+  label: shorthanded-inner
+
+
+Let's try nesting shorthand within classic inner environment.
+"Link: "Click Here"#object-name".emphasize
+
+---
+
+(source_file
+  (document_part
+    (document_part_type )
+    (document_part_title )
+    (meta_block )
+    (document_part_body
+      (block
+        (text_block
+          (text )
+          (verbose_inner_environment
+            (verbose_inner_environment_classic
+              (verbose_inner_environment_body
+                (text )
+                (verbose_inner_environment
+                  (verbose_inner_environment_hashtag
+                    (verbose_inner_environment_body
+                      (text ))
+                    (verbose_inner_environment_type ))))
+              (verbose_inner_environment_type ))))))))
+
+

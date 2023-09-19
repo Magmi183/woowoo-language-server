@@ -1,0 +1,41 @@
+==================
+Shorthanded inner environment - @ ending
+==================
+.Chapter Test
+  label: shorthanded-inner
+
+
+What will follow is a shorthanded version of an inner environment. Instead of:
+"beautiful page".reference.1
+  1:
+    url: 'link'
+
+One might use shorter version: "beautiful page"@1
+  1: 'link'
+
+---
+
+(source_file
+  (document_part
+    (document_part_type )
+    (document_part_title )
+    (meta_block )
+    (document_part_body
+      (block
+        (text_block
+          (text )
+          (verbose_inner_environment
+            (verbose_inner_environment_classic
+              (verbose_inner_environment_body
+                (text ))
+              (verbose_inner_environment_type )
+              (verbose_inner_environment_meta )))
+          (meta_block ))
+        (text_block
+          (text )
+          (verbose_inner_environment
+            (verbose_inner_environment_at
+              (verbose_inner_environment_body
+                (text ))
+              (verbose_inner_environment_at_type )))
+          (meta_block ))))))

@@ -1,0 +1,69 @@
+==================
+Fragile Outer environment - two spaces at start of every row
+==================
+.Chapter Test
+  label: spaced-fragile
+
+
+.Figure:
+  label: fig_newton_ulet
+
+  !tikz:
+    filename: fig_newton_ulet
+    options: yscale=.25,xscale=2,decoration={markings,mark=at position 0.6 with {\arrow{stealth}}}
+
+      \clip (-2,-2.3) rectangle (2.7,20);
+      \draw[thick,->] (-2,0) -- (2.5,0) node[below] {$x$};
+      \draw[thick,->] (0,-2) -- (0,19) node[right] {$y$};
+      \draw[thick,black,domain=-2:2.5,smooth,samples=20] plot (\x,{pow(\x,5)-pow(\x,4)-\x+2});
+      \pgfmathsetmacro{\xx}{2}
+      \draw[thick] (\xx,.4) -- (\xx,-.4) node[below] {$x_1$};
+      % kazdy uncover je jeden krok metody, cyklus \foreach mi v tomto pripade nefungoval...
+      \pgfmathsetmacro{\fxx}{pow(\xx,5)-pow(\xx,4)-\xx+2}
+      \draw[thin,densely dotted,blue] (\xx,0) -- (\xx,\fxx);
+      \pgfmathsetmacro{\oldx}{\xx};
+      \pgfmathsetmacro{\xx}{\xx-(pow(\xx,5)-pow(\xx,4)-\xx+2)/(5*pow(\xx,4)-4*pow(\xx,3)-1)};
+      \draw[postaction={decorate},thin,red] (\oldx,\fxx) --  (\xx,0);
+      \draw[thick] (\xx,.4) -- (\xx,-.4) node[below] {$x_2$};
+      \pgfmathsetmacro{\fxx}{pow(\xx,5)-pow(\xx,4)-\xx+2}
+      \draw[thin,densely dotted,blue] (\xx,0) -- (\xx,\fxx);
+      \pgfmathsetmacro{\oldx}{\xx};
+      \pgfmathsetmacro{\xx}{\xx-(pow(\xx,5)-pow(\xx,4)-\xx+2)/(5*pow(\xx,4)-4*pow(\xx,3)-1)};
+      \draw[postaction={decorate},thin,red] (\oldx,\fxx) --  (\xx,0);
+      \draw[thick] (\xx,.4) -- (\xx,-.4) node[below] {$x_3$};
+      \pgfmathsetmacro{\fxx}{pow(\xx,5)-pow(\xx,4)-\xx+2}
+      \draw[thin,densely dotted,blue] (\xx,0) -- (\xx,\fxx);
+      \pgfmathsetmacro{\oldx}{\xx};
+      \pgfmathsetmacro{\xx}{\xx-(pow(\xx,5)-pow(\xx,4)-\xx+2)/(5*pow(\xx,4)-4*pow(\xx,3)-1)};
+      \draw[postaction={decorate},thin,red] (\oldx,\fxx) --  (\xx,0);
+      \draw[thick] (\xx,.4) -- (\xx,-.4) node[below] {$x_4$};
+      \pgfmathsetmacro{\fxx}{pow(\xx,5)-pow(\xx,4)-\xx+2}
+      \draw[thin,densely dotted,blue] (\xx,0) -- (\xx,\fxx);
+      \pgfmathsetmacro{\oldx}{\xx};
+      \pgfmathsetmacro{\xx}{\xx-(pow(\xx,5)-pow(\xx,4)-\xx+2)/(5*pow(\xx,4)-4*pow(\xx,3)-1)};
+      \draw[postaction={decorate},thin,red] (\oldx,\fxx) --  (\xx,0);
+      \draw[thick] (\xx,.4) -- (\xx,-.4) node[below] {$x_5$};
+      \pgfmathsetmacro{\fxx}{pow(\xx,5)-pow(\xx,4)-\xx+2}
+      \draw[thin,densely dotted,blue] (\xx,0) -- (\xx,\fxx);
+      \pgfmathsetmacro{\oldx}{\xx};
+      \pgfmathsetmacro{\xx}{\xx-(pow(\xx,5)-pow(\xx,4)-\xx+2)/(5*pow(\xx,4)-4*pow(\xx,3)-1)};
+      \draw[postaction={decorate},thin,red] (\oldx,\fxx) --  (\xx,0);
+      \draw[thick] (\xx,.4) -- (\xx,-.4) node[below] {$x_6$};
+
+
+---
+
+(source_file
+  (document_part
+    (document_part_type )
+    (document_part_title )
+    (meta_block )
+    (document_part_body
+      (object
+        (object_type )
+        (meta_block )
+        (block
+          (fragile_outer_environment
+            (outer_environment_type )
+            (meta_block )
+            (fragile_outer_environment_body )))))))

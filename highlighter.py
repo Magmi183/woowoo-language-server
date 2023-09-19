@@ -1,4 +1,4 @@
-import os
+from utils import get_absolute_path
 from lsprotocol.types import SemanticTokens, SemanticTokensParams
 from tree_sitter import Node
 
@@ -51,12 +51,8 @@ class Highlighter:
         self.yaml_highlight_queries = self.read_highlights('queries/yaml-highlights.scm')
 
     def read_highlights(self, file_path) -> str:
-        current_dir = os.path.dirname(os.path.abspath(__file__))
 
-        # Construct the full path
-        full_path = os.path.join(current_dir, file_path)
-
-        with open(full_path, 'r') as file:
+        with open(get_absolute_path(file_path), 'r') as file:
             return file.read()
 
     def semantic_tokens(self, params: SemanticTokensParams):

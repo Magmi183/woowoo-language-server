@@ -1,0 +1,22 @@
+==================
+Outer environment - only implicits
+==================
+.Chapter Test
+  label: only-impls
+
+
+  This is text block inside implicit 1.
+
+  Another text block in the same implicit.
+
+
+  Implicit env in block 2.
+
+
+  Implicit env in block 3.
+
+---
+
+# TODO: This is known issue. I am not able to recognize this, because the dedent that should be on line 11 is not found.
+# This is because I am not emitting dedent when the same indent level is continuing after the empty lines.
+# That is correct in case of objects, but not in this rare case when you want two implicit environments in a row.

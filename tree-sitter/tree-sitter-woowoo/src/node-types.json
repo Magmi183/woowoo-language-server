@@ -1,0 +1,475 @@
+[
+  {
+    "type": "block",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "classic_outer_environment",
+          "named": true
+        },
+        {
+          "type": "fragile_outer_environment",
+          "named": true
+        },
+        {
+          "type": "implicit_outer_environment",
+          "named": true
+        },
+        {
+          "type": "text_block",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "classic_outer_environment",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "meta_block",
+          "named": true
+        },
+        {
+          "type": "outer_environment_type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "document_part",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "document_part_body",
+          "named": true
+        },
+        {
+          "type": "document_part_title",
+          "named": true
+        },
+        {
+          "type": "document_part_type",
+          "named": true
+        },
+        {
+          "type": "meta_block",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "document_part_body",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "object",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "document_part_type",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "fragile_outer_environment",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "fragile_outer_environment_body",
+          "named": true
+        },
+        {
+          "type": "meta_block",
+          "named": true
+        },
+        {
+          "type": "outer_environment_type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "implicit_outer_environment",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "block",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "include",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "filename",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "math_environment",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "math_environment_body",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "meta_block",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "object",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "block",
+          "named": true
+        },
+        {
+          "type": "meta_block",
+          "named": true
+        },
+        {
+          "type": "object_type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "object_type",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "short_inner_environment",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "short_inner_environment_body",
+          "named": true
+        },
+        {
+          "type": "short_inner_environment_type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "short_inner_environment_type",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "source_file",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "document_part",
+          "named": true
+        },
+        {
+          "type": "include",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "text_block",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "math_environment",
+          "named": true
+        },
+        {
+          "type": "meta_block",
+          "named": true
+        },
+        {
+          "type": "short_inner_environment",
+          "named": true
+        },
+        {
+          "type": "text",
+          "named": true
+        },
+        {
+          "type": "verbose_inner_environment",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "verbose_inner_environment",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "verbose_inner_environment_at",
+          "named": true
+        },
+        {
+          "type": "verbose_inner_environment_classic",
+          "named": true
+        },
+        {
+          "type": "verbose_inner_environment_hashtag",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "verbose_inner_environment_at",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "verbose_inner_environment_at_type",
+          "named": true
+        },
+        {
+          "type": "verbose_inner_environment_body",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "verbose_inner_environment_at_type",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "verbose_inner_environment_body",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "math_environment",
+          "named": true
+        },
+        {
+          "type": "short_inner_environment",
+          "named": true
+        },
+        {
+          "type": "text",
+          "named": true
+        },
+        {
+          "type": "verbose_inner_environment",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "verbose_inner_environment_classic",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "verbose_inner_environment_body",
+          "named": true
+        },
+        {
+          "type": "verbose_inner_environment_meta",
+          "named": true
+        },
+        {
+          "type": "verbose_inner_environment_type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "verbose_inner_environment_hashtag",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "verbose_inner_environment_body",
+          "named": true
+        },
+        {
+          "type": "verbose_inner_environment_type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "verbose_inner_environment_type",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "\n",
+    "named": false
+  },
+  {
+    "type": "\r\n",
+    "named": false
+  },
+  {
+    "type": " ",
+    "named": false
+  },
+  {
+    "type": "!",
+    "named": false
+  },
+  {
+    "type": "\"",
+    "named": false
+  },
+  {
+    "type": "#",
+    "named": false
+  },
+  {
+    "type": "$",
+    "named": false
+  },
+  {
+    "type": ".",
+    "named": false
+  },
+  {
+    "type": ".include ",
+    "named": false
+  },
+  {
+    "type": ":",
+    "named": false
+  },
+  {
+    "type": "@",
+    "named": false
+  },
+  {
+    "type": "document_part_title",
+    "named": true
+  },
+  {
+    "type": "filename",
+    "named": true
+  },
+  {
+    "type": "fragile_outer_environment_body",
+    "named": true
+  },
+  {
+    "type": "math_environment_body",
+    "named": true
+  },
+  {
+    "type": "outer_environment_type",
+    "named": true
+  },
+  {
+    "type": "short_inner_environment_body",
+    "named": true
+  },
+  {
+    "type": "text",
+    "named": true
+  },
+  {
+    "type": "verbose_inner_environment_meta",
+    "named": true
+  }
+]

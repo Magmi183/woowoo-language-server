@@ -1,0 +1,32 @@
+==================
+Outer environment - implicit after meta
+==================
+.Chapter Test
+  label: complicated-nesting
+
+
+.outer:
+  meta-outer
+
+    implicit-outer
+
+
+---
+
+(source_file
+  (document_part
+    (document_part_type )
+    (document_part_title )
+    (meta_block )
+    (document_part_body
+      (block
+        (classic_outer_environment
+          (outer_environment_type )
+          (meta_block )
+          (block
+            (implicit_outer_environment
+              (block
+                (text_block
+                  (text ))))))))))
+
+

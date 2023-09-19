@@ -1,0 +1,20 @@
+==================
+Outer environment - implicit as last line of a file
+==================
+.Test test
+
+
+  k
+---
+(source_file
+  (document_part
+    (document_part_type )
+    (document_part_title )
+    (document_part_body
+      (block
+        (implicit_outer_environment
+          (block
+            (text_block
+              (text ))))))))
+
+

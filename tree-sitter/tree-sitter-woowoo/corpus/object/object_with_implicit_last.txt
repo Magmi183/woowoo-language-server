@@ -1,0 +1,48 @@
+==================
+Object - with block that has implicit outer as last element
+==================
+.Chapter Výroková logika
+
+
+.Example:
+  label: exa_podformule_strom
+  title: Podformule a formační strom
+
+  Určíme všechny podformule a formačním stromem znázorníme, jak z nich byla postupně sestavena formule $\neg(A \wedge B) \Leftrightarrow (C \Rightarrow A)$.
+
+
+  Podformule formule $\neg(A \wedge B) \Leftrightarrow (C \Rightarrow A)$ jsou:
+
+    A, B, C, (A \wedge B), \neg(A \wedge B), (C \Rightarrow A), \neg(A \wedge B) \Leftrightarrow (C \Rightarrow A).
+
+
+.Section Test
+
+---
+(source_file
+      (document_part
+        (document_part_type)
+        (document_part_title)
+        (document_part_body
+          (object
+            (object_type)
+            (meta_block)
+            (block
+              (text_block
+                (text)
+                (math_environment
+                  (math_environment_body))
+                (text)))
+            (block
+              (text_block
+                (text)
+                (math_environment
+                  (math_environment_body))
+                (text))
+              (implicit_outer_environment
+                (block
+                  (text_block
+                    (text))))))))
+      (document_part
+        (document_part_type)
+        (document_part_title)))

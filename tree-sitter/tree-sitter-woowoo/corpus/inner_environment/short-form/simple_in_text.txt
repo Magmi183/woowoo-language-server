@@ -1,0 +1,24 @@
+==================
+Short inner environment
+==================
+.Chapter Test
+  label: short-inner
+
+
+Text block with .bold:short inner environment of type BOLD.
+
+---
+
+(source_file
+  (document_part
+    (document_part_type )
+    (document_part_title )
+    (meta_block )
+    (document_part_body
+      (block
+        (text_block
+          (text )
+          (short_inner_environment
+            (short_inner_environment_type )
+            (short_inner_environment_body ))
+          (text ))))))

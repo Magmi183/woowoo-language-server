@@ -1,0 +1,60 @@
+==================
+Fragile Outer environment - nested inside list
+==================
+.Chapter Test
+  label: complicated-nesting
+
+
+.enumerate:
+
+  .item:
+
+     math
+
+  .item:
+
+    more math
+
+    .centered:
+
+      !tikz:
+        filename: fig-venn-a2
+
+        \draw (-2,2) rectangle (3,-2) node[above left]{$\UU$};
+        \draw (0,0) circle (1cm) (-1,1) node {$A$};
+        \draw (1,0) circle (1cm) (2,1) node {$B$};
+        \draw (-0.5,0) node{\footnotesize$1$}
+        (1.5,0) node{\footnotesize$2$}
+        (0.5,0) node{\footnotesize$3$}
+        (0.5,-1.25) node{\footnotesize$4$};
+
+
+---
+
+(source_file
+  (document_part
+    (document_part_type )
+    (document_part_title )
+    (meta_block )
+    (document_part_body
+      (block
+        (classic_outer_environment
+          (outer_environment_type )
+          (block
+            (classic_outer_environment
+              (outer_environment_type )
+              (block
+                (text_block
+                  (text ))))
+            (classic_outer_environment
+              (outer_environment_type )
+              (block
+                (text_block
+                  (text ))
+                (classic_outer_environment
+                  (outer_environment_type )
+                  (block
+                    (fragile_outer_environment
+                      (outer_environment_type )
+                      (meta_block )
+                      (fragile_outer_environment_body))))))))))))

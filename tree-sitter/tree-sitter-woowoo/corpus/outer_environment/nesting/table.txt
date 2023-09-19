@@ -1,0 +1,260 @@
+==================
+Outer environment - one-way nesting
+==================
+.Chapter Test
+  label: outer-env
+
+
+.notobject:
+  label: thm_mnozinove_operace_vlastnosti_3
+  title: Vlastnosti množinových operací - algebraické vlastnosti
+
+  Buďte "$A, B, C \subseteq \UU$"#def_mnozina_prvek.
+  Pak platí:
+
+  .table:
+    columns: lll
+
+    .row:
+      head: true
+
+      Algebraické vlastnosti
+
+      ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+      ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+    .row:
+
+      Zákony idempotence:
+
+      $A \cap A = A$
+
+      $A \cup A = A$
+
+    .row:
+
+      Komutativní zákony:
+
+      $A \cap B = B \cap A$
+
+      $A \cup B = B \cup A$
+
+    .row:
+
+      Asociativní zákony:
+
+      $(A \cap B) \cap C=$ $A \cap (B \cap C)$
+
+      ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+    .row:
+
+      ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+      $(A \cup B) \cup C=$ $A \cup (B \cup C)$
+
+      ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+    .row:
+
+      Distributivní zákony:
+
+      $A \cap (B \cup C)=$ $(A \cap B) \cup (A \cap C)$
+
+      ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+    .row:
+
+      ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+      $A \cup (B \cap C)=$ $(A \cup B) \cap (A \cup C)$
+
+      ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+    .row:
+
+      Zákony absorpce
+
+      $A \cap (A \cup B) = A$
+
+      $A \cup (A \cap B) = A$
+
+    .row:
+
+      De Morganovy zákony:
+      "Po dosazení $A=\UU$ dostaneme jejich alternativní verzi, $\overline{(B \cap C)} = \overline{B} \cup \overline{C}$ a $\overline{(B \cup C)} = \overline{B} \cap \overline{C}$".footnote
+
+      $A \setminus (B \cap C) =$ $(A \setminus B) \cup (A \setminus C)$
+
+      ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+    .row:
+
+      ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+      $A \setminus (B \cup C) =$ $(A \setminus B) \cap (A \setminus C)$
+
+      ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+
+---
+(source_file
+  (document_part
+    (document_part_type )
+    (document_part_title )
+    (meta_block )
+    (document_part_body
+      (block
+        (classic_outer_environment
+          (outer_environment_type )
+          (meta_block )
+          (block
+            (text_block
+              (text )
+              (verbose_inner_environment
+                (verbose_inner_environment_hashtag
+                  (verbose_inner_environment_body
+                    (math_environment
+                      (math_environment_body )))
+                  (verbose_inner_environment_type )))
+              (text )
+              (text ))
+            (classic_outer_environment
+              (outer_environment_type )
+              (meta_block )
+              (block
+                (classic_outer_environment
+                  (outer_environment_type )
+                  (meta_block )
+                  (block
+                    (text_block
+                      (text ))
+                    (text_block
+                      (text ))
+                    (text_block
+                      (text ))))
+                (classic_outer_environment
+                  (outer_environment_type )
+                  (block
+                    (text_block
+                      (text ))
+                    (text_block
+                      (math_environment
+                        (math_environment_body )))
+                    (text_block
+                      (math_environment
+                        (math_environment_body )))))
+                (classic_outer_environment
+                  (outer_environment_type )
+                  (block
+                    (text_block
+                      (text ))
+                    (text_block
+                      (math_environment
+                        (math_environment_body )))
+                    (text_block
+                      (math_environment
+                        (math_environment_body )))))
+                (classic_outer_environment
+                  (outer_environment_type )
+                  (block
+                    (text_block
+                      (text ))
+                    (text_block
+                      (math_environment
+                        (math_environment_body ))
+                      (text )
+                      (math_environment
+                        (math_environment_body )))
+                    (text_block
+                      (text ))))
+                (classic_outer_environment
+                  (outer_environment_type )
+                  (block
+                    (text_block
+                      (text ))
+                    (text_block
+                      (math_environment
+                        (math_environment_body ))
+                      (text )
+                      (math_environment
+                        (math_environment_body )))
+                    (text_block
+                      (text ))))
+                (classic_outer_environment
+                  (outer_environment_type )
+                  (block
+                    (text_block
+                      (text ))
+                    (text_block
+                      (math_environment
+                        (math_environment_body ))
+                      (text )
+                      (math_environment
+                        (math_environment_body )))
+                    (text_block
+                      (text ))))
+                (classic_outer_environment
+                  (outer_environment_type )
+                  (block
+                    (text_block
+                      (text ))
+                    (text_block
+                      (math_environment
+                        (math_environment_body ))
+                      (text )
+                      (math_environment
+                        (math_environment_body )))
+                    (text_block
+                      (text ))))
+                (classic_outer_environment
+                  (outer_environment_type )
+                  (block
+                    (text_block
+                      (text ))
+                    (text_block
+                      (math_environment
+                        (math_environment_body )))
+                    (text_block
+                      (math_environment
+                        (math_environment_body )))))
+                (classic_outer_environment
+                  (outer_environment_type )
+                  (block
+                    (text_block
+                      (text )
+                      (verbose_inner_environment
+                        (verbose_inner_environment_classic
+                          (verbose_inner_environment_body
+                            (text )
+                            (math_environment
+                              (math_environment_body ))
+                            (text )
+                            (math_environment
+                              (math_environment_body ))
+                            (text )
+                            (math_environment
+                              (math_environment_body )))
+                          (verbose_inner_environment_type ))))
+                    (text_block
+                      (math_environment
+                        (math_environment_body ))
+                      (text )
+                      (math_environment
+                        (math_environment_body )))
+                    (text_block
+                      (text ))))
+                (classic_outer_environment
+                  (outer_environment_type )
+                  (block
+                    (text_block
+                      (text ))
+                    (text_block
+                      (math_environment
+                        (math_environment_body ))
+                      (text )
+                      (math_environment
+                        (math_environment_body )))
+                    (text_block
+                      (text ))))))))))))

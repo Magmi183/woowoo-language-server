@@ -1,0 +1,77 @@
+==================
+Outer environment - outers with implicits
+==================
+.Chapter Test
+  label: complicated-nesting
+
+
+Najděte výsledky následujících operací, vycházejte přitom z definice průniku a sjednocení množin (tj. $(x \in A \cup B \Leftrightarrow (x \in A \vee x \in B))$ a $(x \in A \cap B \Leftrightarrow (x \in A \wedge x \in B))$):
+
+.enumerate:
+  type: a
+
+  .item:
+
+      \bigcup_{i=1}^n M_i \,,\quad \bigcup_{i=1}^\infty M_i
+
+  .item:
+
+      \bigcap_{i=1}^n M_i \,,\quad \bigcap_{i=1}^\infty M_i
+
+  .item:
+
+      \bigcup_{i=1}^n N_i \,,\quad \bigcup_{i=1}^\infty N_i
+
+  .item:
+
+      \bigcap_{i=1}^n N_i \,,\quad \bigcap_{i=1}^\infty N_i\,.
+
+
+---
+(source_file
+      (document_part
+        (document_part_type)
+        (document_part_title)
+        (meta_block)
+        (document_part_body
+          (block
+            (text_block
+              (text)
+              (math_environment
+                (math_environment_body))
+              (text)
+              (math_environment
+                (math_environment_body))
+              (text))
+            (classic_outer_environment
+              (outer_environment_type)
+              (meta_block)
+              (block
+                (classic_outer_environment
+                  (outer_environment_type)
+                  (block
+                    (implicit_outer_environment
+                      (block
+                        (text_block
+                          (text))))))
+                (classic_outer_environment
+                  (outer_environment_type)
+                  (block
+                    (implicit_outer_environment
+                      (block
+                        (text_block
+                          (text))))))
+                (classic_outer_environment
+                  (outer_environment_type)
+                  (block
+                    (implicit_outer_environment
+                      (block
+                        (text_block
+                          (text))))))
+                (classic_outer_environment
+                  (outer_environment_type)
+                  (block
+                    (implicit_outer_environment
+                      (block
+                        (text_block
+                          (text))))))))))))

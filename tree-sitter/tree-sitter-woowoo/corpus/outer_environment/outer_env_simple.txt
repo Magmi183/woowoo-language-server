@@ -1,0 +1,29 @@
+==================
+Outer environment - simplest form
+==================
+.Chapter Test
+  label: outer-env
+
+
+.simple:
+
+  Dedent should NOT have been.
+
+  detected on the line above, but on the next line, it should!
+
+---
+
+(source_file
+  (document_part
+    (document_part_type )
+    (document_part_title )
+    (meta_block )
+    (document_part_body
+      (block
+          (classic_outer_environment
+            (outer_environment_type )
+            (block
+              (text_block
+                (text ))
+              (text_block
+                (text ))))))))

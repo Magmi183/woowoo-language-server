@@ -1,0 +1,100 @@
+==================
+Object - two consecutive objects
+==================
+.Chapter Test
+  label: one-simple-object
+
+
+.Example:
+  label: exa_prvotni_vyroky-not
+
+  Uvažujme označení prvotních formulí z Příkladu .reference:exa_prvotni_vyroky:
+
+  !tabular:
+
+    Formule       Výrok                                                    Ohodnocení
+    ------------  -------------------------------------------------------  -------------------
+    $\neg A$:     K předmětu DML neexistuje studijní text.                 $v(\neg A) = 0$
+    $\neg C$:     Neprší.                                                  $v(\neg C) = \, ?$
+    $\neg E$:     $2 + 2 \neq 5$.                                          $v(\neg E) = 1$
+    $\neg F_1$:   Není pravda, že bitva na Bílé hoře byla v roce 1621.     $v(\neg F_1) = 1$
+
+
+.Definition:
+  label: def_spojky_konjunkce
+  title: Konjunkce
+
+  "Konjunkce".notion.1 $A \wedge B$ výroků $A$ a $B$ je pravdivá pro všechna ohodnocení, při kterých jsou $A$ i $B$ současně pravdivé.
+  Pro ostatní ohodnocení je nepravdivá.
+    1:
+      index: [konjunkce, logická spojka!konjunkce]
+
+    \begin{array}{c|c||c}
+    A & B & A \wedge B \\
+    \hline
+    1 & 1 & 1\\
+    1 & 0 & 0\\
+    0 & 1 & 0\\
+    0 & 0 & 0
+    \end{array}
+
+---
+
+(source_file
+      (document_part
+        (document_part_type)
+        (document_part_title)
+        (meta_block)
+        (document_part_body
+          (object
+            (object_type)
+            (meta_block)
+            (block
+              (text_block
+                (text)
+                (short_inner_environment
+                  (short_inner_environment_type)
+                  (short_inner_environment_body)))
+              (fragile_outer_environment
+                (outer_environment_type)
+                (fragile_outer_environment_body))))
+          (object
+            (object_type)
+            (meta_block)
+            (block
+              (text_block
+                (verbose_inner_environment
+                  (verbose_inner_environment_classic
+                    (verbose_inner_environment_body
+                      (text))
+                    (verbose_inner_environment_type)
+                    (verbose_inner_environment_meta)))
+                (text)
+                (math_environment
+                  (math_environment_body))
+                (text)
+                (math_environment
+                  (math_environment_body))
+                (text)
+                (math_environment
+                  (math_environment_body))
+                (text)
+                (math_environment
+                  (math_environment_body))
+                (text)
+                (math_environment
+                  (math_environment_body))
+                (text)
+                (text)
+                (meta_block))
+              (implicit_outer_environment
+                (block
+                  (text_block
+                    (text)
+                    (text)
+                    (text)
+                    (text)
+                    (text)
+                    (text)
+                    (text)
+                    (text)))))))))

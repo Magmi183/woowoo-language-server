@@ -1,0 +1,33 @@
+==================
+Inner environment with meta - more
+==================
+.Chapter Test
+  label: meta-inner
+
+
+First: "content".type.meta, second: "content2".type.meta.
+
+---
+(source_file
+  (document_part
+    (document_part_type )
+    (document_part_title )
+    (meta_block )
+    (document_part_body
+      (block
+        (text_block
+          (text )
+          (verbose_inner_environment
+            (verbose_inner_environment_classic
+              (verbose_inner_environment_body
+                (text ))
+              (verbose_inner_environment_type )
+              (verbose_inner_environment_meta )))
+          (text )
+          (verbose_inner_environment
+            (verbose_inner_environment_classic
+              (verbose_inner_environment_body
+                (text ))
+              (verbose_inner_environment_type )
+              (verbose_inner_environment_meta )))
+          (text ))))))
