@@ -1,6 +1,6 @@
 [submodule "tree-sitter-yaml"]
-	path = tree-sitter-yaml
+	path = tree-sitter/tree-sitter-yaml
 	url = git@github.com:ikatyang/tree-sitter-yaml.git
 [submodule "tree-sitter-woowoo"]
-	path = tree-sitter-woowoo
-	url = git@gitlab.fit.cvut.cz:janecmi9/tree-sitter-woowoo.git
+	path = tree-sitter/tree-sitter-woowoo
+	url = git@gitlab.fit.cvut.cz:woowoo/lsp/tree-sitter-woowoo.git
