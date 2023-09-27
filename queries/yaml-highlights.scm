@@ -2,7 +2,7 @@
 ; types were changed though, to reflect valid VSCode types
 
 (boolean_scalar) @enum
-(null_scalar) @constant
+(null_scalar) @keyword
 (double_quote_scalar) @string
 (single_quote_scalar) @string
 ((block_scalar) @string (#set! "priority" 99))
@@ -10,17 +10,16 @@
 (escape_sequence) @string
 (integer_scalar) @number
 (float_scalar) @number
-(comment) @comment @spell
+(comment) @comment
 (anchor_name) @type
 (alias_name) @type
 (tag) @type
-(ERROR) @error
 
 [
   (yaml_directive)
   (tag_directive)
   (reserved_directive)
-] @preproc
+] @macro
 
 ; I COMMENTED THIS, because some nodes were retrieved multiple times (as result of previous queries)
 ;(block_mapping_pair
