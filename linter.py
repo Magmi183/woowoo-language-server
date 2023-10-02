@@ -9,7 +9,7 @@ class Linter:
 
     def diagnose(self, params) -> [Diagnostic]:
         diagnostics = []
-        tree = self.ls.get_document_tree(params)
+        tree = self.ls.get_document(params).tree
 
         # TODO: Add other types of linting.
         diagnostics += self.diagnose_errors(tree)

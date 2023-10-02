@@ -1,5 +1,5 @@
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 import os
 
 def get_absolute_path(relative_path):
@@ -8,4 +8,4 @@ def get_absolute_path(relative_path):
 
 def uri_to_path(uri: str) -> Path:
     """Converts a URI to a Path object."""
-    return Path(urlparse(uri).path)
+    return Path(unquote(urlparse(uri).path))

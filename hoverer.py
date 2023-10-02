@@ -12,7 +12,7 @@ class Hoverer:
         self.ls = ls
 
     def hover(self, params: TextDocumentPositionParams):
-        tree = self.ls.get_document_tree(params)
+        tree = self.ls.get_document(params).tree
         position = params.position
         line, col = position.line, position.character
         query = WOOWOO_LANGUAGE.query(build_query_string_from_list(self.hoverable_nodes, "type"))

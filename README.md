@@ -61,3 +61,8 @@ See `queries/highlights.scm` (WooWoo without metablocks) and `queries/yaml-highl
 1. Go to file used in the `.include` statement ✅
 2. Go to definition of `Object`, `Document part` or `Outer environment` 🔲
    - based on `label` meta information
+
+### Renaming 
+
+1. Workspace-wide renaming of symbols 🔲
+   - todo (describe what can be renamed)

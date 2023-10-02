@@ -14,7 +14,7 @@ class Navigator:
         self.ls = ls
 
     def go_to_definition(self, params: DefinitionParams):
-        tree = self.ls.get_document_tree(params)
+        tree = self.ls.get_document(params).tree
         position = params.position
         line, col = position.line, position.character
 

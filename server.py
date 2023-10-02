@@ -1,4 +1,6 @@
 import logging
+from pathlib import Path
+
 from pygls.server import LanguageServer
 
 import utils
@@ -16,7 +18,8 @@ from lsprotocol.types import (
     CompletionOptions, INITIALIZED, TEXT_DOCUMENT_DEFINITION, Location, Position, Range, TEXT_DOCUMENT_DID_SAVE,
     DidSaveTextDocumentParams, TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL, SemanticTokensParams, SemanticTokens,
     SemanticTokensLegend, InitializedParams, InitializeParams, InitializeResult, ServerCapabilities, INITIALIZE,
-    WorkspaceFolder, DefinitionParams, TEXT_DOCUMENT_FOLDING_RANGE, FoldingRangeParams
+    WorkspaceFolder, DefinitionParams, TEXT_DOCUMENT_FOLDING_RANGE, FoldingRangeParams, WORKSPACE_DID_RENAME_FILES,
+    RenameFilesParams, WORKSPACE_WILL_RENAME_FILES
 )
 
 from woowoodocument import WooWooDocument
@@ -45,14 +48,23 @@ class WooWooLanguageServer(LanguageServer):
     def load_workspace(self, workspace: WorkspaceFolder):
         root_path = utils.uri_to_path(workspace.uri)
         woo_files = root_path.rglob('*.woo')
+
         for woo_file in woo_files:
-            self.docs[woo_file] = WooWooDocument(woo_file)
+            self.load_document(woo_file)
+
+    def load_document(self, path: Path):
+        self.docs[path] = WooWooDocument(path)
 
     def get_document(self, params):
-        return self.docs[utils.uri_to_path(params.text_document.uri)]
+        document_path = utils.uri_to_path(params.text_document.uri)
+        return self.docs.get(document_path)
 
-    def get_document_tree(self, params):
-        return self.get_document(params).tree
+    def delete_document(self, path: Path):
+        del self.docs[path]
+
+    def rename_document(self, old_path: Path, new_path: Path):
+        self.docs[new_path] = self.docs[old_path]
+        self.delete_document(old_path)
 
 
 SERVER = WooWooLanguageServer('woowoo-language-SERVER', 'v0.1')
@@ -77,6 +89,10 @@ def initiliazed(_ls: WooWooLanguageServer, params: InitializedParams) -> None:
 def did_open(ls: WooWooLanguageServer, params: DidOpenTextDocumentParams):
     logger.debug("[TEXT_DOCUMENT_DID_OPEN] SERVER.feature called")
 
+    if ls.get_document(params) is None:
+        document_path = utils.uri_to_path(params.text_document.uri)
+        ls.load_document(document_path)
+
     ls.linter.diagnose(params)
 
 
@@ -86,6 +102,30 @@ def did_save(ls: WooWooLanguageServer, params: DidSaveTextDocumentParams) -> Non
 
     ls.linter.diagnose(params)
 
+
+@SERVER.feature(WORKSPACE_WILL_RENAME_FILES)
+def did_rename_files(ls: WooWooLanguageServer, params: RenameFilesParams):
+    logger.debug("[WORKSPACE_WILL_RENAME_FILES] SERVER.feature called")
+
+    # TODO: Refactor file references to the new name (like in .include statements)
+    # https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#renameFilesParams
+
+
+@SERVER.feature(WORKSPACE_DID_RENAME_FILES)
+def did_rename_files(ls: WooWooLanguageServer, params: RenameFilesParams):
+    logger.debug("[WORKSPACE_DID_RENAME_FILES] notification received")
+
+    for file_rename in params.files:
+        old_uri, new_uri = file_rename.old_uri, file_rename.new_uri
+        old_path, new_path = map(utils.uri_to_path, (old_uri, new_uri))
+        if str(new_path).endswith(".woo"):
+            ls.rename_document(old_path, new_path)
+        else:
+            ls.delete_document(old_path)
+
+
+
+# TODO: Handle file deletion!
 
 @SERVER.feature(TEXT_DOCUMENT_DID_CHANGE)
 def did_change(ls: WooWooLanguageServer, params: DidChangeTextDocumentParams):
@@ -123,7 +163,6 @@ def semantic_tokens(ls: WooWooLanguageServer, params: SemanticTokensParams):
     # That means no syntax highlighting is needed on the client side.
 
     return ls.highlighter.semantic_tokens(params)
-
 
 
 @SERVER.feature(TEXT_DOCUMENT_DEFINITION)
