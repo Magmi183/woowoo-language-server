@@ -1,6 +1,5 @@
 from pathlib import Path
 
-from parser import Parser
 from parser import parse_source
 
 class WooWooDocument:
@@ -8,19 +7,28 @@ class WooWooDocument:
     def __init__(self, path: Path):
         self.path = path
         self.tree = None
+        self.source = None
         self.meta_block_trees = [] # [(line offset, tree)]
+        self.comment_lines = []
         self.utf8_to_utf16_mappings = None
         self._load()
 
     def update_source(self, source: str):
+        self.source = source
         self.tree, self.meta_block_trees = parse_source(source)
         self.build_utf8_to_utf16_mapping(source)
+        self.update_comment_lines()
 
     def _load(self):
         with self.path.open('r') as f:
             source = f.read()
             self.update_source(source)
-
+    
+    def update_comment_lines(self):
+        for i, line in enumerate(self.source.split("\n")):
+            if len(line) > 0 and line[0] == "%":
+                self.comment_lines.append((i, len(line)))
+            
 
     def build_utf8_to_utf16_mapping(self, source):
         lines = source.splitlines()

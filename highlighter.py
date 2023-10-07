@@ -63,17 +63,21 @@ class Highlighter:
         nodes = WOOWOO_LANGUAGE.query(self.woo_highlight_queries).captures(woowoo_document.tree.root_node)
 
         # get nodes to highlight in every meta-block of the file
-        meta_blocks_nodes = [] # [(metablock line offset from file start, [(Node, type)])]
-        for line_offset, meta_block_tree in woowoo_document.meta_block_trees:
-            meta_block_nodes = YAML_LANGUAGE.query(self.yaml_highlight_queries).captures(
-                meta_block_tree.root_node)
-            meta_blocks_nodes.append((line_offset, meta_block_nodes))
-
+        meta_blocks_nodes = self._get_meta_block_nodes(woowoo_document)
 
         current_meta_block_index = 0
-        next_meta_block_start = float('inf') # line offset of the first metablock
-        if current_meta_block_index < len(meta_blocks_nodes):
-            next_meta_block_start = meta_blocks_nodes[current_meta_block_index][0]
+         
+        # line offset of the first metablock
+        next_meta_block_start = (
+            meta_blocks_nodes[current_meta_block_index][0] 
+            if current_meta_block_index < len(meta_blocks_nodes) 
+            else float('inf') # there are no meta-blocks in the file
+        )
+        
+
+        cl = woowoo_document.comment_lines
+        current_comment_index = 0
+        next_comment = cl[0] if len(cl) > 0 else (float('inf'), 0) # (start, len)
 
         last_line, last_start = 0, 0
         for node in nodes:
@@ -87,9 +91,17 @@ class Highlighter:
                                                                                    next_meta_block_start)
 
                 current_meta_block_index += 1
-                next_meta_block_start = float('inf')
-                if current_meta_block_index < len(meta_blocks_nodes):
-                    next_meta_block_start = meta_blocks_nodes[current_meta_block_index][0]
+                next_meta_block_start = (
+                    meta_blocks_nodes[current_meta_block_index][0] 
+                    if current_meta_block_index < len(meta_blocks_nodes) 
+                    else float('inf') # there are no meta-blocks in the file
+                )
+                
+            while node[0].start_point[0] > next_comment[0]:
+                data, last_line, last_start = self.add_comment_for_highlight(data, next_comment, last_line)
+                current_comment_index += 1
+                next_comment = cl[current_comment_index] if len(cl) > current_comment_index else (float('inf'), 0) # (start, len)
+
 
             data, last_line, last_start = self.add_node_for_highlight(woowoo_document, data, node, last_line,
                                                                            last_start)
@@ -106,6 +118,11 @@ class Highlighter:
             next_meta_block_start = float('inf')
             if current_meta_block_index < len(meta_blocks_nodes):
                 next_meta_block_start = meta_blocks_nodes[current_meta_block_index][0]
+
+        while current_comment_index < len(cl):
+                data, last_line, last_start = self.add_comment_for_highlight(data, next_comment, last_line)
+                current_comment_index += 1
+                next_comment = cl[current_comment_index] if len(cl) > current_comment_index else (float('inf'), 0) # (start, len)
 
         return SemanticTokens(data=data)
 
@@ -136,9 +153,30 @@ class Highlighter:
 
         return data, last_line, last_start
 
+    def add_comment_for_highlight(self, data, comment, last_line):
+        data += [comment[0] - last_line,  # token line number, relative to the previous token
+                 0,  # token start character, relative to the previous token (or start of the line)
+                 comment[1],  # the length of the token.
+                 Highlighter.token_types.index('comment'),  # type
+                 0  # modifiers (bit encoding)
+                 ]
+        
+        return data, comment[0], 0
+
+
     def adjust_bounds(self, start, end, node):
 
         if node.type == 'include':
             return start, (end[0], start[1] + len('.include'))
         else:
             return start, end
+
+    def _get_meta_block_nodes(self, woowoo_document) -> [(int, [(Node, type)])]:
+        # get nodes to highlight in every meta-block of the file
+        meta_blocks_nodes = [] # [(metablock line offset from file start, [(Node, type)])]
+        for line_offset, meta_block_tree in woowoo_document.meta_block_trees:
+            meta_block_nodes = YAML_LANGUAGE.query(self.yaml_highlight_queries).captures(
+                meta_block_tree.root_node)
+            meta_blocks_nodes.append((line_offset, meta_block_nodes))
+            
+        return meta_blocks_nodes
