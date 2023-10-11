@@ -66,3 +66,9 @@ See `queries/highlights.scm` (WooWoo without metablocks) and `queries/yaml-highl
 
 1. Workspace-wide renaming of symbols 🔲
    - todo (describe what can be renamed)
+   
+   
+### On Type Formatting
+
+1. Automatic indentation 🔲
+   - automatically indent after outer environment is used
