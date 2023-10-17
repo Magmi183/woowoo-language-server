@@ -84,12 +84,18 @@ class Highlighter:
 
             while node[0].start_point[0] > next_meta_block_start:
                 # node is after meta-block which has NOT been processed yet, now is the time
+                processed = {}
                 for meta_block_node in meta_blocks_nodes[current_meta_block_index][1]:
+                    # yaml queries allow nodes to be retrieved multiple times
+                    # we skip nodes that we encounter for the second time
+                    # this is possible thanks to the priority arrangment in the query file
+                    if meta_block_node[0].start_point in processed: continue
+                    processed[meta_block_node[0].start_point] = True
+
                     data, last_line, last_start = self.add_node_for_highlight(woowoo_document, data,
                                                                                    meta_block_node,
                                                                                    last_line, last_start,
                                                                                    next_meta_block_start)
-
                 current_meta_block_index += 1
                 next_meta_block_start = (
                     meta_blocks_nodes[current_meta_block_index][0] 

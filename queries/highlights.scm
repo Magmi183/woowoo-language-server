@@ -1,6 +1,3 @@
-; Comment
-; TODO
-
 ; Include statement
 
 (include) @keyword
@@ -10,16 +7,13 @@
 ; Document part
 
 (document_part "." @operator)
-(document_part_type) @keyword
-(document_part_title) @string
-
-; Meta block
-; TODO: Should I highlight the whole metablock? Is it better than nothing?
+(document_part_type) @namespace
+(document_part_title) @variable
 
 
 ; Object
 (object ["." ":"] @operator)
-(object_type) @property
+(object_type) @struct
 
 
 ; Block
@@ -28,13 +22,15 @@
 
 (short_inner_environment ["." ":"] @operator)
 (short_inner_environment_type) @type
+(short_inner_environment_body) @parameter
 
 ;  - Verbose Inner Environment
 
 (verbose_inner_environment (_ "\"" @string))
 (verbose_inner_environment (_ ["." "@" "#"] @operator))
-(verbose_inner_environment_type) @type
-(verbose_inner_environment_at_type) @type
+(verbose_inner_environment_type) @method
+(verbose_inner_environment_at_type) @method
+(verbose_inner_environment_meta) @modifier
 
 ;  - Outer Environment
 
@@ -45,4 +41,4 @@
 ;  - Math
 
 (math_environment "$" @function)
-(math_environment_body ) @variable
+(math_environment_body ) @number
