@@ -15,9 +15,9 @@ from lsprotocol.types import (
     TEXT_DOCUMENT_COMPLETION,
     CompletionParams, TEXT_DOCUMENT_HOVER, TextDocumentPositionParams,
     DidOpenTextDocumentParams, DidChangeTextDocumentParams, TEXT_DOCUMENT_DID_OPEN, TEXT_DOCUMENT_DID_CHANGE,
-    CompletionOptions, INITIALIZED, TEXT_DOCUMENT_DEFINITION, Location, Position, Range, TEXT_DOCUMENT_DID_SAVE,
-    DidSaveTextDocumentParams, TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL, SemanticTokensParams, SemanticTokens,
-    SemanticTokensLegend, InitializedParams, InitializeParams, InitializeResult, ServerCapabilities, INITIALIZE,
+    CompletionOptions, INITIALIZED, TEXT_DOCUMENT_DEFINITION, TEXT_DOCUMENT_DID_SAVE,
+    DidSaveTextDocumentParams, TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL, SemanticTokensParams,
+    SemanticTokensLegend, InitializedParams, InitializeParams, INITIALIZE,
     WorkspaceFolder, DefinitionParams, TEXT_DOCUMENT_FOLDING_RANGE, FoldingRangeParams, WORKSPACE_DID_RENAME_FILES,
     RenameFilesParams, WORKSPACE_WILL_RENAME_FILES
 )
@@ -104,7 +104,7 @@ def did_save(ls: WooWooLanguageServer, params: DidSaveTextDocumentParams) -> Non
 
 
 @SERVER.feature(WORKSPACE_WILL_RENAME_FILES)
-def did_rename_files(ls: WooWooLanguageServer, params: RenameFilesParams):
+def will_rename_files(ls: WooWooLanguageServer, params: RenameFilesParams):
     logger.debug("[WORKSPACE_WILL_RENAME_FILES] SERVER.feature called")
 
     # TODO: Refactor file references to the new name (like in .include statements)
@@ -140,17 +140,19 @@ def did_change(ls: WooWooLanguageServer, params: DidChangeTextDocumentParams):
     ls.linter.diagnose(params)
 
 
-# TODO: Set trigger characters.
 @SERVER.feature(TEXT_DOCUMENT_COMPLETION, CompletionOptions(trigger_characters=Completer.trigger_characters))
 def completions(ls: WooWooLanguageServer, params: CompletionParams):
     logger.debug("[TEXT_DOCUMENT_COMPLETION] SERVER.feature called")
     return ls.completer.complete(params)
 
 
+""" 
+# TODO: Uncomment when the feature is finished.
 @SERVER.feature(TEXT_DOCUMENT_HOVER)
 def on_hover(ls: WooWooLanguageServer, params: TextDocumentPositionParams):
     logger.debug("[TEXT_DOCUMENT_HOVER] SERVER.feature called")
     return ls.hoverer.hover(params)
+"""
 
 
 @SERVER.feature(TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
@@ -158,10 +160,6 @@ def on_hover(ls: WooWooLanguageServer, params: TextDocumentPositionParams):
                                      token_modifiers=Highlighter.token_modifiers))
 def semantic_tokens(ls: WooWooLanguageServer, params: SemanticTokensParams):
     logger.debug("[TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL] SERVER.feature called")
-
-    # NOTE: At this time, this function is used to full-scale highlighting.
-    # That means no syntax highlighting is needed on the client side.
-
     return ls.highlighter.semantic_tokens(params)
 
 

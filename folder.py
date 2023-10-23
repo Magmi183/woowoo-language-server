@@ -7,7 +7,7 @@ from woowoodocument import WooWooDocument
 
 class Folder:
 
-    foldable_types = ["document_part", "object", "block", "classic_outer_environment"]
+    foldable_types = ["document_part", "object", "block"]
 
     def __init__(self, ls):
         self.ls = ls

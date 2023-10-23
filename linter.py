@@ -59,9 +59,15 @@ class Linter:
 
         error_nodes = [node for node, _ in query.captures(tree.root_node)]
         for error_node in error_nodes:
+            
+            range = Range(start=Position(*error_node.start_point),
+                            end=Position(*error_node.end_point))
+            if range.start.line != range.end.line:
+                range = Range(start=Position(*error_node.start_point),
+                            end=Position(line=error_node.start_point[0], character=error_node.start_point[1]+1))
+            
             diagnostics.append(Diagnostic(
-                range=Range(start=Position(*error_node.start_point),
-                            end=Position(*error_node.end_point)),
+                range=range,
                 message="Syntax error",
                 source=self.ls.name,
                 severity=DiagnosticSeverity.Error

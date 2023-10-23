@@ -32,7 +32,7 @@ class Completer:
     def complete_include(self, document: WooWooDocument, params: CompletionParams):
 
         # TODO: Do more conditions. This is POC.
-        if tree_utils.is_query_overlapping_pos(document.tree, "(text_block) @tb", params.position.line, params.position.character):
+        if tree_utils.is_query_overlapping_pos(document.tree, "(block) @b (object) @ob", params.position.line, max(0, params.position.character-1)):
             return []
 
         current_doc_path = utils.uri_to_path(params.text_document.uri)
