@@ -25,6 +25,7 @@ class WooWooDocument:
             self.update_source(source)
     
     def update_comment_lines(self):
+        self.comment_lines.clear()
         for i, line in enumerate(self.source.split("\n")):
             if len(line) > 0 and line[0] == "%":
                 self.comment_lines.append((i, len(line)))

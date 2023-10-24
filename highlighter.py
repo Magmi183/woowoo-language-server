@@ -55,6 +55,8 @@ class Highlighter:
         with open(get_absolute_path(file_path), 'r') as file:
             return file.read()
 
+
+    # TODO: Refactor this function so that it is less redundant (less code duplication).
     def semantic_tokens(self, params: SemanticTokensParams):
         woowoo_document = self.ls.get_document(params)
         data = []
@@ -114,7 +116,10 @@ class Highlighter:
 
         # all non-meta block processed, but meta-block could still remain (if they are last nodes of the file)
         while current_meta_block_index < len(meta_blocks_nodes):
+            processed = {}
             for meta_block_node in meta_blocks_nodes[current_meta_block_index][1]:
+                if meta_block_node[0].start_point in processed: continue
+                processed[meta_block_node[0].start_point] = True
                 data, last_line, last_start = self.add_node_for_highlight(woowoo_document, data,
                                                                                 meta_block_node,
                                                                                 last_line, last_start,
@@ -125,6 +130,7 @@ class Highlighter:
             if current_meta_block_index < len(meta_blocks_nodes):
                 next_meta_block_start = meta_blocks_nodes[current_meta_block_index][0]
 
+        
         while current_comment_index < len(cl):
                 data, last_line, last_start = self.add_comment_for_highlight(data, next_comment, last_line)
                 current_comment_index += 1
