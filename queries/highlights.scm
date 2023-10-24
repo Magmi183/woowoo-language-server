@@ -8,7 +8,9 @@
 
 (document_part "." @operator)
 (document_part_type) @namespace
-(document_part_title) @variable
+
+; Let client do the title, use LS just to highlight environments in title
+;(document_part_title) @variable
 
 
 ; Object
