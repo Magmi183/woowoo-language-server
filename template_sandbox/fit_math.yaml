@@ -1,0 +1,159 @@
+name: "FIT Math"
+version_code: 1
+version_name: "1.0.0"
+description: |-
+  This template is used for writing almost all of the math courses on FIT CTU.
+  Blocks are rendered as paragraphs.
+  Indented blocks are unnumbered equations.
+  It was developed by Tomas Kalvoda.
+implicit_outer_environment: "equation"
+
+document_parts:
+  - name: "Chapter"
+    description: "A single page with the chapter's textual content and list of sections."
+    meta_block: &doc_part_meta
+      required_fields:
+        - name: label
+          pattern: "TODO"
+      optional_fields:
+        - name: short_title
+          pattern: "TODO"
+        - name: pdf_string
+          pattern: "TODO"
+        - name: index
+          pattern: "TODO"
+  - name: "Section"
+    description: "A single page with the section's textual content and list of subsections."
+    meta_block: *doc_part_meta
+  - name: "Subsection"
+    description: "Rendered as part of the section page."
+    meta_block: *doc_part_meta
+
+
+
+wobjects:
+  - name: "Algorithm"
+    description: "Environment with a textual description of an algorithm."
+    meta_block: &default_meta
+      required_fields:
+        - name: title
+        - name: english
+        - name: label
+        - name: index
+
+  - name: "Corollary"
+    description: "Mathematical environment containing a corollary."
+    meta_block: *default_meta
+
+  - name: "Definition"
+    description: "Mathematical environment containing a definition."
+    meta_block: *default_meta
+
+  - name: "Example"
+    description: "Environment intended for examples."
+    meta_block: &default_with_star
+      <<: *default_meta
+      optional_fields:
+        - name: star
+          #type: boolean # Starred examples are considered to be harder.
+
+  - name: "Exercise"
+    description: "Environment intended for exercises."
+    meta_block: *default_with_star
+
+  - name: "Figure"
+    description: "Analogue of the LaTeX figure float environment."
+    meta_block:
+      required_fields: ~
+      optional_fields:
+        - name: label
+        - name: columns
+    # TODO: Should contain .images or !tikzs and a .caption.
+
+  - name: "Lemma"
+    description: "Mathematical environment containing a lemma."
+    meta_block: *default_meta
+
+  - name: "Observation"
+    description: "Textual observation of some sorts."
+    meta_block: *default_meta
+
+  - name: "Proposition"
+    description: "Mathematical environment containing a proposition."
+    meta_block: *default_meta
+
+  - name: "Question"
+    description: "Environment for questions with possible solutions summarized at the end of the document."
+    meta_block:
+      required_fields: ~
+      optional_fields:
+        - name: label
+        - name: solution
+
+  - name: "Remark"
+    description: "Mathematical environment containing a remark."
+    meta_block: *default_meta
+
+  - name: "Proof"
+    description: "A mathematical proof."
+    meta_block: &math_result
+      required_fields: ~
+      optional_fields:
+        - name: title
+        - name: label
+        - name: show
+
+  - name: "Solution"
+    description: "Environment containing a solution."
+    meta_block: *math_result
+
+  - name: "Table"
+    description: "Equivalent of the LaTeX table float environment."
+    meta_block:
+      required_fields: ~
+      optional_fields:
+        - name: label
+        - name: options
+    # TODO: Should contain !tabular or ,table and a .caption
+
+  - name: "Theorem"
+    description: "Mathematical environment containing a theorem."
+    meta_block: *default_meta
+
+  - name: "Warning"
+    description: "Mathematical environment containing a warning."
+    meta_block: *default_meta
+
+
+# TODO: Add remaining outers
+outer_environments:
+  classic:
+    - name: enumerate
+      description: "An enumerated list."
+      meta_block:
+        required_fields: ~
+        optional_fields:
+          - name: type
+            # TODO: possible values 1 or "a"
+
+  fragile:
+    - name: tikz
+      description: "A tikz picture environment."
+      meta_block:
+        required_fields:
+          - name: filename
+        optional_fields:
+          - name: options
+          - name: include_options
+
+
+# TODO: Gather and add remaining inner envs.
+inner_environments:
+  classic:
+    - name: quoted
+      description: "A piece of quoted text, inline."
+
+  short:
+    - name: reference
+      description: "A reference to other part of document or outside source."
+      body: "label" # TODO: Later, adjust this to be a struct, like a ContentDescriptor, with more options than just one field

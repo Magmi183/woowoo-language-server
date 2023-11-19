@@ -187,3 +187,5 @@ fabric.properties
 # tree-sitter
 
 *.so
+# files for local template testing
+template_sandbox/

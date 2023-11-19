@@ -1,0 +1,25 @@
+name: "FIT Math"
+version_code: 1
+version_name: "1.0.0"
+description: |-
+  This template is used for writing almost all of the math courses on FIT CTU.
+  Blocks are rendered as paragraphs.
+  Indented blocks are unnumbered equations.
+  It was developed by Tomas Kalvoda.
+implicit_outer_environment_type: equation
+document_parts:
+  description: "The template supports three levels of document division: chapters, sections and subsections."
+    - type: Chapter
+      description: "A single page with the chapter's textual content and list of sections."
+      meta_block: &doc_part_meta
+        required_fields: 
+          - name: label
+            pattern: *
+        optional_fields:
+          - name: short_title
+            pattern: *
+          - name: pdf_string
+            pattern: *
+          - name: index
+
+wobjects:
