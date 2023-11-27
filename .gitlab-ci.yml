@@ -1,0 +1,57 @@
+stages:
+  - build
+
+variables:
+  LINUX_BINARY: "parser-linux.so"
+  WINDOWS_BINARY: "parser-windows.dll"
+  BUILD_DIR: "builds_ts"
+  GIT_SUBMODULE_STRATEGY: normal # pull just top-level submodules (tree-sitter repos)
+
+build-linux:
+  stage: build
+  image: ubuntu:latest
+  script:
+    - mkdir -p $BUILD_DIR/woowoo/ $BUILD_DIR/yaml/
+    - ls -la
+    - apt-get update
+    - apt-get install -y clang git
+    - git config --global user.email "ci@example.com"
+    - git config --global user.name "CI Builder"
+    - git remote set-url origin https://oauth2:$CI_CD_TOKEN@gitlab.fit.cvut.cz/woowoo/lsp/woowoo-language-server.git
+    - git checkout gitlab/actions/pre-compiling
+    - clang++ -o $BUILD_DIR/woowoo/$LINUX_BINARY -shared tree-sitter/tree-sitter-woowoo/src/parser.c tree-sitter/tree-sitter-woowoo/src/scanner.cc -I./tree-sitter/tree-sitter-woowoo/src
+    - clang++ -o $BUILD_DIR/yaml/$LINUX_BINARY -shared tree-sitter/tree-sitter-yaml/src/parser.c tree-sitter/tree-sitter-yaml/src/scanner.cc -I./tree-sitter/tree-sitter-yaml/src
+    - git add $BUILD_DIR
+    - git commit --amend --no-edit
+    - git push --force # -o ci.skip
+  only:
+     - web
+
+
+build-windows:
+  stage: build
+  image: dockcross/windows-shared-x64:latest
+  script:
+    - git config --global user.email "ci@example.com"
+    - git config --global user.name "CI Builder"
+    - git remote set-url origin https://oauth2:$CI_CD_TOKEN@gitlab.fit.cvut.cz/woowoo/lsp/woowoo-language-server.git
+    - git checkout gitlab/actions/pre-compiling
+    - git fetch
+    - git reset --hard origin/gitlab/actions/pre-compiling
+    - >
+      $CC -o $BUILD_DIR/woowoo/$WINDOWS_BINARY -shared 
+      tree-sitter/tree-sitter-woowoo/src/parser.c 
+      tree-sitter/tree-sitter-woowoo/src/scanner.cc 
+      -I./tree-sitter/tree-sitter-woowoo/src -lstdc++
+    - >
+      $CC -o $BUILD_DIR/yaml/$WINDOWS_BINARY -shared 
+      tree-sitter/tree-sitter-yaml/src/parser.c 
+      tree-sitter/tree-sitter-yaml/src/scanner.cc 
+      -I./tree-sitter/tree-sitter-yaml/src -lstdc++
+    - git add $BUILD_DIR
+    - git commit --amend --no-edit
+    - git push --force # -o ci.skip
+  dependencies:
+    - build-linux
+  only:
+    - web
