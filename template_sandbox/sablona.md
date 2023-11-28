@@ -88,3 +88,14 @@ TBD
 
 - význam operátorů # a @, např. # je reference, takže je tam možné udělat nějaké napovídání
 - výčet názvů...
+
+
+
+## Nápady
+
+1) U konstruktů, kde se proklikávám ke zdroji, bych mohl mít field "instance", např. reference by
+měl "instance_of: label", body field může být názvem matoucí.
+
+
+2) Místo "body: "label"" bych mohl psát např. body: "equation.label" a tím bych zajistil, že např. 
+   "eqref" se zajímá jen o labeli, co jsou součástí equation.

@@ -157,3 +157,7 @@ inner_environments:
     - name: reference
       description: "A reference to other part of document or outside source."
       body: "label" # TODO: Later, adjust this to be a struct, like a ContentDescriptor, with more options than just one field
+
+    - name: eqref
+      description: "Equation reference."
+      body: "label"

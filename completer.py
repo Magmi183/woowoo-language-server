@@ -4,13 +4,14 @@ from lsprotocol.types import CompletionParams, CompletionList, CompletionItem, C
 
 import tree_utils
 import utils
+from parser import WOOWOO_LANGUAGE
 from woowoodocument import WooWooDocument
 
 
 class Completer:
 
     # TODO: Add trigger characters.
-    trigger_characters = ['.']
+    trigger_characters = ['.', ':']
 
     def __init__(self, ls):
         self.ls = ls
@@ -24,7 +25,10 @@ class Completer:
         document = self.ls.get_document(params)
         completion_items = []
 
+        # TODO: Call these methods based on trigger char., to avoid useless overhead
         completion_items += self.complete_include(document, params)
+        if params.context.trigger_character == ':':
+            completion_items += self.complete_inner_envs(document, params)
 
         return completion_items
 
@@ -47,4 +51,23 @@ class Completer:
                     insert_text_format=InsertTextFormat.Snippet,
                     insert_text=f'include ${{1|{paths_joined}|}}'
                 )]
+
+
+    def complete_inner_envs(self, document: WooWooDocument, params: CompletionParams):
+        line, char = document.utf16_to_utf8_offset((params.position.line, params.position.character-1))
+
+        short_inner_envs = WOOWOO_LANGUAGE.query("(short_inner_environment) @sie").captures(document.tree.root_node, start_point=(line, char), end_point=(line, char + 1))
+
+        if len(short_inner_envs) > 0:
+
+            short_inner_env = short_inner_envs[0][0]
+            short_inner_environment_type = short_inner_env.children[1].text
+
+            # TODO: get key names from template manager
+
+            values = document.search_meta_blocks("label")
+
+            return [CompletionItem(label=x.decode('utf-8')) for x in values]
+
+
 
