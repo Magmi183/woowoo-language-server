@@ -30,7 +30,7 @@ build-linux:
 
 build-windows:
   stage: build
-  image: dockcross/windows-shared-x64:latest
+  image: dockcross/windows-static-x64:latest
   script:
     - git config --global user.email "ci@example.com"
     - git config --global user.name "CI Builder"
