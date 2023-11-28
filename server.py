@@ -11,6 +11,8 @@ from hoverer import Hoverer
 from linter import Linter
 from navigator import Navigator
 
+from template_manager import TemplateManager
+
 from lsprotocol.types import (
     TEXT_DOCUMENT_COMPLETION,
     CompletionParams, TEXT_DOCUMENT_HOVER, TextDocumentPositionParams,
@@ -35,6 +37,8 @@ class WooWooLanguageServer(LanguageServer):
     def __init__(self, name: str, version: str):
         logger.debug("Constructing WooWooLanguageServer.")
         super().__init__(name, version)
+
+        self.template_manager = TemplateManager()
 
         self.linter = Linter(self)
         self.completer = Completer(self)
@@ -66,6 +70,9 @@ class WooWooLanguageServer(LanguageServer):
         self.docs[new_path] = self.docs[old_path]
         self.delete_document(old_path)
 
+    def set_template(self, template_file_path):
+        self.template_manager.load_template(template_file_path)
+
 
 SERVER = WooWooLanguageServer('woowoo-language-SERVER', 'v0.1')
 
@@ -76,6 +83,13 @@ def initiliaze(ls: WooWooLanguageServer, params: InitializeParams) -> None:
 
     if len(params.workspace_folders) != 1:
         logger.error("Exactly one workspace has to be opened. No other options are supported for now.")
+
+    if 'templateFilePath' in params.initialization_options:
+        ls.set_template(params.initialization_options["templateFilePath"])
+    else:
+        # TODO: Default behaviour
+        pass
+
 
     ls.load_workspace(params.workspace_folders[0])
 

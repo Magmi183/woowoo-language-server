@@ -1,15 +1,19 @@
 import yaml
 
 from template import Template
-from document_part import DocumentPart
 
 
 class TemplateManager:
-    def __init__(self, yaml_location):
-        self.active_template = self._load_template(yaml_location)
+    def __init__(self, template_file_path=None):
+        self.active_template = None
+        if template_file_path:
+            self.load_template(template_file_path)
 
-    def _load_template(self, yaml_location):
-        with open(yaml_location, 'r') as file:
+    def load_template(self, template_file_path):
+        self.active_template = self._load_template(template_file_path)
+
+    def _load_template(self, template_file_path):
+        # TODO: Exception handling. Maybe propagate error to the user?
+        with open(template_file_path, 'r') as file:
             yaml_data = yaml.safe_load(file)
-        # Assuming that the top-level structure in the YAML is a Template
         return Template(**yaml_data)
