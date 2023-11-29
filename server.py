@@ -71,8 +71,12 @@ class WooWooLanguageServer(LanguageServer):
         self.delete_document(old_path)
 
     def set_template(self, template_file_path):
-        self.template_manager.load_template(template_file_path)
-
+        # TODO: better fallback mechanisms and error handling + handle default template better
+        if template_file_path != "":
+            self.template_manager.load_template(template_file_path)
+        else:
+            import utils
+            self.template_manager.load_template(utils.get_absolute_path("template_sandbox/fit_math.yaml"))
 
 SERVER = WooWooLanguageServer('woowoo-language-SERVER', 'v0.1')
 
@@ -84,12 +88,8 @@ def initiliaze(ls: WooWooLanguageServer, params: InitializeParams) -> None:
     if len(params.workspace_folders) != 1:
         logger.error("Exactly one workspace has to be opened. No other options are supported for now.")
 
-    if 'templateFilePath' in params.initialization_options:
-        ls.set_template(params.initialization_options["templateFilePath"])
-    else:
-        # TODO: Default behaviour
-        pass
-
+    # default: ""
+    ls.set_template(params.initialization_options["templateFilePath"])
 
     ls.load_workspace(params.workspace_folders[0])
 

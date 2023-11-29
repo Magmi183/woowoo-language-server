@@ -20,7 +20,8 @@ class WooWooDocument:
         self.update_comment_lines()
 
     def _load(self):
-        with self.path.open('r') as f:
+        # TODO: Support more encodings and test this.
+        with self.path.open('r', encoding='utf-8') as f:
             source = f.read()
             self.update_source(source)
     
