@@ -1,8 +1,5 @@
 from tree_sitter import Language, Parser, Tree
 import os
-from ctypes import CDLL, c_char_p
-import ctypes.util
-import sys
 import platform
 from utils import get_absolute_path
 
@@ -11,33 +8,50 @@ logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-def get_parser_lib_filename():
-    os_system = platform.system()
+PARSERS_DIRECTORY = "tree-sitter/builds/"
 
-    if os_system == "Windows":
-        return "parser-windows.dll"
-    elif os_system == "Linux":
-        return "parser-linux.so"
+def get_parser_lib_filename():
+    filename = ""
+    os_system = platform.system().lower()
+    arch = platform.machine().lower()
+
+    if arch in ["x64", "x86_64", "amd64"]:
+        arch = "x64"
+    elif arch in ["arm64"]:
+        arch = "arm64"
     else:
         return None
 
+    filename += os_system + "-" + arch
+    if os_system == "windows":
+        filename += ".dll"
+    elif os_system == "linux":
+        filename += ".so"
+    else:
+        return None
+
+    return filename
+
+
+
 def initialize_parsers():
     parser_filename = get_parser_lib_filename()
+    loaded = False
     if parser_filename is not None:
         try:
-            woowoo_lib_path = os.path.join(get_absolute_path('builds_ts/woowoo'), parser_filename)
-            yaml_lib_path = os.path.join(get_absolute_path('builds_ts/yaml'), parser_filename)
+            woowoo_lib_path = os.path.join(get_absolute_path(PARSERS_DIRECTORY + "woowoo/"), parser_filename)
+            yaml_lib_path = os.path.join(get_absolute_path(PARSERS_DIRECTORY + "yaml/"), parser_filename)
 
             WOOWOO_LANGUAGE = Language(woowoo_lib_path, 'woowoo')
             YAML_LANGUAGE = Language(yaml_lib_path, 'yaml')
+            loaded = True
         except OSError as e:
-            # Log the error details
             logger.error(f"Error loading parser library: {e}")
             logger.error(f"Tried to load: {woowoo_lib_path} and {yaml_lib_path}")
-            # Handle the error (e.g., fall back to compilation)
-            return
-    else:
+
+    if not loaded:
         # unknown system, try to compile it locally
+        logger.warning(f"Unsupported system, falling back to local compilation (C++ compiler needed).")
         WOOWOO_LANGUAGE, YAML_LANGUAGE = compile_parsers()
 
     woowoo_parser = Parser()

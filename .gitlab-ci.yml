@@ -1,57 +1,109 @@
 stages:
   - build
+  - combine
 
 variables:
-  LINUX_BINARY: "parser-linux.so"
-  WINDOWS_BINARY: "parser-windows.dll"
-  BUILD_DIR: "builds_ts"
+  BUILD_DIR: "tree-sitter/builds"
   GIT_SUBMODULE_STRATEGY: normal # pull just top-level submodules (tree-sitter repos)
 
-build-linux:
-  stage: build
-  image: ubuntu:latest
-  script:
-    - mkdir -p $BUILD_DIR/woowoo/ $BUILD_DIR/yaml/
-    - ls -la
-    - apt-get update
-    - apt-get install -y clang git
-    - git config --global user.email "ci@example.com"
-    - git config --global user.name "CI Builder"
-    - git remote set-url origin https://oauth2:$CI_CD_TOKEN@gitlab.fit.cvut.cz/woowoo/lsp/woowoo-language-server.git
-    - git checkout gitlab/actions/pre-compiling
-    - clang++ -o $BUILD_DIR/woowoo/$LINUX_BINARY -shared tree-sitter/tree-sitter-woowoo/src/parser.c tree-sitter/tree-sitter-woowoo/src/scanner.cc -I./tree-sitter/tree-sitter-woowoo/src
-    - clang++ -o $BUILD_DIR/yaml/$LINUX_BINARY -shared tree-sitter/tree-sitter-yaml/src/parser.c tree-sitter/tree-sitter-yaml/src/scanner.cc -I./tree-sitter/tree-sitter-yaml/src
-    - git add $BUILD_DIR
-    - git commit --amend --no-edit
-    - git push --force # -o ci.skip
-  only:
-     - web
+
+.gitconfig: &gitconfig
+  - git config --global user.email $GITLAB_USER_EMAIL
+  - git config --global user.name "CI Builder"
+  - git remote set-url origin https://oauth2:$CI_CD_TOKEN@gitlab.fit.cvut.cz/woowoo/lsp/woowoo-language-server.git
+  - git checkout $CI_COMMIT_BRANCH
+  - git fetch
+  - git reset --hard $CI_COMMIT_BRANCH
 
 
-build-windows:
+# -- BUILDS:
+
+.build_script: &build_script
+  - mkdir -p $BUILD_DIR/woowoo/ $BUILD_DIR/yaml/
+  - $CC -o $BUILD_DIR/woowoo/${OS}-${ARCH}.$EXT -shared -fPIC tree-sitter/tree-sitter-woowoo/src/parser.c tree-sitter/tree-sitter-woowoo/src/scanner.cc -I./tree-sitter/tree-sitter-woowoo/src -lstdc++
+  - $CC -o $BUILD_DIR/yaml/${OS}-${ARCH}.$EXT -shared -fPIC tree-sitter/tree-sitter-yaml/src/parser.c tree-sitter/tree-sitter-yaml/src/scanner.cc -I./tree-sitter/tree-sitter-yaml/src -lstdc++
+
+
+build-windows-x64:
   stage: build
   image: dockcross/windows-static-x64:latest
+  variables:
+    OS: "windows"
+    ARCH: "x64"
+    EXT: "dll"
   script:
-    - git config --global user.email "ci@example.com"
-    - git config --global user.name "CI Builder"
-    - git remote set-url origin https://oauth2:$CI_CD_TOKEN@gitlab.fit.cvut.cz/woowoo/lsp/woowoo-language-server.git
-    - git checkout gitlab/actions/pre-compiling
-    - git fetch
-    - git reset --hard origin/gitlab/actions/pre-compiling
-    - >
-      $CC -o $BUILD_DIR/woowoo/$WINDOWS_BINARY -shared 
-      tree-sitter/tree-sitter-woowoo/src/parser.c 
-      tree-sitter/tree-sitter-woowoo/src/scanner.cc 
-      -I./tree-sitter/tree-sitter-woowoo/src -lstdc++
-    - >
-      $CC -o $BUILD_DIR/yaml/$WINDOWS_BINARY -shared 
-      tree-sitter/tree-sitter-yaml/src/parser.c 
-      tree-sitter/tree-sitter-yaml/src/scanner.cc 
-      -I./tree-sitter/tree-sitter-yaml/src -lstdc++
+    - *build_script
+  artifacts:
+    untracked: true
+    expire_in: 1 hour
+  only:
+    - web
+
+
+# TODO: test
+build-windows-arm64:
+  stage: build
+  image: dockcross/windows-arm64
+  variables:
+    OS: "windows"
+    ARCH: "arm64"
+    EXT: "dll"
+  script:
+    - *build_script
+  artifacts:
+    untracked: true
+    expire_in: 1 hour
+  only:
+    - web
+
+
+build-linux-x64:
+  stage: build
+  image: dockcross/linux-x64-clang
+  variables:
+    OS: "linux"
+    ARCH: "x64"
+    EXT: "so"
+  script:
+    - *build_script
+  artifacts:
+    untracked: true
+    expire_in: 1 hour
+  only:
+    - web
+
+
+build-linux-arm64:
+  stage: build
+  image: dockcross/linux-arm64
+  variables:
+    OS: "linux"
+    ARCH: "arm64"
+    EXT: "so"
+  script:
+    - *build_script
+  artifacts:
+    untracked: true
+    expire_in: 1 hour
+  only:
+    - web
+
+
+
+combine-and-commit:
+  stage: combine
+  script:
+    - ls -la
+    - ls -la $BUILD_DIR
+    - ls -la $BUILD_DIR/woowoo/
+    - *gitconfig
     - git add $BUILD_DIR
-    - git commit --amend --no-edit
-    - git push --force # -o ci.skip
+    - git commit -m "Combined build for version $VERSION"
+    - git push origin
   dependencies:
-    - build-linux
+    - build-windows-x64
+    - build-windows-arm64
+    - build-linux-x64
+    - build-linux-arm64
   only:
     - web
