@@ -15,7 +15,7 @@
 
 ; Object
 (object ["." ":"] @operator)
-(object_type) @struct
+(object_type) @storage.type.struct
 
 
 ; Block
@@ -36,7 +36,7 @@
 
 ;  - Outer Environment
 
-(outer_environment_type) @type
+(outer_environment_type) @variable.other
 (fragile_outer_environment ["!" ":"] @operator)
 (classic_outer_environment ["." ":"] @operator)
 

@@ -17,6 +17,8 @@ variables:
 
 
 # -- BUILDS:
+# 
+# cross-compile tree-sitter parsers (WooWoo + yaml) using Dockcross images
 
 .build_script: &build_script
   - mkdir -p $BUILD_DIR/woowoo/ $BUILD_DIR/yaml/
@@ -73,6 +75,7 @@ build-linux-x64:
     - web
 
 
+# TODO: test
 build-linux-arm64:
   stage: build
   image: dockcross/linux-arm64
@@ -89,7 +92,7 @@ build-linux-arm64:
     - web
 
 
-
+# Commit all previously generated parsers (into new separate commit).
 combine-and-commit:
   stage: combine
   script:
@@ -98,7 +101,7 @@ combine-and-commit:
     - ls -la $BUILD_DIR/woowoo/
     - *gitconfig
     - git add $BUILD_DIR
-    - git commit -m "Combined build for version $VERSION"
+    - git commit -m "Generated parser binaries."
     - git push origin
   dependencies:
     - build-windows-x64

@@ -17,6 +17,8 @@ class Highlighter:
         'typeParameter',
         'parameter',
         'variable',
+        'variable.other', # added
+        'storage.type.struct', # added
         'property',
         'enumMember',
         'event',
