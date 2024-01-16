@@ -186,3 +186,5 @@ fabric.properties
 
 # files for local template testing
 template_sandbox/
+
+**/tmp.py
