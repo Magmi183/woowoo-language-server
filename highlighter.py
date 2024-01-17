@@ -188,9 +188,9 @@ class Highlighter:
     def _get_meta_block_nodes(self, woowoo_document) -> [(int, [(Node, type)])]:
         # get nodes to highlight in every meta-block of the file
         meta_blocks_nodes = [] # [(metablock line offset from file start, [(Node, type)])]
-        for line_offset, meta_block_tree in woowoo_document.meta_block_trees:
+        for meta_block in woowoo_document.meta_blocks:
             meta_block_nodes = YAML_LANGUAGE.query(self.yaml_highlight_queries).captures(
-                meta_block_tree.root_node)
-            meta_blocks_nodes.append((line_offset, meta_block_nodes))
+                meta_block.tree.root_node)
+            meta_blocks_nodes.append((meta_block.line_offset, meta_block_nodes))
             
         return meta_blocks_nodes

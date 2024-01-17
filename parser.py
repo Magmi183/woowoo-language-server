@@ -1,7 +1,10 @@
-from tree_sitter import Language, Parser, Tree
+from tree_sitter import Language, Parser, Tree, Node
 import os
 import platform
+
+from meta_context import MetaContext
 from utils import get_absolute_path
+from typing import List
 
 import logging
 logging.basicConfig()
@@ -80,15 +83,37 @@ def compile_parsers():
 woowoo_parser, WOOWOO_LANGUAGE, yaml_parser, YAML_LANGUAGE = initialize_parsers()
 
 
-def parse_source(src: str) -> (Tree, [(int, Tree)]):
+def parse_source(src: str) -> (Tree, List[MetaContext]):
     tree = woowoo_parser.parse(bytes(src, "utf-8"))
 
     query = WOOWOO_LANGUAGE.query("(meta_block) @yaml")
     meta_blocks = query.captures(tree.root_node)
 
-    yaml_trees = [] # [(line offset, tree)]
-    for meta_block in meta_blocks:
-        yaml_tree = yaml_parser.parse(meta_block[0].text)
-        yaml_trees.append((meta_block[0].start_point[0], yaml_tree))
+    yaml_trees = []
+    for meta_block, _ in meta_blocks:
+        parent = meta_block.parent
+        parent_name = extract_structure_name(parent)
+        parent_type = parent.type if "outer_environment" not in parent.type else "outer_environment"
+        yaml_tree = yaml_parser.parse(meta_block.text)
+        yaml_trees.append(MetaContext(yaml_tree, meta_block.start_point[0], parent_type, parent_name))
 
     return tree, yaml_trees
+
+def extract_structure_name(node: Node):
+    """
+    Extract the name part of a given node.
+    """
+    child_with_name = None
+    if node.type == "document_part":
+        child_with_name = "document_part_title"
+    elif "outer_environment" in node.type:
+        child_with_name = "outer_environment_type"
+    elif node.type == "object":
+        child_with_name = "object_type"
+
+    if child_with_name is None:
+        return None
+
+    for child in node.children:
+        if child.type == child_with_name:
+            return child.text.decode('utf-8')

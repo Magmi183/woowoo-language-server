@@ -8,7 +8,7 @@ from tree_sitter import Tree, Node
 
 class Navigator:
     # nodes in this list MUST NOT overlap each other (one can not be child of another)
-    go_to_definition_nodes = ["filename"]
+    go_to_definition_nodes = ["filename", "short_inner_environment"]
 
     def __init__(self, ls):
         self.ls = ls
@@ -33,6 +33,9 @@ class Navigator:
         if node.type == 'filename':
             filename = node.text.decode('utf-8')
             return self.get_file_location(filename, params)
+        elif node.type == 'short_inner_environment':
+            return self.resolve_short_inner_environment_reference(node)
+
 
     def get_file_location(self, filename: str, params: DefinitionParams):
         target_file_path = uri_to_path(params.text_document.uri).parent / filename
@@ -46,3 +49,7 @@ class Navigator:
                 end=Position(line=0, character=0)
             )
         )
+
+    def resolve_short_inner_environment_reference(self, node: Node):
+        pass
+        # TODO

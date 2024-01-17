@@ -170,5 +170,6 @@ inner_environments:
     - name: eqref
       description: "Equation reference."
       references:
-        - outer_environment: equation
+        - structure_type: outer_environment
+          structure_name: equation
           meta_key: label
