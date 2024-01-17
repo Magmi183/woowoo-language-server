@@ -1,8 +1,12 @@
-from meta_block import MetaBlock
+from .meta_block import MetaBlock
+from .reference import Reference
 
 
 class InnerEnvironment:
-    def __init__(self, name, description, body=None):
+    def __init__(self, name, description, references=None):
         self.name = name
         self.description = description
-        self.body = body
+        if references:
+            self.references = [Reference(reference) for reference in references]
+        else:
+            self.references = None

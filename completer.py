@@ -61,13 +61,12 @@ class Completer:
         if len(short_inner_envs) > 0:
 
             short_inner_env = short_inner_envs[0][0]
-            short_inner_environment_type = short_inner_env.children[1].text
+            short_inner_environment_type = short_inner_env.children[1].text.decode('utf-8')
 
-            # TODO: get key names from template manager
+            possible_references = self.ls.template_manager.get_possible_short_inner_references(short_inner_environment_type)
+            #TODO
 
-            values = document.search_meta_blocks("label")
+            values = document.search_meta_blocks(possible_references[0])
 
             return [CompletionItem(label=x.decode('utf-8')) for x in values]
-
-
 

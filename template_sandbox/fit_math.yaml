@@ -136,6 +136,14 @@ outer_environments:
           - name: type
             # TODO: possible values 1 or "a"
 
+    - name: equation
+      description: "A simple math equation"
+      meta_block:
+        required_fields: ~
+        optional_fields:
+          - name: label
+
+
   fragile:
     - name: tikz
       description: "A tikz picture environment."
@@ -156,8 +164,11 @@ inner_environments:
   short:
     - name: reference
       description: "A reference to other part of document or outside source."
-      body: "label" # TODO: Later, adjust this to be a struct, like a ContentDescriptor, with more options than just one field
+      references:
+        - meta_key: label
 
     - name: eqref
       description: "Equation reference."
-      body: "label"
+      references:
+        - outer_environment: equation
+          meta_key: label

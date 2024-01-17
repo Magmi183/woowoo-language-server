@@ -1,7 +1,7 @@
-from document_part import DocumentPart
-from inner_environment import InnerEnvironment
-from wobject import Wobject
-from outer_environment import OuterEnvironment
+from .document_part import DocumentPart
+from .inner_environment import InnerEnvironment
+from .wobject import Wobject
+from .outer_environment import OuterEnvironment
 
 
 class Template:

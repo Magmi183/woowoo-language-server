@@ -1,4 +1,4 @@
-from meta_block import MetaBlock
+from .meta_block import MetaBlock
 
 
 class Wobject:

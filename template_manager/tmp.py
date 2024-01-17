@@ -1,4 +1,4 @@
-from template_manager import TemplateManager
+from .template_manager import TemplateManager
 from pprint import pprint
 
 # Test script

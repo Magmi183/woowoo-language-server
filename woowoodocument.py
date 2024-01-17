@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from parser import parse_source, YAML_LANGUAGE
+from template_manager.reference import Reference
 
 
 class WooWooDocument:
@@ -80,13 +81,14 @@ class WooWooDocument:
             return 4
 
 
-    def search_meta_blocks(self, key):
-        """Search for all k:v pairs where k = key. Collect all values and return them."""
+    def search_meta_blocks(self, reference: Reference):
+        """Search for all k:v pairs in meta blocks that follow the structure in reference.
+         Collect all values and return them."""
 
         query = f"""(block_mapping_pair
             key: (flow_node [(double_quote_scalar) (single_quote_scalar) (plain_scalar)] @key)
             value: (flow_node) @value
-            (#eq? @key "{key}"))"""
+            (#eq? @key "{reference.meta_key}"))"""
         nodes_all = []
         for meta_block in self.meta_block_trees:
             nodes_all += YAML_LANGUAGE.query(query).captures(meta_block[1].root_node)

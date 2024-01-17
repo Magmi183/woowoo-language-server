@@ -11,7 +11,7 @@ from hoverer import Hoverer
 from linter import Linter
 from navigator import Navigator
 
-from template_manager import TemplateManager
+from template_manager.template_manager import TemplateManager
 
 from lsprotocol.types import (
     TEXT_DOCUMENT_COMPLETION,
