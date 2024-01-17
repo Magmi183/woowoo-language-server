@@ -48,27 +48,73 @@ class WooWooLanguageServer(LanguageServer):
         self.folder = Folder(self)
 
         self.docs = {}
+        self.doc_to_project = {}
 
     def load_workspace(self, workspace: WorkspaceFolder):
         root_path = utils.uri_to_path(workspace.uri)
-        woo_files = root_path.rglob('*.woo')
+        project_folders = self.find_project_folders(root_path)
 
-        for woo_file in woo_files:
-            self.load_document(woo_file)
+        for project_folder in project_folders:
+            woo_files = project_folder.rglob('*.woo')
+            for woo_file in woo_files:
+                self.load_document(woo_file, project_folder)
 
-    def load_document(self, path: Path):
-        self.docs[path] = WooWooDocument(path)
+        # other .woo files, not in any project
+        for woo_file in root_path.glob('*.woo'):
+            if woo_file not in self.doc_to_project:
+                self.load_document(woo_file, None)
+
+    def find_project_folders(self, root_path: Path):
+        # Find all folders containing a Woofile
+        return [path.parent for path in root_path.rglob('Woofile')]
+
+    def find_project_folder(self, path: Path):
+        # Find project folder for a given file.
+
+        for parent in path.parents:
+            # Check if this directory has a 'Woofile'
+            if (parent / 'Woofile').exists():
+                return parent
+        return None
+
+    def load_document(self, path: Path, project_folder: Path):
+        if project_folder not in self.docs:
+            self.docs[project_folder] = {}
+        self.docs[project_folder][path] = WooWooDocument(path)
+        self.doc_to_project[path] = project_folder
 
     def get_document(self, params):
         document_path = utils.uri_to_path(params.text_document.uri)
-        return self.docs.get(document_path)
+        return self.docs[self.doc_to_project[document_path]][document_path]
 
     def delete_document(self, path: Path):
-        del self.docs[path]
+        del self.docs[self.doc_to_project[path]][path]
 
     def rename_document(self, old_path: Path, new_path: Path):
-        self.docs[new_path] = self.docs[old_path]
-        self.delete_document(old_path)
+        old_project_folder = self.doc_to_project[old_path]
+        new_project_folder = self.find_project_folder(new_path)
+
+        if old_project_folder == new_project_folder:
+            # Update the document within the same project
+            self.docs[old_project_folder][new_path] = self.docs[old_project_folder].pop(old_path)
+        else:
+            # Move the document to a new project
+            self.docs[new_project_folder][new_path] = self.docs[old_project_folder].pop(old_path)
+            # Update the project mapping for the new path
+            self.doc_to_project[new_path] = new_project_folder
+            # Remove the old path from the project mapping
+            del self.doc_to_project[old_path]
+
+        # Update the path of the document
+        self.docs[new_project_folder][new_path].path = new_path
+
+    def handle_document_change(self, params: DidChangeTextDocumentParams):
+        uri = params.text_document.uri
+        path = utils.uri_to_path(uri)
+        doc = self.workspace.get_document(uri)
+
+        # NOTE: As of now, re-parsing the whole file on every change. TODO FIX!!
+        self.docs[self.doc_to_project[path]][path].update_source(doc.source)
 
     def set_template(self, template_file_path):
         # TODO: better fallback mechanisms and error handling + handle default template better
@@ -144,13 +190,7 @@ def did_rename_files(ls: WooWooLanguageServer, params: RenameFilesParams):
 @SERVER.feature(TEXT_DOCUMENT_DID_CHANGE)
 def did_change(ls: WooWooLanguageServer, params: DidChangeTextDocumentParams):
     logger.debug("[TEXT_DOCUMENT_DID_CHANGE] SERVER.feature called")
-    uri = params.text_document.uri
-    path = utils.uri_to_path(uri)
-    doc = ls.workspace.get_document(uri)
-
-    # NOTE: As of now, re-parsing the whole file on every change.
-    ls.docs[path].update_source(doc.source)
-
+    ls.handle_document_change(params)
     ls.linter.diagnose(params)
 
 
