@@ -64,8 +64,11 @@ class Completer:
             short_inner_environment_type = short_inner_env.children[1].text.decode('utf-8')
 
             possible_references = self.ls.template_manager.get_possible_short_inner_references(short_inner_environment_type)
+            project_documents = self.ls.docs[self.ls.doc_to_project[document.path]].values()
 
-            values = document.search_meta_blocks(possible_references)
+            values = set()
+            for doc in project_documents:
+                values.update(doc.search_meta_blocks(possible_references))
 
             return [CompletionItem(label=x.decode('utf-8')) for x in values]
 
