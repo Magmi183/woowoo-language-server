@@ -28,6 +28,8 @@ class WooWooDocument:
         with self.path.open('r', encoding='utf-8') as f:
             source = f.read()
             self.update_source(source)
+
+
     
     def update_comment_lines(self):
         self.comment_lines.clear()
@@ -105,6 +107,26 @@ class WooWooDocument:
 
         return values
 
+
+    def find_reference(self, references: List[Reference], reference_value: str):
+
+        for reference in references:
+            query = f"""(block_mapping_pair
+                        key: (flow_node [(double_quote_scalar) (single_quote_scalar) (plain_scalar)] @key)
+                        value: (flow_node) @value
+                        (#eq? @key "{reference.meta_key}")
+                        (#eq? @value "{reference_value}"))"""
+
+            for meta_block in self.meta_blocks:
+                if reference.structure_type in [None, meta_block.parent_type] and reference.structure_name in [None,
+                                                                                                               meta_block.parent_name]:
+                    captures = YAML_LANGUAGE.query(query).captures(meta_block.tree.root_node)
+                    if len(captures) > 0:
+                        for capture in captures:
+                            if capture[1] == 'value':
+                                return capture[0], meta_block.line_offset
+
+        return None, None
 
     def utf8_to_utf16_offset(self, coords):
         """Converts a line's utf8 offset to its utf16 offset using the mapping.
