@@ -86,6 +86,11 @@ woowoo_parser, WOOWOO_LANGUAGE, yaml_parser, YAML_LANGUAGE = initialize_parsers(
 def parse_source(src: str) -> (Tree, List[MetaContext]):
     tree = woowoo_parser.parse(bytes(src, "utf-8"))
 
+    yaml_trees = parse_metas(tree)
+
+    return tree, yaml_trees
+
+def parse_metas(tree: Tree) -> List[MetaContext]:
     query = WOOWOO_LANGUAGE.query("(meta_block) @yaml")
     meta_blocks = query.captures(tree.root_node)
 
@@ -97,7 +102,7 @@ def parse_source(src: str) -> (Tree, List[MetaContext]):
         yaml_tree = yaml_parser.parse(meta_block.text)
         yaml_trees.append(MetaContext(yaml_tree, meta_block.start_point[0], parent_type, parent_name))
 
-    return tree, yaml_trees
+    return yaml_trees
 
 def extract_structure_name(node: Node):
     """

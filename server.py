@@ -4,19 +4,18 @@ from pathlib import Path
 from pygls.server import LanguageServer
 
 import utils
-from completer import Completer
-from folder import Folder
-from highlighter import Highlighter
-from hoverer import Hoverer
-from linter import Linter
-from navigator import Navigator
+from components.completer import Completer
+from components.folder import Folder
+from components.highlighter import Highlighter
+from components.hoverer import Hoverer
+from components.linter import Linter
+from components.navigator import Navigator
 
 from template_manager.template_manager import TemplateManager
 
 from lsprotocol.types import (
     TEXT_DOCUMENT_COMPLETION,
-    CompletionParams, TEXT_DOCUMENT_HOVER, TextDocumentPositionParams,
-    DidOpenTextDocumentParams, DidChangeTextDocumentParams, TEXT_DOCUMENT_DID_OPEN, TEXT_DOCUMENT_DID_CHANGE,
+    CompletionParams, DidOpenTextDocumentParams, DidChangeTextDocumentParams, TEXT_DOCUMENT_DID_OPEN, TEXT_DOCUMENT_DID_CHANGE,
     CompletionOptions, INITIALIZED, TEXT_DOCUMENT_DEFINITION, TEXT_DOCUMENT_DID_SAVE,
     DidSaveTextDocumentParams, TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL, SemanticTokensParams,
     SemanticTokensLegend, InitializedParams, InitializeParams, INITIALIZE,
@@ -108,13 +107,35 @@ class WooWooLanguageServer(LanguageServer):
         # Update the path of the document
         self.docs[new_project_folder][new_path].path = new_path
 
+    """
     def handle_document_change(self, params: DidChangeTextDocumentParams):
+        import time
+        start_time = time.time()
         uri = params.text_document.uri
         path = utils.uri_to_path(uri)
         doc = self.workspace.get_document(uri)
 
         # NOTE: As of now, re-parsing the whole file on every change. TODO FIX!!
         self.docs[self.doc_to_project[path]][path].update_source(doc.source)
+
+        end_time = time.time()
+        parse_duration = end_time - start_time
+        logger.debug(f"Parsing of {params.text_document.uri} took {parse_duration} seconds.")
+    """
+
+
+    def handle_document_change(self, params: DidChangeTextDocumentParams):
+        import time
+        start_time = time.time()
+        uri = params.text_document.uri
+        path = utils.uri_to_path(uri)
+        doc = self.workspace.get_document(uri)
+
+        self.docs[self.doc_to_project[path]][path].update_source_incremental(doc, params)
+
+        end_time = time.time()
+        parse_duration = end_time - start_time
+        logger.debug(f"Parsing of {params.text_document.uri} took {parse_duration} seconds.")
 
     def set_template(self, template_file_path):
         # TODO: better fallback mechanisms and error handling + handle default template better
