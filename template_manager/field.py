@@ -1,4 +1,3 @@
 class Field:
-    def __init__(self, name, pattern=None):
+    def __init__(self, name):
         self.name = name
-        self.pattern = pattern

@@ -122,7 +122,7 @@ class WooWooLanguageServer(LanguageServer):
             self.template_manager.load_template(template_file_path)
         else:
             import utils
-            self.template_manager.load_template(utils.get_absolute_path("template_sandbox/fit_math.yaml"))
+            self.template_manager.load_template(utils.get_absolute_path("templates/fit_math.yaml"))
 
 SERVER = WooWooLanguageServer('woowoo-language-SERVER', 'v0.1')
 

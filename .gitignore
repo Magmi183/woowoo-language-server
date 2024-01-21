@@ -185,6 +185,6 @@ fabric.properties
 # tree-sitter
 
 # files for local template testing
-template_sandbox/
+templates/
 
 **/tmp.py
