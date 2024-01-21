@@ -20,53 +20,69 @@ Následující položky neovlivňují interpretaci WooWoo dokumentu, ale jsou po
 
 Názvy struktur nejsou jazykem WooWoo nijak definovány. Například název `document_part` může být libovolný regex `/[^[\n\r]]+/`.  Že se jedná o typ `document_part` je parserem rozeznáno na základě kontextu (operátory `.`, `:`, použití malých/velkých písmen...), nikdy na základě konkrétních klíčových slov.
 
-WooWoo dokumenty se však používají pro generování různého obsahu. Generátor pracuje s konkrétní šablonou, která definuje, různé možné názvy struktur.
-Použití jiných názvů by nevedlo k syntax erroru při parsování, ale problém by nastal ve chvíli použití generátoru.
+WooWoo dokumenty se však používají pro generování různého obsahu. Generátor pracuje s konkrétní šablonou, která definuje možné názvy struktur.
+Použití jiných názvů by nevedlo k syntax erroru při parsování, ale problém by nastal až ve chvíli použití generátoru.
+
 
 Každá šablona tedy musí definovat výčet možných typů pro:
 1. document_part (document_part_type)
 2. object (object_type)
-3. outer_environment (outer_environment_type)
+3. outer_environments (outer_environment_type)
     - výčet možných typů pro křehké vnější prostředí
     - výčet možných typů pro klasické vnější prosředí
-4. verbose_inner_environment (verbose_inner_environment_type)
-5. short_inner_environment (short_inner_environment_type)
+4. inner_environments
+   - klasické (verbose_inner_environment_type)
+   - krátké (short_inner_environment_type)
 
-Ke každému z těchto typů se tedy váže seznam povolených názvů. Seznam pro `outer_environment` je pak rozdělený na dvě části.
 
-### Popis klíčových slov
+### Popis typů
 
-Každé klíčové slovo (typ) může mít popis. Tento popis je dobrý pro uživatele šablony, generování obsahu nijak neovlivňuje.
+Každý typ může mít popis. Tento popis je dobrý pro uživatele šablony, generování obsahu nijak neovlivňuje.
+Také slouží pro LSP jako zdroj pro funkci `hover`.
 
 ## Obsah meta bloků
 
 Některé WooWoo struktury mohou být následovány tzv. meta blokem (`meta_block`), což je kus kódu ve formátu `yaml`, který obsahuje meta informace danné struktury. Tyto informace pak většinou ovlivňují výstup generátorů obsahu.
 
-Pro všechny typy následujících struktur šablona definuje seznam **povinných** a seznam **volitelných** atributů v meta bloku.
+Pro **všechny typy struktur** šablona definuje seznam **povinných** a seznam **volitelných** atributů v meta bloku.
 
-1. document_part
-2. object
-3. outer_environment
 
-### Hodnoty atributů
+### Reference
 
-Šablona také definuje, jakých hodnot můžou jednotlivé atributy nabývat. 
-Pro každý atribut (ze sjednocení povinných a volitelných) je uvedena jedna z následujících možností:
+Některé struktury mohou odkazovat na jiné struktury, např. krátké vnitřní prostředí
+`.eqref` odkazuje na nějaké vnější prostředí typy `equation`. 
+Konkrétní struktura se pak rozpozná podle meta bloku, u šablony FIT-Math je to klíč `label`.
 
-1. Regulární výraz
-2. Výčet hodnot (seznam)
-3. Název jiného atributu (jedna hodnota)
-    - Toto je pro případ, kdy hodnota může být jakákoliv taková, která byla někdy použita jako hodnota uvedeného atributu.
-    - Např. reference vždy odkazuje na label.
+Na co konkrétně struktura odkazuje se dá parametrizovat pomocí `reference`, která je definovaná třemi prvky:
+  1. structure_type (např. outer_environment) 
+  2. structure_name (např. equation)
+  3. meta_key (např. label)
+
+Ve výše uvedeném příkladu by struktura s touto referencí odkazovala na vnější prostředí typu equation pomocí meta klíče `label`.
+
     
 ## Implicitní vnější prostředí
 
-V každé šabloné může být právě jedno vnější prostředí označené jako implicitní. Každá šablona proto musí definovat, které to je.
+V každé šabloné je právě jedno vnější prostředí označené jako implicitní. Každá šablona proto musí definovat, které to je.
 Např. u matematické šablony to může být `equation`, u programátorské pak zase `code`.
+
+
+
+## Vnitřní prostředí
+
+TODO
+
+- význam operátorů # a @, např. # je reference, takže je tam možné udělat nějaké napovídání
+- výčet názvů...
+
+
+
+# Nápady
+
 
 ## Povinný obsah
 
-TBD
+TODO: ve fázi nápadu
 
 např. objekt Question by mohl povinně obsahovat vnější prostředí .solution
 objekt Table by mohl povinně obsahovat křehké prostředí !tabular
@@ -81,21 +97,3 @@ TBD
 
 u krátkých vnitřních prostředí by šablona mohla definovat jaký má být jejich obsah
 např. u cite je to klíč z bibliografie
-
-## Vnitřní prostředí
-
-TBD
-
-- význam operátorů # a @, např. # je reference, takže je tam možné udělat nějaké napovídání
-- výčet názvů...
-
-
-
-## Nápady
-
-1) U konstruktů, kde se proklikávám ke zdroji, bych mohl mít field "instance", např. reference by
-měl "instance_of: label", body field může být názvem matoucí.
-
-
-2) Místo "body: "label"" bych mohl psát např. body: "equation.label" a tím bych zajistil, že např. 
-   "eqref" se zajímá jen o labeli, co jsou součástí equation.

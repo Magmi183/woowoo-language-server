@@ -18,13 +18,14 @@ document_parts:
         - name: short_title
         - name: pdf_string
         - name: index
+
   - name: "Section"
     description: "A single page with the section's textual content and list of subsections."
     meta_block: *doc_part_meta
+
   - name: "Subsection"
     description: "Rendered as part of the section page."
     meta_block: *doc_part_meta
-
 
 
 wobjects:
@@ -62,9 +63,12 @@ wobjects:
     meta_block:
       required_fields: ~
       optional_fields:
+        - name: options
+        - name: glue
+        - name: vertical
         - name: label
         - name: columns
-    # Should contain .images or !tikzs and a .caption.
+    # Content: Should contain .images or !tikzs and a .caption.
 
   - name: "Lemma"
     description: "Mathematical environment containing a lemma."
@@ -98,6 +102,7 @@ wobjects:
         - name: title
         - name: label
         - name: show
+    # Content: Should contain !tabular or ,table and a .caption.
 
   - name: "Solution"
     description: "Environment containing a solution."
@@ -110,7 +115,7 @@ wobjects:
       optional_fields:
         - name: label
         - name: options
-    # Should contain !tabular or ,table and a .caption
+    # Content: Should contain !tabular or ,table and a .caption
 
   - name: "Theorem"
     description: "Mathematical environment containing a theorem."
@@ -161,7 +166,7 @@ outer_environments:
           - name: language
 
     - name: description
-      description: "Bootstrap description."
+      description: "Description list with custom bullets. Essentially the itemize environment."
 
     - name: ditem
       description: "A description item with a custom bullet."
@@ -174,6 +179,7 @@ outer_environments:
       meta_block:
         optional_fields:
           - name: alt
+          - name: options
 
     - name: itemize
       description: "A general unnumbered list."
@@ -193,13 +199,18 @@ outer_environments:
       meta_block:
         required_fields:
           - name: columns
+        optional_fields:
+          - name: arraystretch
 
     - name: row
       description: "A table row."
 
     - name: tabular
       description: "Simple tables processed by pandoc."
-
+      meta_block:
+        optional_fields:
+          - name: arraystretch
+          - name: filename
 
 
 
@@ -227,7 +238,9 @@ inner_environments:
       description: "A footnote."
 
     - name: mpopup
-      description: "Render a pop up hint in math equation (relies on a JS from custom.js)."
+      description: | 
+        Render a pop up hint in math equation (relies on a JS from custom.js).
+        Ignored in PDF (mainly do to lack of PDF viewers support).
 
     - name: notion
       description: "An introduction of a new notion."
@@ -273,4 +286,7 @@ inner_environments:
 # 1) https://gitlab.fit.cvut.cz/woowoo/fit-html
 #   - TODO: full_reference, math, sage (not found anywhere)
 #         small, underline (they are both classic + short, wait for merge/not merge)
-# 2)
+# 2) https://gitlab.fit.cvut.cz/woowoo/fit-pdf
+#   - almost the same as fit-html
+#   - I merged descriptions of some items
+#   - merged information, for example meta fields in image (different in both)
