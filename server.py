@@ -15,12 +15,13 @@ from template_manager.template_manager import TemplateManager
 
 from lsprotocol.types import (
     TEXT_DOCUMENT_COMPLETION,
-    CompletionParams, DidOpenTextDocumentParams, DidChangeTextDocumentParams, TEXT_DOCUMENT_DID_OPEN, TEXT_DOCUMENT_DID_CHANGE,
+    CompletionParams, DidOpenTextDocumentParams, DidChangeTextDocumentParams, TEXT_DOCUMENT_DID_OPEN,
+    TEXT_DOCUMENT_DID_CHANGE,
     CompletionOptions, INITIALIZED, TEXT_DOCUMENT_DEFINITION, TEXT_DOCUMENT_DID_SAVE,
     DidSaveTextDocumentParams, TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL, SemanticTokensParams,
     SemanticTokensLegend, InitializedParams, InitializeParams, INITIALIZE,
     WorkspaceFolder, DefinitionParams, TEXT_DOCUMENT_FOLDING_RANGE, FoldingRangeParams, WORKSPACE_DID_RENAME_FILES,
-    RenameFilesParams, WORKSPACE_WILL_RENAME_FILES
+    RenameFilesParams, WORKSPACE_WILL_RENAME_FILES, TEXT_DOCUMENT_HOVER, TextDocumentPositionParams
 )
 
 from templatedwoowoodocument import TemplatedWooWooDocument
@@ -242,13 +243,10 @@ def completions(ls: WooWooLanguageServer, params: CompletionParams):
     return ls.completer.complete(params)
 
 
-""" 
-# TODO: Uncomment when the feature is finished.
 @SERVER.feature(TEXT_DOCUMENT_HOVER)
 def on_hover(ls: WooWooLanguageServer, params: TextDocumentPositionParams):
     logger.debug("[TEXT_DOCUMENT_HOVER] SERVER.feature called")
     return ls.hoverer.hover(params)
-"""
 
 
 @SERVER.feature(TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,

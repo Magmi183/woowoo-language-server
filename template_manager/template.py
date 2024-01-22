@@ -20,6 +20,6 @@ class Template:
         self.classic_outer_environments = [OuterEnvironment(**oe) for oe in outer_environments.get("classic", [])]
         self.fragile_outer_environments = [OuterEnvironment(**oe) for oe in outer_environments.get("fragile", [])]
 
-        self.classic_inner_environemnts = [InnerEnvironment(**ie) for ie in inner_environments.get("classic", [])]
-        self.short_inner_environemnts = [InnerEnvironment(**ie) for ie in inner_environments.get("short", [])]
+        self.classic_inner_environments = [InnerEnvironment(**ie) for ie in inner_environments.get("classic", [])]
+        self.short_inner_environments = [InnerEnvironment(**ie) for ie in inner_environments.get("short", [])]
 

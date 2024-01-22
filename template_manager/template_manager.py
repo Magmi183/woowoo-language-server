@@ -25,7 +25,7 @@ class TemplateManager:
 
     def process_template(self):
         # process short inner environments for faster lookup
-        for short_inner in self.active_template.short_inner_environemnts:
+        for short_inner in self.active_template.short_inner_environments:
             self.short_inner_environment_references[short_inner.name] = short_inner.references
 
 
@@ -39,3 +39,38 @@ class TemplateManager:
                 names.append(short_inner)
 
         return names
+
+    def get_description(self, type: str, name: str):
+        """
+        Based on a tree-sitter type and its name, get description of it.
+        Recognized types should be the same as the hoverable types in the LS.
+
+        Args:
+            type: tree-sitter node type (example: object_type)
+            name: the name of the type (example: "Question")
+
+        Returns: the description of the type with the given name
+        """
+
+        structure_lists = []
+        if type == "outer_environment_type":
+            structure_lists = [self.active_template.classic_outer_environments, self.active_template.fragile_outer_environments]
+        elif type in ["short_inner_environment_type", "verbose_inner_environment_type"]:
+            structure_lists = [self.active_template.short_inner_environments, self.active_template.classic_inner_environments]
+        elif type == "document_part_type":
+            structure_lists = [self.active_template.document_parts]
+        elif type == "object_type":
+            structure_lists = [self.active_template.wobjects]
+
+        for structure_list in structure_lists:
+            for structure in structure_list:
+                if structure.name == name:
+                    return structure.description
+
+        return None
+
+    def get_template_name(self):
+        return self.active_template.name
+
+    def get_template_version_name(self):
+        return self.active_template.version_name

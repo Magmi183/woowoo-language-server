@@ -5,16 +5,21 @@ from tree_utils import build_query_string_from_list
 
 
 class Hoverer:
+
     hoverable_nodes = ["document_part_type",
-                       "outer_environment_type"]
+                       "object_type",
+                       "short_inner_environment_type",
+                       "verbose_inner_environment_type",
+                       "outer_environment_type"
+                       ]
 
     def __init__(self, ls):
         self.ls = ls
 
     def hover(self, params: TextDocumentPositionParams):
-        tree = self.ls.get_document(params).tree
-        position = params.position
-        line, col = position.line, position.character
+        document = self.ls.get_document(params)
+        tree = document.tree
+        line, col = document.utf16_to_utf8_offset((params.position.line, params.position.character))
         query = WOOWOO_LANGUAGE.query(build_query_string_from_list(self.hoverable_nodes, "type"))
 
         captures = query.captures(tree.root_node, start_point=(line, col), end_point=(line, col + 1))
@@ -27,5 +32,12 @@ class Hoverer:
             return Hover(contents=content)
 
     def get_hover_text(self, node: Node):
-        # TODO: Do the logic here - decide what hover text to display for this node, which we know is hoverable.
-        return f"This is hoverable type, {node.type}."
+
+        description = self.ls.template_manager.get_description(node.type, node.text.decode("utf-8"))
+
+        if description is None:
+            description = "Unknown type."
+
+        return (f"{description},"
+                f" by {self.ls.template_manager.get_template_name()}, "
+                f"version: {self.ls.template_manager.get_template_version_name()} .")

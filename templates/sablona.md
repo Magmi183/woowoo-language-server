@@ -97,3 +97,9 @@ TBD
 
 u krátkých vnitřních prostředí by šablona mohla definovat jaký má být jejich obsah
 např. u cite je to klíč z bibliografie
+
+## Lepší descriptions
+
+LSP mám nakonfigurované tak, že umí pracovat s popisky ve formátu Markdown. Lze např.
+využít kurzívy a tučného písma, vypadá to pak lépe. 
+Ke zvážení jsou i ukázky kódu (také klasický markdown formát) atd.
