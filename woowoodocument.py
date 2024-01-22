@@ -1,12 +1,10 @@
-import logging
 from pathlib import Path
 
 from lsprotocol.types import DidChangeTextDocumentParams
 from pygls.workspace import Document
 
 from meta_context import MetaContext
-from parser import parse_source, YAML_LANGUAGE, woowoo_parser, parse_metas
-from template_manager.reference import Reference
+from parser import parse_source
 from typing import List
 
 

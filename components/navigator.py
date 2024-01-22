@@ -53,16 +53,15 @@ class Navigator:
         short_inner_environment_type = get_child_by_type(node, "short_inner_environment_type", True)
         possible_references = self.ls.template_manager.get_possible_short_inner_references(short_inner_environment_type)
 
-        short_inner_environment_body = get_child_by_type(node, "short_inner_environment_body", True)
+        short_inner_environment_body = get_child_by_type(node, "short_inner_environment_body").text
 
         document = self.ls.get_document(params)
         project_documents = self.ls.docs[self.ls.doc_to_project[document.path]].values()
 
         for doc in project_documents:
-            ref, line_offset = doc.find_reference(possible_references, short_inner_environment_body)
+            ref, line_offset = doc.find_referencable(possible_references, short_inner_environment_body)
             if ref is not None:
                 import urllib.parse
-                import pathlib
                 file_uri = urllib.parse.urljoin('file:', urllib.parse.quote(str(doc.path)))
                 start_point = document.utf8_to_utf16_offset(ref.start_point)
                 end_point = document.utf8_to_utf16_offset(ref.end_point)
