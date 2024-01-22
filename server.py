@@ -86,6 +86,27 @@ class WooWooLanguageServer(LanguageServer):
         document_path = utils.uri_to_path(params.text_document.uri)
         return self.docs[self.doc_to_project[document_path]][document_path]
 
+    def get_paths(self, document: WooWooDocument = None):
+        """Return paths to all documents known to the LS.
+        If document parameter is provided, return only documents in the same project.
+        """
+
+        if document:
+            return self.docs[self.doc_to_project[document.path]].keys()
+        else:
+            return self.doc_to_project.keys()
+
+    def get_documents_from_project(self, document: WooWooDocument):
+        """
+        Returns all WooWooDocuments from the same project as "document".
+        Args:
+            document:
+
+        Returns:
+
+        """
+        return self.docs[self.doc_to_project[document.path]].values()
+
     def delete_document(self, path: Path):
         del self.docs[self.doc_to_project[path]][path]
 

@@ -25,24 +25,32 @@ class Completer:
         document = self.ls.get_document(params)
         completion_items = []
 
-        # TODO: Call these methods based on trigger char., to avoid useless overhead
-        completion_items += self.complete_include(document, params)
-        if params.context.trigger_character == ':':
+        if params.context.trigger_character == '.':
+            completion_items += self.complete_include(document, params)
+        elif params.context.trigger_character == ':':
             completion_items += self.complete_inner_envs(document, params)
 
         return completion_items
 
 
     def complete_include(self, document: WooWooDocument, params: CompletionParams):
+        """
+        Check if the "include" statement would be valid and recommend files to autocomplete.
+        Args:
+            document:
+            params:
 
-        # TODO: Do more conditions. This is POC.
+        Returns:
+
+        """
+        # TODO: Review this condition.
         if tree_utils.is_query_overlapping_pos(document.tree, "(block) @b (object) @ob", params.position.line, max(0, params.position.character-1)):
             return []
 
         current_doc_path = utils.uri_to_path(params.text_document.uri)
 
-        # relative paths of woo files in the workspace
-        relative_paths = [os.path.relpath(path, os.path.dirname(current_doc_path)) for path in self.ls.docs.keys()]
+        # relative paths of woo files in the same project as the current file
+        relative_paths = [os.path.relpath(path, os.path.dirname(current_doc_path)) for path in self.ls.get_paths(document)]
         paths_joined = ",".join(relative_paths)
 
         return [CompletionItem(
@@ -64,10 +72,9 @@ class Completer:
             short_inner_environment_type = short_inner_env.children[1].text.decode('utf-8')
 
             possible_references = self.ls.template_manager.get_possible_short_inner_references(short_inner_environment_type)
-            project_documents = self.ls.docs[self.ls.doc_to_project[document.path]].values()
 
             values = set()
-            for doc in project_documents:
+            for doc in self.ls.get_documents_from_project(document):
                 values.update(doc.search_meta_blocks(possible_references))
 
             return [CompletionItem(label=x.decode('utf-8')) for x in values]
