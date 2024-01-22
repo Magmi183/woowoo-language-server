@@ -5,7 +5,7 @@ from lsprotocol.types import CompletionParams, CompletionList, CompletionItem, C
 import tree_utils
 import utils
 from parser import WOOWOO_LANGUAGE
-from woowoodocument import WooWooDocument
+from templatedwoowoodocument import TemplatedWooWooDocument
 
 
 class Completer:
@@ -33,7 +33,7 @@ class Completer:
         return completion_items
 
 
-    def complete_include(self, document: WooWooDocument, params: CompletionParams):
+    def complete_include(self, document: TemplatedWooWooDocument, params: CompletionParams):
         """
         Check if the "include" statement would be valid and recommend files to autocomplete.
         Args:
@@ -61,7 +61,18 @@ class Completer:
                 )]
 
 
-    def complete_inner_envs(self, document: WooWooDocument, params: CompletionParams):
+    def complete_inner_envs(self, document: TemplatedWooWooDocument, params: CompletionParams):
+        """
+        Autocomplete the bodies of inner environments. Behaviour entirely given by the template.
+        For example, suggest possible "reference" values based on "labels" used in the document.
+        .reference:<autocomplete>
+        Args:
+            document:
+            params:
+
+        Returns:
+
+        """
         line, char = document.utf16_to_utf8_offset((params.position.line, params.position.character-1))
 
         short_inner_envs = WOOWOO_LANGUAGE.query("(short_inner_environment) @sie").captures(document.tree.root_node, start_point=(line, char), end_point=(line, char + 1))
@@ -71,11 +82,11 @@ class Completer:
             short_inner_env = short_inner_envs[0][0]
             short_inner_environment_type = short_inner_env.children[1].text.decode('utf-8')
 
-            possible_references = self.ls.template_manager.get_possible_short_inner_references(short_inner_environment_type)
-
             values = set()
             for doc in self.ls.get_documents_from_project(document):
-                values.update(doc.search_meta_blocks(possible_references))
+                values.update(doc.search_for_referencables_by(short_inner_environment_type))
 
             return [CompletionItem(label=x.decode('utf-8')) for x in values]
 
+        else:
+            return None

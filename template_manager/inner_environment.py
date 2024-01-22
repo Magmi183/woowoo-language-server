@@ -7,5 +7,5 @@ class InnerEnvironment:
         self.name = name
         self.description = description
 
-        self.references = [Reference(reference) for reference in references] if references else None
+        self.references = [Reference(reference) for reference in references] if references else []
         self.meta_block = MetaBlock(**meta_block) if meta_block else MetaBlock()

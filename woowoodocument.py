@@ -158,50 +158,6 @@ class WooWooDocument:
         else:
             return 4
 
-
-    def search_meta_blocks(self, references: List[Reference]):
-        """Search for all k:v pairs in meta blocks that follow the structure in reference.
-         Collect all values and return them."""
-
-        nodes_all = []
-        for reference in references:
-            query = f"""(block_mapping_pair
-                key: (flow_node [(double_quote_scalar) (single_quote_scalar) (plain_scalar)] @key)
-                value: (flow_node) @value
-                (#eq? @key "{reference.meta_key}"))"""
-
-            for meta_block in self.meta_blocks:
-                if reference.structure_type in [None, meta_block.parent_type] and reference.structure_name in [None, meta_block.parent_name]:
-                    nodes_all += YAML_LANGUAGE.query(query).captures(meta_block.tree.root_node)
-
-        values = set()
-        for node in nodes_all:
-            if node[1] == 'value':
-                values.add(node[0].text)
-
-        return values
-
-
-    def find_reference(self, references: List[Reference], reference_value: str):
-
-        for reference in references:
-            query = f"""(block_mapping_pair
-                        key: (flow_node [(double_quote_scalar) (single_quote_scalar) (plain_scalar)] @key)
-                        value: (flow_node) @value
-                        (#eq? @key "{reference.meta_key}")
-                        (#eq? @value "{reference_value}"))"""
-
-            for meta_block in self.meta_blocks:
-                if reference.structure_type in [None, meta_block.parent_type] and reference.structure_name in [None,
-                                                                                                               meta_block.parent_name]:
-                    captures = YAML_LANGUAGE.query(query).captures(meta_block.tree.root_node)
-                    if len(captures) > 0:
-                        for capture in captures:
-                            if capture[1] == 'value':
-                                return capture[0], meta_block.line_offset
-
-        return None, None
-
     def utf8_to_utf16_offset(self, coords):
         """Converts a line's utf8 offset to its utf16 offset using the mapping.
         This is needed because VSCode uses utf16 internally, it is based on JavaScript.

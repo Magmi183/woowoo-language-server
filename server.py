@@ -23,7 +23,7 @@ from lsprotocol.types import (
     RenameFilesParams, WORKSPACE_WILL_RENAME_FILES
 )
 
-from woowoodocument import WooWooDocument
+from templatedwoowoodocument import TemplatedWooWooDocument
 
 # TODO: Setup logging better.
 logging.basicConfig()
@@ -79,14 +79,14 @@ class WooWooLanguageServer(LanguageServer):
     def load_document(self, path: Path, project_folder: Path):
         if project_folder not in self.docs:
             self.docs[project_folder] = {}
-        self.docs[project_folder][path] = WooWooDocument(path)
+        self.docs[project_folder][path] = TemplatedWooWooDocument(path, self.template_manager)
         self.doc_to_project[path] = project_folder
 
     def get_document(self, params):
         document_path = utils.uri_to_path(params.text_document.uri)
         return self.docs[self.doc_to_project[document_path]][document_path]
 
-    def get_paths(self, document: WooWooDocument = None):
+    def get_paths(self, document: TemplatedWooWooDocument = None):
         """Return paths to all documents known to the LS.
         If document parameter is provided, return only documents in the same project.
         """
@@ -96,9 +96,9 @@ class WooWooLanguageServer(LanguageServer):
         else:
             return self.doc_to_project.keys()
 
-    def get_documents_from_project(self, document: WooWooDocument):
+    def get_documents_from_project(self, document: TemplatedWooWooDocument):
         """
-        Returns all WooWooDocuments from the same project as "document".
+        Returns all TemplatedWooWooDocuments from the same project as "document".
         Args:
             document:
 

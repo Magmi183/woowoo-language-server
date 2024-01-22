@@ -31,3 +31,11 @@ class TemplateManager:
 
     def get_possible_short_inner_references(self, short_inner_environment_name):
         return self.short_inner_environment_references[short_inner_environment_name]
+
+    def get_referencing_type_names(self):
+        names = []
+        for short_inner, references in self.short_inner_environment_references.items():
+            if len(references) > 0:
+                names.append(short_inner)
+
+        return names
