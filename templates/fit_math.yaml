@@ -6,7 +6,9 @@ description: |-
   Blocks are rendered as paragraphs.
   Indented blocks are unnumbered equations.
   It was developed by Tomas Kalvoda.
-implicit_outer_environment: "equation"
+
+#implicit_outer_environment: "equation"
+#hash_environment: "reference"
 
 document_parts:
   - name: "Chapter"

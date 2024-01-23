@@ -3,7 +3,7 @@ stages:
   - combine
 
 variables:
-  BUILD_DIR: "tree-sitter/builds"
+  BUILD_DIR: "tree-sitter/builds" # when change, "paths:" has to be changed manually
   GIT_SUBMODULE_STRATEGY: normal # pull just top-level submodules (tree-sitter repos)
 
 
@@ -12,8 +12,6 @@ variables:
   - git config --global user.name "CI Builder"
   - git remote set-url origin https://oauth2:$CI_CD_TOKEN@gitlab.fit.cvut.cz/woowoo/lsp/woowoo-language-server.git
   - git checkout $CI_COMMIT_BRANCH
-  - git fetch
-  - git reset --hard $CI_COMMIT_BRANCH
 
 
 # -- BUILDS:
@@ -36,7 +34,9 @@ build-windows-x64:
   script:
     - *build_script
   artifacts:
-    untracked: true
+    paths:
+      - tree-sitter/builds/woowoo/windows-x64.dll
+      - tree-sitter/builds/yaml/windows-x64.dll
     expire_in: 1 hour
   only:
     - web
@@ -53,7 +53,9 @@ build-windows-arm64:
   script:
     - *build_script
   artifacts:
-    untracked: true
+    paths:
+      - tree-sitter/builds/woowoo/windows-arm64.dll
+      - tree-sitter/builds/yaml/windows-arm64.dll
     expire_in: 1 hour
   only:
     - web
@@ -69,7 +71,9 @@ build-linux-x64:
   script:
     - *build_script
   artifacts:
-    untracked: true
+    paths:
+      - tree-sitter/builds/woowoo/linux-x64.so
+      - tree-sitter/builds/yaml/linux-x64.so
     expire_in: 1 hour
   only:
     - web
@@ -86,7 +90,9 @@ build-linux-arm64:
   script:
     - *build_script
   artifacts:
-    untracked: true
+    paths:
+      - tree-sitter/builds/woowoo/linux-arm64.so
+      - tree-sitter/builds/yaml/linux-arm64.so
     expire_in: 1 hour
   only:
     - web
@@ -102,7 +108,7 @@ combine-and-commit:
     - *gitconfig
     - git add $BUILD_DIR
     - git commit -m "Generated parser binaries."
-    - git push origin
+    - git push origin $CI_COMMIT_BRANCH
   dependencies:
     - build-windows-x64
     - build-windows-arm64

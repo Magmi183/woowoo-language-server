@@ -103,3 +103,7 @@ např. u cite je to klíč z bibliografie
 LSP mám nakonfigurované tak, že umí pracovat s popisky ve formátu Markdown. Lze např.
 využít kurzívy a tučného písma, vypadá to pak lépe. 
 Ke zvážení jsou i ukázky kódu (také klasický markdown formát) atd.
+
+## Template-based error detection
+
+Můžu detekovat neznámé názvy struktur a oznamovat to jako warning/error.
