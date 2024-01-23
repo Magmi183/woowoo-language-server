@@ -7,7 +7,7 @@ class TemplateManager:
     def __init__(self, template_file_path=None):
         self.active_template = None
 
-        self.short_inner_environment_references = {}
+        self.inner_environment_references = {}
 
         if template_file_path:
             self.load_template(template_file_path)
@@ -25,18 +25,18 @@ class TemplateManager:
 
     def process_template(self):
         # process short inner environments for faster lookup
-        for short_inner in self.active_template.short_inner_environments:
-            self.short_inner_environment_references[short_inner.name] = short_inner.references
+        for inner in self.active_template.inner_environments:
+            self.inner_environment_references[inner.name] = inner.references
 
 
-    def get_possible_short_inner_references(self, short_inner_environment_name):
-        return self.short_inner_environment_references[short_inner_environment_name]
+    def get_possible_inner_references(self, inner_environment_name):
+        return self.inner_environment_references[inner_environment_name]
 
     def get_referencing_type_names(self):
         names = []
-        for short_inner, references in self.short_inner_environment_references.items():
+        for inner, references in self.inner_environment_references.items():
             if len(references) > 0:
-                names.append(short_inner)
+                names.append(inner)
 
         return names
 
@@ -56,7 +56,7 @@ class TemplateManager:
         if type == "outer_environment_type":
             structure_lists = [self.active_template.classic_outer_environments, self.active_template.fragile_outer_environments]
         elif type in ["short_inner_environment_type", "verbose_inner_environment_type"]:
-            structure_lists = [self.active_template.short_inner_environments, self.active_template.classic_inner_environments]
+            structure_lists = self.active_template.inner_environments
         elif type == "document_part_type":
             structure_lists = [self.active_template.document_parts]
         elif type == "object_type":

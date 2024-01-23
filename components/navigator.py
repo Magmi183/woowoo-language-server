@@ -51,7 +51,7 @@ class Navigator:
 
     def resolve_short_inner_environment_reference(self, node: Node, params: DefinitionParams):
         short_inner_environment_type = get_child_by_type(node, "short_inner_environment_type", True)
-        possible_references = self.ls.template_manager.get_possible_short_inner_references(short_inner_environment_type)
+        possible_references = self.ls.template_manager.get_possible_inner_references(short_inner_environment_type)
 
         short_inner_environment_body = get_child_by_type(node, "short_inner_environment_body").text
 

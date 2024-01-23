@@ -69,7 +69,7 @@ class TemplatedWooWooDocument(WooWooDocument):
         """
 
         for type in self.template_manager.get_referencing_type_names():
-            references = self.template_manager.get_possible_short_inner_references(type)
+            references = self.template_manager.get_possible_inner_references(type)
             values = set()
             for reference in references:
                 query = f"""(block_mapping_pair

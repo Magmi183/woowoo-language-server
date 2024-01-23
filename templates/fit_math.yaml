@@ -7,7 +7,7 @@ description: |-
   Indented blocks are unnumbered equations.
   It was developed by Tomas Kalvoda.
 
-#implicit_outer_environment: "equation"
+implicit_outer_environment: "equation"
 #hash_environment: "reference"
 
 document_parts:
@@ -227,59 +227,52 @@ outer_environments:
           - name: include_options
 
 
-# TODO: Gather and add remaining inner envs.
 inner_environments:
-  classic:
-    - name: quoted
-      description: "A piece of quoted text, inline."
+  - name: quoted
+    description: "A piece of quoted text, inline."
 
-    - name: emphasize
-      description: "An emphasized text."
+  - name: emphasize
+    description: "An emphasized text."
 
-    - name: footnote
-      description: "A footnote."
+  - name: footnote
+    description: "A footnote."
 
-    - name: mpopup
-      description: | 
-        Render a pop up hint in math equation (relies on a JS from custom.js).
-        Ignored in PDF (mainly do to lack of PDF viewers support).
+  - name: mpopup
+    description: | 
+      Render a pop up hint in math equation (relies on a JS from custom.js).
+      Ignored in PDF (mainly do to lack of PDF viewers support).
 
-    - name: notion
-      description: "An introduction of a new notion."
-      meta_block:
-        optional_fields:
-          - name: label
-          - name: index
+  - name: notion
+    description: "An introduction of a new notion."
+    meta_block:
+      optional_fields:
+        - name: label
+        - name: index
 
-    - name: reference # note: reference can be both short/classic inner environment
-      description: "A reference to other part of document or outside source."
-      meta_block:
-        optional_fields:
-          - name: ref
-          - name: link
+  - name: reference
+    description: "A reference to other part of document or outside source."
+    meta_block:
+      optional_fields:
+        - name: ref
+        - name: link
+    references:
+      - meta_key: label
 
-    - name: todo
-      description: "A brief inline todo note."
+  - name: todo
+    description: "A brief inline todo note."
 
-  short:
+  - name: eqref
+    description: "Equation reference."
+    references:
+      - structure_type: outer_environment
+        structure_name: equation
+        meta_key: label
 
-    - name: reference # note: reference can be both short/classic inner environment
-      description: "A reference to other part of document or outside source."
-      references:
-        - meta_key: label
+  - name: cite
+    description: "Citation of a bibliography source."
 
-    - name: eqref
-      description: "Equation reference."
-      references:
-        - structure_type: outer_environment
-          structure_name: equation
-          meta_key: label
-
-    - name: cite
-      description: "Citation of a bibliography source."
-
-    - name: code
-      description: "Inline code with no highlighting."
+  - name: code
+    description: "Inline code with no highlighting."
 
 
 
