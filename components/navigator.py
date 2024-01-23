@@ -1,6 +1,9 @@
+from typing import List
+
 from lsprotocol.types import DefinitionParams, Location, Range, Position
 
 from parser import WOOWOO_LANGUAGE
+from template_manager.reference import Reference
 from tree_utils import build_query_string_from_list, get_child_by_type
 from utils import uri_to_path
 from tree_sitter import Tree, Node
@@ -8,7 +11,8 @@ from tree_sitter import Tree, Node
 
 class Navigator:
     # nodes in this list MUST NOT overlap each other (one can not be child of another)
-    go_to_definition_nodes = ["filename", "short_inner_environment"]
+    go_to_definition_nodes = ["filename", "short_inner_environment", "verbose_inner_environment_hash_end",
+                              "verbose_inner_environment_at_end"]
 
     def __init__(self, ls):
         self.ls = ls
@@ -35,6 +39,10 @@ class Navigator:
             return self.get_file_location(filename, params)
         elif node.type == 'short_inner_environment':
             return self.resolve_short_inner_environment_reference(node, params)
+        elif node.type  == "verbose_inner_environment_hash_end":
+            return self.resolve_shorthand_reference("#", node, params)
+        elif node.type == "verbose_inner_environment_at_end":
+            return self.resolve_shorthand_reference("@", node, params)
 
     def get_file_location(self, filename: str, params: DefinitionParams):
         target_file_path = uri_to_path(params.text_document.uri).parent / filename
@@ -53,13 +61,24 @@ class Navigator:
         short_inner_environment_type = get_child_by_type(node, "short_inner_environment_type", True)
         possible_references = self.ls.template_manager.get_possible_inner_references(short_inner_environment_type)
 
-        short_inner_environment_body = get_child_by_type(node, "short_inner_environment_body").text
+        value = get_child_by_type(node, "short_inner_environment_body").text
 
+        return self.get_referencable_location(params, possible_references, value)
+
+
+    def resolve_shorthand_reference(self, shorthand_type: str, node: Node, params: DefinitionParams):
+
+        possible_references = self.ls.template_manager.get_possible_inner_references(shorthand_type)
+        value = node.text
+
+        return self.get_referencable_location(params, possible_references, value)
+
+    def get_referencable_location(self,params: DefinitionParams, references: List[Reference], value: str):
         document = self.ls.get_document(params)
         project_documents = self.ls.docs[self.ls.doc_to_project[document.path]].values()
 
         for doc in project_documents:
-            ref, line_offset = doc.find_referencable(possible_references, short_inner_environment_body)
+            ref, line_offset = doc.find_referencable(references, value)
             if ref is not None:
                 import urllib.parse
                 file_uri = urllib.parse.urljoin('file:', urllib.parse.quote(str(doc.path)))

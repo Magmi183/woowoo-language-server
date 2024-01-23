@@ -11,7 +11,7 @@ from templatedwoowoodocument import TemplatedWooWooDocument
 class Completer:
 
     # TODO: Add trigger characters.
-    trigger_characters = ['.', ':']
+    trigger_characters = ['.', ':', '#', '@']
 
     def __init__(self, ls):
         self.ls = ls
@@ -29,6 +29,8 @@ class Completer:
             completion_items += self.complete_include(document, params)
         elif params.context.trigger_character == ':':
             completion_items += self.complete_inner_envs(document, params)
+        elif params.context.trigger_character in '#@':
+            completion_items += self.complete_shorthand(document, params, params.context.trigger_character)
 
         return completion_items
 
@@ -90,3 +92,14 @@ class Completer:
 
         else:
             return None
+
+
+    def complete_shorthand(self,document: TemplatedWooWooDocument, params: CompletionParams, type: str):
+        # NOTE: As of now, suggesting completion everytime, even out of context.
+        # line, char = document.utf16_to_utf8_offset((params.position.line, params.position.character - 1))
+
+        values = set()
+        for doc in self.ls.get_documents_from_project(document):
+            values.update(doc.search_for_referencables_by(type))
+
+        return [CompletionItem(label=x.decode('utf-8')) for x in values]

@@ -28,6 +28,11 @@ class TemplateManager:
         for inner in self.active_template.inner_environments:
             self.inner_environment_references[inner.name] = inner.references
 
+        # process shorthands
+        for shorthand in [self.active_template.shorthand_hash, self.active_template.shorthand_at]:
+            if len(shorthand.references) > 0:
+                self.inner_environment_references[shorthand.type] = shorthand.references
+
 
     def get_possible_inner_references(self, inner_environment_name):
         return self.inner_environment_references[inner_environment_name]

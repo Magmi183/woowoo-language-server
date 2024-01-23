@@ -8,7 +8,6 @@ description: |-
   It was developed by Tomas Kalvoda.
 
 implicit_outer_environment: "equation"
-#hash_environment: "reference"
 
 document_parts:
   - name: "Chapter"
@@ -274,7 +273,17 @@ inner_environments:
   - name: code
     description: "Inline code with no highlighting."
 
-
+shorthands:
+  hash:
+    description: "Clickable link to an equation or object."
+    references:
+      - structure_type: object
+        meta_key: label
+      - structure_type: outer_environment
+        structure_name: equation
+        meta_key: label
+  at:
+    description: "Can be used when referencing external web page."
 
 
 # SOURCES:

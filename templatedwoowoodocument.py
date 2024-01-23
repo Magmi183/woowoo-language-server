@@ -77,12 +77,13 @@ class TemplatedWooWooDocument(WooWooDocument):
                             value: (flow_node) @value
                             (#eq? @key "{reference.meta_key}"))"""
 
+                if reference not in self.referencables_node_cache:
+                    self.referencables_node_cache[reference] = {}
+
                 for meta_block in self.meta_blocks:
                     if reference.structure_type in [None, meta_block.parent_type] and reference.structure_name in [None,
                                                                                                                    meta_block.parent_name]:
                         captures = YAML_LANGUAGE.query(query).captures(meta_block.tree.root_node)
-                        if reference not in self.referencables_node_cache:
-                            self.referencables_node_cache[reference] = {}
                         for node in captures:
                             if node[1] == 'value':
                                 values.add(node[0].text)
