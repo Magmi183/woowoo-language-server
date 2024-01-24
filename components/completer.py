@@ -1,6 +1,7 @@
 import os
 
-from lsprotocol.types import CompletionParams, CompletionList, CompletionItem, CompletionItemKind, InsertTextFormat
+from lsprotocol.types import CompletionParams, CompletionList, CompletionItem, CompletionItemKind, InsertTextFormat, \
+    CompletionTriggerKind
 
 import tree_utils
 import utils
@@ -25,12 +26,17 @@ class Completer:
         document = self.ls.get_document(params)
         completion_items = []
 
-        if params.context.trigger_character == '.':
-            completion_items += self.complete_include(document, params)
-        elif params.context.trigger_character == ':':
-            completion_items += self.complete_inner_envs(document, params)
-        elif params.context.trigger_character in '#@':
-            completion_items += self.complete_shorthand(document, params, params.context.trigger_character)
+        if params.context.trigger_kind == CompletionTriggerKind.TriggerCharacter:
+            if params.context.trigger_character == '.':
+                completion_items += self.complete_include(document, params)
+            elif params.context.trigger_character == ':':
+                completion_items += self.complete_inner_envs(document, params)
+            elif params.context.trigger_character in '#@':
+                completion_items += self.complete_shorthand(document, params, params.context.trigger_character)
+        else:
+            # TODO: Handle other kinds of triggers or decide not to.
+            # https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#completionTriggerKind
+            pass
 
         return completion_items
 
@@ -77,21 +83,23 @@ class Completer:
         """
         line, char = document.utf16_to_utf8_offset((params.position.line, params.position.character-1))
 
-        short_inner_envs = WOOWOO_LANGUAGE.query("(short_inner_environment) @sie").captures(document.tree.root_node, start_point=(line, char), end_point=(line, char + 1))
+        short_inner_env_type = WOOWOO_LANGUAGE.query("(short_inner_environment_type) @siet").captures(document.tree.root_node,
+                                                                                                  start_point=(line, max(0, char-1)),
+                                                                                                  end_point=(line, char + 1))
 
-        if len(short_inner_envs) > 0:
+        if len(short_inner_env_type) > 0:
 
-            short_inner_env = short_inner_envs[0][0]
-            short_inner_environment_type = short_inner_env.children[1].text.decode('utf-8')
+            short_inner_env_type = short_inner_env_type[0][0]
+            short_inner_env_type = short_inner_env_type.text.decode('utf-8')
 
             values = set()
             for doc in self.ls.get_documents_from_project(document):
-                values.update(doc.search_for_referencables_by(short_inner_environment_type))
+                values.update(doc.search_for_referencables_by(short_inner_env_type))
 
             return [CompletionItem(label=x.decode('utf-8')) for x in values]
 
         else:
-            return None
+            return []
 
 
     def complete_shorthand(self,document: TemplatedWooWooDocument, params: CompletionParams, type: str):

@@ -61,7 +61,7 @@ class TemplateManager:
         if type == "outer_environment_type":
             structure_lists = [self.active_template.classic_outer_environments, self.active_template.fragile_outer_environments]
         elif type in ["short_inner_environment_type", "verbose_inner_environment_type"]:
-            structure_lists = self.active_template.inner_environments
+            structure_lists = [self.active_template.inner_environments]
         elif type == "document_part_type":
             structure_lists = [self.active_template.document_parts]
         elif type == "object_type":

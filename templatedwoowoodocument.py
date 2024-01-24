@@ -101,9 +101,9 @@ class TemplatedWooWooDocument(WooWooDocument):
         for change in params.content_changes:
             start_point = self.utf16_to_utf8_offset((change.range.start.line, change.range.start.character))
             end_point = self.utf16_to_utf8_offset((change.range.end.line, change.range.end.character))
-            metas = (WOOWOO_LANGUAGE.query("(meta_block) @mb")
-                     .captures(self.tree.root_node, start_point=start_point, end_point=end_point))
-            if len(metas) > 0:
-                self.referencables_values_cache = {}
-                self.referencables_node_cache = {}
-                break
+            for meta_block in self.meta_blocks:
+                # check if meta block range overlap with the change range
+                if meta_block.line_offset <= end_point[0] and start_point[0] <= meta_block.line_offset + meta_block.num_of_lines():
+                    self.referencables_values_cache = {}
+                    self.referencables_node_cache = {}
+                    break
