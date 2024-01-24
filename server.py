@@ -77,7 +77,8 @@ class WooWooLanguageServer(LanguageServer):
                 return parent
         return None
 
-    def load_document(self, path: Path, project_folder: Path):
+    def load_document(self, path: Path, project_folder: Path = None):
+        if project_folder is None: project_folder = self.find_project_folder(path)
         if project_folder not in self.docs:
             self.docs[project_folder] = {}
         self.docs[project_folder][path] = TemplatedWooWooDocument(path, self.template_manager)

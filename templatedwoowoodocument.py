@@ -95,7 +95,13 @@ class TemplatedWooWooDocument(WooWooDocument):
 
 
     def update_source_incremental(self, document: Document, params: DidChangeTextDocumentParams):
+        meta_blocks_before = len(self.meta_blocks)
         super().update_source_incremental(document, params)
+        meta_blocks_now = len(self.meta_blocks)
+
+        reset_caches = False
+        if meta_blocks_before != meta_blocks_now: reset_caches = True
+
 
         # check if a meta_block was changed, and if yes, clear the caches
         for change in params.content_changes:
@@ -104,6 +110,9 @@ class TemplatedWooWooDocument(WooWooDocument):
             for meta_block in self.meta_blocks:
                 # check if meta block range overlap with the change range
                 if meta_block.line_offset <= end_point[0] and start_point[0] <= meta_block.line_offset + meta_block.num_of_lines():
-                    self.referencables_values_cache = {}
-                    self.referencables_node_cache = {}
+                    reset_caches = True
                     break
+
+        if reset_caches:
+            self.referencables_values_cache = {}
+            self.referencables_node_cache = {}

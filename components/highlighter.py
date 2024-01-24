@@ -70,14 +70,14 @@ class Highlighter:
         meta_blocks_nodes = self._get_meta_block_nodes(woowoo_document)
 
         current_meta_block_index = 0
-         
+
         # line offset of the first metablock
         next_meta_block_start = (
-            meta_blocks_nodes[current_meta_block_index][0] 
-            if current_meta_block_index < len(meta_blocks_nodes) 
+            meta_blocks_nodes[current_meta_block_index][0]
+            if current_meta_block_index < len(meta_blocks_nodes)
             else float('inf') # there are no meta-blocks in the file
         )
-        
+
 
         cl = woowoo_document.comment_lines
         current_comment_index = 0
@@ -86,54 +86,62 @@ class Highlighter:
         last_line, last_start = 0, 0
         for node in nodes:
 
-            while node[0].start_point[0] > next_meta_block_start:
-                # node is after meta-block which has NOT been processed yet, now is the time
-                processed = {}
-                for meta_block_node in meta_blocks_nodes[current_meta_block_index][1]:
-                    # yaml queries allow nodes to be retrieved multiple times
-                    # we skip nodes that we encounter for the second time
-                    # this is possible thanks to the priority arrangment in the query file
-                    if meta_block_node[0].start_point in processed: continue
-                    processed[meta_block_node[0].start_point] = True
+            while node[0].start_point[0] > next_meta_block_start or node[0].start_point[0] > next_comment[0]:
 
-                    data, last_line, last_start = self.add_node_for_highlight(woowoo_document, data,
-                                                                                   meta_block_node,
-                                                                                   last_line, last_start,
-                                                                                   next_meta_block_start)
-                current_meta_block_index += 1
-                next_meta_block_start = (
-                    meta_blocks_nodes[current_meta_block_index][0] 
-                    if current_meta_block_index < len(meta_blocks_nodes) 
-                    else float('inf') # there are no meta-blocks in the file
-                )
-                
-            while node[0].start_point[0] > next_comment[0]:
-                data, last_line, last_start = self.add_comment_for_highlight(data, next_comment, last_line)
-                current_comment_index += 1
-                next_comment = cl[current_comment_index] if len(cl) > current_comment_index else (float('inf'), 0) # (start, len)
+                if next_meta_block_start < next_comment[0]:
+                 # node is after meta-block which has NOT been processed yet, now is the time
+                    processed = {}
+                    for meta_block_node in meta_blocks_nodes[current_meta_block_index][1]:
+                        # yaml queries allow nodes to be retrieved multiple times
+                        # we skip nodes that we encounter for the second time
+                        # this is possible thanks to the priority arrangment in the query file
+                        if meta_block_node[0].start_point in processed: continue
+                        processed[meta_block_node[0].start_point] = True
+
+                        data, last_line, last_start = self.add_node_for_highlight(woowoo_document, data,
+                                                                                       meta_block_node,
+                                                                                       last_line, last_start,
+                                                                                       next_meta_block_start)
+                    current_meta_block_index += 1
+                    next_meta_block_start = (
+                        meta_blocks_nodes[current_meta_block_index][0]
+                        if current_meta_block_index < len(meta_blocks_nodes)
+                        else float('inf') # there are no meta-blocks in the file
+                    )
+                else:
+                    data, last_line, last_start = self.add_comment_for_highlight(data, next_comment, last_line)
+                    current_comment_index += 1
+                    next_comment = cl[current_comment_index] if len(cl) > current_comment_index else (float('inf'), 0) # (start, len)
 
 
             data, last_line, last_start = self.add_node_for_highlight(woowoo_document, data, node, last_line,
                                                                            last_start)
 
-        # all non-meta block processed, but meta-block could still remain (if they are last nodes of the file)
-        while current_meta_block_index < len(meta_blocks_nodes):
+        # All WooWoo nodes (as in highlights.scm) processed, but comments and metablock can still remain
+        while current_meta_block_index < len(meta_blocks_nodes) or current_comment_index < len(cl):
             processed = {}
-            for meta_block_node in meta_blocks_nodes[current_meta_block_index][1]:
-                if meta_block_node[0].start_point in processed: continue
-                processed[meta_block_node[0].start_point] = True
-                data, last_line, last_start = self.add_node_for_highlight(woowoo_document, data,
-                                                                                meta_block_node,
-                                                                                last_line, last_start,
-                                                                                next_meta_block_start)
 
-            current_meta_block_index += 1
-            next_meta_block_start = float('inf')
-            if current_meta_block_index < len(meta_blocks_nodes):
-                next_meta_block_start = meta_blocks_nodes[current_meta_block_index][0]
+            # decide whether comment or meta_block is up next
+            process_comment = True
+            if next_meta_block_start < next_comment[0]:
+                process_comment = False
 
-        
-        while current_comment_index < len(cl):
+            if not process_comment:
+                # meta_block is next
+                for meta_block_node in meta_blocks_nodes[current_meta_block_index][1]:
+                    if meta_block_node[0].start_point in processed: continue
+                    processed[meta_block_node[0].start_point] = True
+                    data, last_line, last_start = self.add_node_for_highlight(woowoo_document, data,
+                                                                                    meta_block_node,
+                                                                                    last_line, last_start,
+                                                                                    next_meta_block_start)
+
+                current_meta_block_index += 1
+                next_meta_block_start = float('inf')
+                if current_meta_block_index < len(meta_blocks_nodes):
+                    next_meta_block_start = meta_blocks_nodes[current_meta_block_index][0]
+            else:
+                # comment is next
                 data, last_line, last_start = self.add_comment_for_highlight(data, next_comment, last_line)
                 current_comment_index += 1
                 next_comment = cl[current_comment_index] if len(cl) > current_comment_index else (float('inf'), 0) # (start, len)
@@ -174,7 +182,7 @@ class Highlighter:
                  Highlighter.token_types.index('comment'),  # type
                  0  # modifiers (bit encoding)
                  ]
-        
+
         return data, comment[0], 0
 
 
@@ -192,5 +200,5 @@ class Highlighter:
             meta_block_nodes = YAML_LANGUAGE.query(self.yaml_highlight_queries).captures(
                 meta_block.tree.root_node)
             meta_blocks_nodes.append((meta_block.line_offset, meta_block_nodes))
-            
+
         return meta_blocks_nodes

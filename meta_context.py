@@ -6,4 +6,4 @@ class MetaContext:
         self.parent_name = parent_name
 
     def num_of_lines(self):
-        return self.tree.root_node.end_point[0] - 1
+        return self.tree.root_node.end_point[0]
