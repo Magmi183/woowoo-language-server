@@ -25,9 +25,16 @@ class WooWooDocument:
 
     def update_source_incremental(self, document: Document, params: DidChangeTextDocumentParams):
         changed_lines = set()
+        multiline_change = False
         for change in params.content_changes:
             for line_number in range(change.range.start.line, change.range.end.line + 1):
                 changed_lines.add(line_number)
+            if "\n" in change.text:
+                multiline_change = True
+
+        if len(changed_lines) > 1:
+            multiline_change = True
+
             # TODO: fix this incremental part
             """
             start_byte = document.offset_at_position(change.range.start)
@@ -54,8 +61,10 @@ class WooWooDocument:
         self.tree = woowoo_parser.parse(bytes(document.source, "utf-8"), old_tree=self.tree)
         self.meta_blocks = parse_metas(self.tree)
         """
-
-        self.update_comments_and_mappings(document.source, changed_lines)
+        if multiline_change:
+            self.update_comments_and_mappings(document.source, changed_lines)
+        else:
+            self.update_comments_and_mappings_for_single_line(document.source, next(iter(changed_lines)))
 
         # TODO: remove when incremental fixed
         self.tree, self.meta_blocks = parse_source(document.source)
@@ -65,6 +74,31 @@ class WooWooDocument:
         with self.path.open('r', encoding='utf-8') as f:
             source = f.read()
             self.update_source(source)
+
+    def update_comments_and_mappings_for_single_line(self, source, line):
+        try:
+            changed_line_text = source.splitlines()[line]
+        except IndexError:
+            # occurs when deleting last char on a line, thus the line no longer exist
+            return
+
+        if changed_line_text[0] == "%":
+            updated = False
+            for i, cl in enumerate(self.comment_lines):
+                if cl[0] == line:
+                    self.comment_lines[i] = (line, len(changed_line_text))
+                    updated = True
+                    break
+            if not updated:
+                self.comment_lines.append((line, len(changed_line_text)))
+
+        while line >= len(self.utf8_to_utf16_mappings):
+            self.utf8_to_utf16_mappings.append({})
+            self.utf16_to_utf8_mappings.append({})
+
+        self.utf8_to_utf16_mappings[line] = self.line_utf8_to_utf16_mapping(changed_line_text)
+        inverse_mapping = {v: k for k, v in self.utf8_to_utf16_mappings[line].items()}
+        self.utf16_to_utf8_mappings[line] = inverse_mapping
 
 
     def update_comments_and_mappings(self, source, changed_lines):
@@ -99,6 +133,8 @@ class WooWooDocument:
                 self.utf16_to_utf8_mappings.append(inverse_mapping)
         # remove outdated
         self.utf16_to_utf8_mappings = self.utf16_to_utf8_mappings[:max_line_index + 1]
+
+
 
     def update_comment_lines(self, source):
         self.comment_lines.clear()

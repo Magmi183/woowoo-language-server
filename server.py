@@ -86,7 +86,11 @@ class WooWooLanguageServer(LanguageServer):
 
     def get_document(self, params):
         document_path = utils.uri_to_path(params.text_document.uri)
-        return self.docs[self.doc_to_project[document_path]][document_path]
+
+        if document_path in self.doc_to_project:
+            return self.docs[self.doc_to_project[document_path]][document_path]
+        else:
+            return None
 
     def get_paths(self, document: TemplatedWooWooDocument = None):
         """Return paths to all documents known to the LS.
@@ -158,7 +162,7 @@ class WooWooLanguageServer(LanguageServer):
 
         end_time = time.time()
         parse_duration = end_time - start_time
-        logger.debug(f"Parsing of {params.text_document.uri} took {parse_duration} seconds.")
+        #logger.debug(f"Parsing of {params.text_document.uri} took {parse_duration} seconds.")
 
     def set_template(self, template_file_path):
         # TODO: better fallback mechanisms and error handling + handle default template better

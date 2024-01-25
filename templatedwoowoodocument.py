@@ -116,3 +116,4 @@ class TemplatedWooWooDocument(WooWooDocument):
         if reset_caches:
             self.referencables_values_cache = {}
             self.referencables_node_cache = {}
+            self.build_referencables_cache()
