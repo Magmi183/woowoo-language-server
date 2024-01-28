@@ -34,6 +34,11 @@ if(NOT tree_sitter_POPULATED)
     set(TREE_SITTER_INCLUDE_DIRS ${tree_sitter_SOURCE_DIR}/lib/include ${tree_sitter_SOURCE_DIR}/lib/src)
 endif()
 
+# Tree-Sitter WooWoo
+set(WOOWOO_PARSER_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../tree-sitter/tree-sitter-woowoo/src/parser.c)
+set(WOOWOO_SCANNER_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../tree-sitter/tree-sitter-woowoo/src/scanner.cc)
+
+
 # - - - - -
 
 # Set the Python version
@@ -42,6 +47,8 @@ find_package(Python3 3.9 EXACT REQUIRED Interpreter Development)
 add_subdirectory(external/pybind11)
 pybind11_add_module(${PROJECT_NAME}
         ${TREE_SITTER_SRC} # Add Tree-sitter lib.c source
+        ${WOOWOO_PARSER_SRC}
+        ${WOOWOO_SCANNER_SRC}
         Bindings.cpp
         WooWooAnalyzer.cpp
         WooWooDocument.cpp
@@ -55,6 +62,7 @@ pybind11_add_module(${PROJECT_NAME}
         template/InnerEnvironment.cpp
         template/OuterEnvironment.cpp
         template/Wobject.cpp
+        components/Hoverer.cpp
         Parser.cpp
 )
 target_include_directories(${PROJECT_NAME} PRIVATE ${TREE_SITTER_INCLUDE_DIRS}) # Include Tree-sitter headers
@@ -65,6 +73,8 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE VERSION_INFO=${EXAMPLE_VERSIO
 # - - - WooWooTest
 add_executable(WooWooTest
         ${TREE_SITTER_SRC}
+        ${WOOWOO_PARSER_SRC}
+        ${WOOWOO_SCANNER_SRC}
         main.cpp
         WooWooAnalyzer.cpp
         WooWooDocument.cpp
@@ -78,6 +88,7 @@ add_executable(WooWooTest
         template/InnerEnvironment.cpp
         template/OuterEnvironment.cpp
         template/Wobject.cpp
+        components/Hoverer.cpp
         Parser.cpp
 )
 target_include_directories(WooWooTest PRIVATE ${TREE_SITTER_INCLUDE_DIRS})
