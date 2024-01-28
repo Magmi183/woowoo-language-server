@@ -23,9 +23,9 @@ void WooWooDocument::updateSource() {
         file.close();
 
         // Convert the file content into a std::string
-        std::string content = buffer.str();
+        source = buffer.str();
 
-        tree = parser->parse(content);
+        tree = parser->parse(source);
     } else {
         std::cerr << "Could not open file: " << documentPath << std::endl;
     }

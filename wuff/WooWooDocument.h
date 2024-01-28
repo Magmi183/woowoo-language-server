@@ -17,6 +17,7 @@ public:
     TSTree* tree;
     Parser * parser;
     fs::path documentPath;
+    std::string source;
     
     WooWooDocument(fs::path documentPath1, Parser * parser1);
     

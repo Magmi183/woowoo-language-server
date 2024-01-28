@@ -14,17 +14,17 @@ class Hoverer {
 public:
     Hoverer(WooWooAnalyzer* anal);
 
-    std::string hover(const std::string& documentUri, int line, int character);
+    std::string hover(const std::string& documentUri, uint32_t line, uint32_t character);
 
 private:
     WooWooAnalyzer * analyzer;
-    std::vector<std::string> hoverableNodes = {
-            "document_part_type",
-            "object_type",
-            "short_inner_environment_type",
-            "verbose_inner_environment_type",
-            "outer_environment_type"
-    };
+    const char* hoverable_nodes_query_string = "(document_part_type) @node"
+                               "(object_type) @node"
+                               "(short_inner_environment_type) @node"
+                               "(verbose_inner_environment_type) @node"
+                               "(outer_environment_type) @node";
+
+    
 
     std::string getHoverText(const std::string& nodeType, const std::string& nodeText);
 };

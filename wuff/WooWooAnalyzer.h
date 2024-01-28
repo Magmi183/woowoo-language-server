@@ -21,17 +21,17 @@ class WooWooAnalyzer {
 private:
     std::unordered_map<std::string, std::unordered_map<std::string, WooWooDocument*>> projects;
     std::unordered_map<std::string, std::string> docToProject;
-    TemplateManager* templateManager;
     Parser* parser;
     Hoverer* hoverer;
 
 public:
     WooWooAnalyzer();
-    ~WooWooAnalyzer(); // Remember to declare a destructor to manage dynamic memory
+    ~WooWooAnalyzer(); 
     void setTemplate(const std::string& templatePath);
     bool loadWorkspace(const std::string& workspacePath);
     std::string hover(const std::string& pathToDoc, int line, int character);
     WooWooDocument * getDocument(const std::string& pathToDoc);
+    TemplateManager* templateManager;
 
 private:
     std::vector<fs::path> findProjectFolders(const fs::path& rootPath);

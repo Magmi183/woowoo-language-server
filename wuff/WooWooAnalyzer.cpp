@@ -5,7 +5,6 @@
 //#include <pybind11/pybind11.h>
 #include <filesystem>
 #include <string>
-#include <iostream>
 
 #include "WooWooAnalyzer.h"
 #include "template/TemplateManager.h"
@@ -15,15 +14,14 @@
 
 WooWooAnalyzer::WooWooAnalyzer() {
     parser = new Parser();
-    // Initialize other components
-    hoverer = new Hoverer(this); // Assuming Hoverer takes a WooWooAnalyzer pointer
+    
+    hoverer = new Hoverer(this); 
 }
 
 WooWooAnalyzer::~WooWooAnalyzer() {
     delete parser;
     delete hoverer;
-    // Delete other dynamically allocated resources if any
-    // Don't forget to delete documents in the projects map
+    
     for (auto& project : projects) {
         for (auto& docPair : project.second) {
             delete docPair.second;
@@ -47,7 +45,7 @@ bool WooWooAnalyzer::loadWorkspace(const std::string& workspacePath) {
         }
     }
 
-    return true; // Consider adding error handling or a more meaningful return value
+    return true;
 }
 
 std::vector<fs::path> WooWooAnalyzer::findProjectFolders(const fs::path& rootPath) {

@@ -9,6 +9,9 @@
 #include <string>
 #include <iostream>
 
+// Declare the external function to get the Tree-sitter language object for WooWoo
+extern "C" TSLanguage* tree_sitter_woowoo();
+
 class Parser {
 public:
     Parser();

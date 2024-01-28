@@ -6,7 +6,6 @@
 #include <pybind11/pybind11.h>
 #include "WooWooAnalyzer.h"
 #include "WooWooDocument.h"
-// Include other headers as needed
 
 namespace py = pybind11;
 
@@ -17,7 +16,6 @@ PYBIND11_MODULE(Wuff, m) {
             .def("load_workspace", &WooWooAnalyzer::loadWorkspace)
             .def("hover", &WooWooAnalyzer::hover);
 
-    // Add bindings for WooWooDocument and other classes/functions
+   
 }
 
-// Repeat for other classes and functions as necessary

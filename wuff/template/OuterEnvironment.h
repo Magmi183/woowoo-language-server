@@ -6,10 +6,11 @@
 #define OUTERENVIRONMENT_H
 
 #include <string>
-#include "MetaBlock.h"  
+#include "MetaBlock.h"
+#include "IDescribable.h"
 #include <yaml-cpp/yaml.h>
 
-class OuterEnvironment {
+class OuterEnvironment : public IDescribable {
 public:
     std::string name;
     std::string description;
@@ -19,6 +20,14 @@ public:
     OuterEnvironment(const std::string& name, const std::string& description, const MetaBlock& metaBlock = MetaBlock());
     void deserialize(const YAML::Node& node);
 
+    std::string getDescription() const override {
+        return description;
+    }
+
+    std::string getName() const override {
+        return name;
+    }
+    
 };
 
 #endif // OUTERENVIRONMENT_H

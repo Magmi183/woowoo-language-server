@@ -5,8 +5,7 @@
 #include "Parser.h"
 #include <iostream>
 
-// Declare the external function to get the Tree-sitter language object for WooWoo
-extern "C" TSLanguage* tree_sitter_woowoo();
+
 
 Parser::Parser() : parser(ts_parser_new()) {
     // Set the language for the parser to WooWoo

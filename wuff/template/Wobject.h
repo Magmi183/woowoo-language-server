@@ -6,11 +6,12 @@
 #define WOBJECT_H
 
 #include <string>
-#include "MetaBlock.h" 
+#include "MetaBlock.h"
+#include "IDescribable.h"
 #include <yaml-cpp/yaml.h>
 
 
-class Wobject {
+class Wobject : public IDescribable {
 public:
     std::string name;
     std::string description;
@@ -19,6 +20,14 @@ public:
     Wobject() = default;
     Wobject(const std::string& name, const std::string& description, const MetaBlock& metaBlock = MetaBlock());
     void deserialize(const YAML::Node& node);
+
+    std::string getDescription() const override {
+        return description;
+    }
+
+    std::string getName() const override {
+        return name;
+    }
 
 };
 
