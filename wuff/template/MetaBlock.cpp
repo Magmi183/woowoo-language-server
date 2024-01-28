@@ -13,7 +13,7 @@ void MetaBlock::deserialize(const YAML::Node& node) {
     if (node["required_fields"]) {
         for (const auto& rfNode : node["required_fields"]) {
             Field rf;
-            rf.deserialize(rfNode);  // Use the deserialize method in Field
+            rf.deserialize(rfNode); 
             requiredFields.push_back(rf);
         }
     }
@@ -21,7 +21,7 @@ void MetaBlock::deserialize(const YAML::Node& node) {
     if (node["optional_fields"]) {
         for (const auto& ofNode : node["optional_fields"]) {
             Field of;
-            of.deserialize(ofNode);  // Use the deserialize method in Field
+            of.deserialize(ofNode); 
             optionalFields.push_back(of);
         }
     }

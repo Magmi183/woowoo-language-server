@@ -10,11 +10,10 @@ Shorthand::Shorthand(const std::string& type, const std::string& description, co
 
 
 void Shorthand::deserialize(const YAML::Node& node) {
-    if (!node["type"] || !node["description"]) {
-        throw std::runtime_error("Shorthand YAML node is missing 'type' or 'description'");
+    if (!node["description"]) {
+        throw std::runtime_error("Shorthand YAML node is missing a 'description'");
     }
 
-    type = node["type"].as<std::string>();
     description = node["description"].as<std::string>();
 
     // Deserialize References
@@ -22,13 +21,12 @@ void Shorthand::deserialize(const YAML::Node& node) {
         references.clear();  // Clear existing references before deserializing
         for (const auto& refNode : node["references"]) {
             Reference ref;
-            ref.deserialize(refNode);  // Assuming Reference has a deserialize method
+            ref.deserialize(refNode); 
             references.push_back(ref);
         }
     }
 
-    // Deserialize MetaBlock
     if (node["meta_block"]) {
-        metaBlock.deserialize(node["meta_block"]);  // Assuming MetaBlock has a deserialize method
+        metaBlock.deserialize(node["meta_block"]);  
     }
 }

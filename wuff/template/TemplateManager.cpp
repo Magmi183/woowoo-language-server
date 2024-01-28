@@ -16,10 +16,9 @@ void TemplateManager::loadTemplate(const std::string& templateFilePath) {
     YAML::Node yamlData = YAML::LoadFile(templateFilePath);
     activeTemplate = std::make_unique<Template>();
     activeTemplate->deserialize(yamlData);
-    processTemplate();  // Call processTemplate here or implement as needed
+    processTemplate();  
 }
 
 void TemplateManager::processTemplate() {
-    // Implement the processing logic for your template
-    // This could involve setting up environments, validating data, etc.
+    
 }

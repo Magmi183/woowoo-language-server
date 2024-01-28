@@ -34,8 +34,8 @@ void Template::deserialize(const YAML::Node& node) {
     }
 
     // Deserialize Classic Outer Environments
-    if (node["classic_outer_environments"]) {
-        for (const auto& oeNode : node["classic_outer_environments"]) {
+    if (node["outer_environments"]["classic"]) {
+        for (const auto& oeNode : node["outer_environments"]["classic"]) {
             auto oe = std::make_unique<OuterEnvironment>();
             oe->deserialize(oeNode);
             classic_outer_environments.push_back(std::move(oe));
@@ -43,8 +43,8 @@ void Template::deserialize(const YAML::Node& node) {
     }
 
     // Deserialize Fragile Outer Environments
-    if (node["fragile_outer_environments"]) {
-        for (const auto& oeNode : node["fragile_outer_environments"]) {
+    if (node["outer_environments"]["fragile"]) {
+        for (const auto& oeNode : node["outer_environments"]["fragile"]) {
             auto oe = std::make_unique<OuterEnvironment>();
             oe->deserialize(oeNode);
             fragile_outer_environments.push_back(std::move(oe));
@@ -64,10 +64,12 @@ void Template::deserialize(const YAML::Node& node) {
     if (node["shorthands"]["hash"]) {
         shorthand_hash = std::make_unique<Shorthand>();
         shorthand_hash->deserialize(node["shorthands"]["hash"]);
+        shorthand_hash->type = "hash";
     }
 
     if (node["shorthands"]["at"]) {
         shorthand_at = std::make_unique<Shorthand>();
         shorthand_at->deserialize(node["shorthands"]["at"]);
+        shorthand_at->type = "at";
     }
 }

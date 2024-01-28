@@ -6,7 +6,7 @@
 #define OUTERENVIRONMENT_H
 
 #include <string>
-#include "MetaBlock.h"  // Ensure you have a MetaBlock class defined
+#include "MetaBlock.h"  
 #include <yaml-cpp/yaml.h>
 
 class OuterEnvironment {
