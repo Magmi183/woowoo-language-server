@@ -7,15 +7,19 @@
 
 #include <filesystem>
 #include "tree_sitter/api.h"
-#include "Parser.h"
+#include "../Parser.h"
+#include "UTF8toUTF16Mapping.h"
 
 namespace fs = std::filesystem;
 
 class WooWooDocument {
 
+    
 public:
     TSTree* tree;
     Parser * parser;
+    UTF8toUTF16Mapping * utfMappings;
+
     fs::path documentPath;
     std::string source;
     

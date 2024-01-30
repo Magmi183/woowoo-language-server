@@ -51,7 +51,8 @@ pybind11_add_module(${PROJECT_NAME}
         ${WOOWOO_SCANNER_SRC}
         Bindings.cpp
         WooWooAnalyzer.cpp
-        WooWooDocument.cpp
+        document/WooWooDocument.cpp
+        document/UTF8toUTF16Mapping.cpp
         template/TemplateManager.cpp
         template/DocumentPart.cpp
         template/Template.cpp
@@ -77,7 +78,8 @@ add_executable(WooWooTest
         ${WOOWOO_SCANNER_SRC}
         main.cpp
         WooWooAnalyzer.cpp
-        WooWooDocument.cpp
+        document/WooWooDocument.cpp
+        document/UTF8toUTF16Mapping.cpp
         template/TemplateManager.cpp
         template/DocumentPart.cpp
         template/Template.cpp

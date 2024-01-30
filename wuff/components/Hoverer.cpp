@@ -7,7 +7,10 @@
 
 std::string Hoverer::hover(const std::string &docPath, uint32_t line, uint32_t character) {
     WooWooDocument * document = analyzer->getDocument(docPath);
-
+    auto pos = document->utfMappings->utf16ToUtf8(line, character);
+    line = pos.first;
+    character = pos.second;
+    
     uint32_t error_offset;
     TSQueryError error_type;
     TSQuery* query = ts_query_new(tree_sitter_woowoo(), hoverable_nodes_query_string, strlen(hoverable_nodes_query_string), &error_offset, &error_type);

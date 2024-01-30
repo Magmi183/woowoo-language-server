@@ -8,7 +8,7 @@
 
 #include "WooWooAnalyzer.h"
 #include "template/TemplateManager.h"
-#include "WooWooDocument.h"
+#include "document/WooWooDocument.h"
 
 #include "components/Hoverer.h"
 

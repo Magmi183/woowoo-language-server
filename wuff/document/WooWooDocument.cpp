@@ -10,6 +10,7 @@
 WooWooDocument::WooWooDocument(fs::path documentPath1, Parser *parser1) {
     documentPath = documentPath1;
     parser = parser1;
+    utfMappings = new UTF8toUTF16Mapping();
     updateSource();
 }
 
@@ -24,8 +25,9 @@ void WooWooDocument::updateSource() {
 
         // Convert the file content into a std::string
         source = buffer.str();
-
         tree = parser->parse(source);
+        utfMappings->buildMappings(source);
+        
     } else {
         std::cerr << "Could not open file: " << documentPath << std::endl;
     }

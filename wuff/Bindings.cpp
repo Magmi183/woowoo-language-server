@@ -5,7 +5,7 @@
 
 #include <pybind11/pybind11.h>
 #include "WooWooAnalyzer.h"
-#include "WooWooDocument.h"
+#include "document/WooWooDocument.h"
 
 namespace py = pybind11;
 
