@@ -7,7 +7,7 @@
 
 #include <filesystem>
 #include "tree_sitter/api.h"
-#include "../Parser.h"
+#include "../parser/Parser.h"
 #include "UTF8toUTF16Mapping.h"
 
 namespace fs = std::filesystem;
@@ -17,6 +17,7 @@ class WooWooDocument {
     
 public:
     TSTree* tree;
+    std::vector<MetaContext *> metaBlocks;
     Parser * parser;
     UTF8toUTF16Mapping * utfMappings;
 
@@ -26,6 +27,8 @@ public:
     WooWooDocument(fs::path documentPath1, Parser * parser1);
     
     void updateSource();
+    std::string getNodeText(TSNode node);
+    std::string substr(uint8_t startByte, uint8_t endByte);
 };
 
 

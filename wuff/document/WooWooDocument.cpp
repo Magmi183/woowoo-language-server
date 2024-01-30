@@ -25,10 +25,22 @@ void WooWooDocument::updateSource() {
 
         // Convert the file content into a std::string
         source = buffer.str();
-        tree = parser->parse(source);
+        tree = parser->parseWooWoo(source);
+        metaBlocks = parser->parseMetas(tree, source);
         utfMappings->buildMappings(source);
         
     } else {
         std::cerr << "Could not open file: " << documentPath << std::endl;
     }
+}
+
+std::string WooWooDocument::substr(uint8_t startByte, uint8_t endByte) {
+    return source.substr(startByte, endByte - startByte);
+}
+
+std::string WooWooDocument::getNodeText(TSNode node) {
+    // function assumes that the node is a part of this document!
+    uint32_t start_byte = ts_node_start_byte(node);
+    uint32_t end_byte = ts_node_end_byte(node);
+    return substr(start_byte, end_byte);
 }

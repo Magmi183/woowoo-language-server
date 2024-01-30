@@ -3,7 +3,7 @@
 //
 
 #include "Hoverer.h"
-#include "../Parser.h"
+#include "../parser/Parser.h"
 
 std::string Hoverer::hover(const std::string &docPath, uint32_t line, uint32_t character) {
     WooWooDocument * document = analyzer->getDocument(docPath);
@@ -33,11 +33,11 @@ std::string Hoverer::hover(const std::string &docPath, uint32_t line, uint32_t c
     if (ts_query_cursor_next_match(cursor, &match)) {
         if (match.capture_count > 0) {
             TSNode node = match.captures[0].node;
-            uint32_t start_byte = ts_node_start_byte(node);
-            uint32_t end_byte = ts_node_end_byte(node);
+            
             
             nodeType = ts_node_type(node);
-            nodeText = document->source.substr(start_byte, end_byte - start_byte);
+            nodeText = document->getNodeText(node);
+            
         }
     }
     

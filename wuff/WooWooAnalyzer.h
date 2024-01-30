@@ -10,7 +10,7 @@
 #include <string>
 #include <unordered_map>
 #include "document/WooWooDocument.h"
-#include "Parser.h"
+#include "parser/Parser.h"
 #include "template/TemplateManager.h"
 
 class Hoverer;

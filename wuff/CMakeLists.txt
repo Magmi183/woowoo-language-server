@@ -38,6 +38,9 @@ endif()
 set(WOOWOO_PARSER_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../tree-sitter/tree-sitter-woowoo/src/parser.c)
 set(WOOWOO_SCANNER_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../tree-sitter/tree-sitter-woowoo/src/scanner.cc)
 
+# Tree-Sitter YAML
+set(YAML_PARSER_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../tree-sitter/tree-sitter-yaml/src/parser.c)
+set(YAML_SCANNER_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../tree-sitter/tree-sitter-yaml/src/scanner.cc)
 
 # - - - - -
 
@@ -49,6 +52,8 @@ pybind11_add_module(${PROJECT_NAME}
         ${TREE_SITTER_SRC} # Add Tree-sitter lib.c source
         ${WOOWOO_PARSER_SRC}
         ${WOOWOO_SCANNER_SRC}
+        ${YAML_PARSER_SRC}
+        ${YAML_SCANNER_SRC}
         Bindings.cpp
         WooWooAnalyzer.cpp
         document/WooWooDocument.cpp
@@ -64,7 +69,8 @@ pybind11_add_module(${PROJECT_NAME}
         template/OuterEnvironment.cpp
         template/Wobject.cpp
         components/Hoverer.cpp
-        Parser.cpp
+        parser/Parser.cpp
+        parser/MetaContext.cpp
 )
 target_include_directories(${PROJECT_NAME} PRIVATE ${TREE_SITTER_INCLUDE_DIRS}) # Include Tree-sitter headers
 target_link_libraries(${PROJECT_NAME} PUBLIC yaml-cpp::yaml-cpp)
@@ -76,6 +82,8 @@ add_executable(WooWooTest
         ${TREE_SITTER_SRC}
         ${WOOWOO_PARSER_SRC}
         ${WOOWOO_SCANNER_SRC}
+        ${YAML_PARSER_SRC}
+        ${YAML_SCANNER_SRC}
         main.cpp
         WooWooAnalyzer.cpp
         document/WooWooDocument.cpp
@@ -91,7 +99,8 @@ add_executable(WooWooTest
         template/OuterEnvironment.cpp
         template/Wobject.cpp
         components/Hoverer.cpp
-        Parser.cpp
+        parser/Parser.cpp
+        parser/MetaContext.cpp
 )
 target_include_directories(WooWooTest PRIVATE ${TREE_SITTER_INCLUDE_DIRS})
 target_link_libraries(WooWooTest PUBLIC yaml-cpp::yaml-cpp pybind11::embed)
