@@ -14,8 +14,7 @@ PYBIND11_MODULE(Wuff, m) {
             .def(py::init<>())
             .def("set_template", &WooWooAnalyzer::setTemplate)
             .def("load_workspace", &WooWooAnalyzer::loadWorkspace)
-            .def("hover", &WooWooAnalyzer::hover);
-
-   
+            .def("hover", &WooWooAnalyzer::hover)
+            .def("semantic_tokens", &WooWooAnalyzer::semanticTokens);
 }
 

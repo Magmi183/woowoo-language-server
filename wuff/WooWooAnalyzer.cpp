@@ -11,10 +11,12 @@
 #include "document/WooWooDocument.h"
 
 #include "components/Hoverer.h"
+#include "components/Highlighter.h"
 
 WooWooAnalyzer::WooWooAnalyzer() {
     parser = new Parser();
     
+    highlighter = new Highlighter(this); 
     hoverer = new Hoverer(this); 
 }
 
@@ -70,4 +72,8 @@ std::string WooWooAnalyzer::hover(const std::string& pathToDoc, int line, int ch
 
 WooWooDocument * WooWooAnalyzer::getDocument(const std::string &pathToDoc) {
     return projects[docToProject[pathToDoc]][pathToDoc];
+}
+
+std::vector<int> WooWooAnalyzer::semanticTokens(const std::string &pathToDoc) {
+    return highlighter->semanticTokens(pathToDoc);
 }

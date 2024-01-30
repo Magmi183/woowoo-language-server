@@ -14,6 +14,8 @@
 #include "template/TemplateManager.h"
 
 class Hoverer;
+class Highlighter;
+
 
 namespace fs = std::filesystem;
 
@@ -23,15 +25,19 @@ private:
     std::unordered_map<std::string, std::string> docToProject;
     Parser* parser;
     Hoverer* hoverer;
+    Highlighter* highlighter;
 
 public:
     WooWooAnalyzer();
     ~WooWooAnalyzer(); 
     void setTemplate(const std::string& templatePath);
     bool loadWorkspace(const std::string& workspacePath);
-    std::string hover(const std::string& pathToDoc, int line, int character);
     WooWooDocument * getDocument(const std::string& pathToDoc);
     TemplateManager* templateManager;
+    
+    // LSP-like functionalities
+    std::string hover(const std::string& pathToDoc, int line, int character);
+    std::vector<int> semanticTokens(const std::string& pathToDoc);
 
 private:
     std::vector<fs::path> findProjectFolders(const fs::path& rootPath);

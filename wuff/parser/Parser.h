@@ -6,7 +6,7 @@
 #define WUFF_PARSER_H
 
 #include "tree_sitter/api.h"
-#include "MetaContext.h"
+#include "../document/MetaContext.h"
 #include <string>
 #include <vector>
 #include <iostream>

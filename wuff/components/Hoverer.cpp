@@ -49,4 +49,4 @@ std::string Hoverer::hover(const std::string &docPath, uint32_t line, uint32_t c
     return analyzer->templateManager->getDescription(nodeType, nodeText);
 }
 
-Hoverer::Hoverer(WooWooAnalyzer* anal) : analyzer(anal) {}
+Hoverer::Hoverer(WooWooAnalyzer* analyzer) : analyzer(analyzer) {}

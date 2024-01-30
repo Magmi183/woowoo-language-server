@@ -57,6 +57,8 @@ pybind11_add_module(${PROJECT_NAME}
         Bindings.cpp
         WooWooAnalyzer.cpp
         document/WooWooDocument.cpp
+        document/MetaContext.cpp
+        document/CommentLine.cpp
         document/UTF8toUTF16Mapping.cpp
         template/TemplateManager.cpp
         template/DocumentPart.cpp
@@ -69,8 +71,8 @@ pybind11_add_module(${PROJECT_NAME}
         template/OuterEnvironment.cpp
         template/Wobject.cpp
         components/Hoverer.cpp
+        components/Highlighter.cpp
         parser/Parser.cpp
-        parser/MetaContext.cpp
 )
 target_include_directories(${PROJECT_NAME} PRIVATE ${TREE_SITTER_INCLUDE_DIRS}) # Include Tree-sitter headers
 target_link_libraries(${PROJECT_NAME} PUBLIC yaml-cpp::yaml-cpp)
@@ -87,6 +89,8 @@ add_executable(WooWooTest
         main.cpp
         WooWooAnalyzer.cpp
         document/WooWooDocument.cpp
+        document/MetaContext.cpp
+        document/CommentLine.cpp
         document/UTF8toUTF16Mapping.cpp
         template/TemplateManager.cpp
         template/DocumentPart.cpp
@@ -99,8 +103,8 @@ add_executable(WooWooTest
         template/OuterEnvironment.cpp
         template/Wobject.cpp
         components/Hoverer.cpp
+        components/Highlighter.cpp
         parser/Parser.cpp
-        parser/MetaContext.cpp
 )
 target_include_directories(WooWooTest PRIVATE ${TREE_SITTER_INCLUDE_DIRS})
 target_link_libraries(WooWooTest PUBLIC yaml-cpp::yaml-cpp pybind11::embed)
