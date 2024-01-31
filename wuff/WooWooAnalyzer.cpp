@@ -13,6 +13,8 @@
 #include "components/Hoverer.h"
 #include "components/Highlighter.h"
 
+#include "utils/utils.h"
+
 WooWooAnalyzer::WooWooAnalyzer() {
     parser = new Parser();
     
@@ -35,8 +37,8 @@ void WooWooAnalyzer::setTemplate(const std::string& templatePath) {
     templateManager = new TemplateManager(templatePath);
 }
 
-bool WooWooAnalyzer::loadWorkspace(const std::string& workspacePath) {
-    fs::path rootPath = workspacePath;
+bool WooWooAnalyzer::loadWorkspace(const std::string& workspaceUri) {
+    fs::path rootPath = utils::uriToPath(workspaceUri);
     auto projectFolders = findProjectFolders(rootPath);
 
     for (const fs::path& projectFolderPath : projectFolders) {
@@ -51,6 +53,7 @@ bool WooWooAnalyzer::loadWorkspace(const std::string& workspacePath) {
 }
 
 std::vector<fs::path> WooWooAnalyzer::findProjectFolders(const fs::path& rootPath) {
+    
     std::vector<fs::path> projectFolders;
     for (const auto& entry : fs::recursive_directory_iterator(rootPath)) {
         if (entry.is_regular_file() && entry.path().filename() == "Woofile") {

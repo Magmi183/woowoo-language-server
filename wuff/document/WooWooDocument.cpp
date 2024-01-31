@@ -41,8 +41,9 @@ void WooWooDocument::updateComments() {
     std::string line;
     int lineIndex = 0;
     while (std::getline(stream, line)) {
-        if(line[0] == '%')
-            commentLines.emplace_back(new CommentLine(lineIndex++, line.size()));
+        if(!line.empty() && line[0] == '%')
+            commentLines.emplace_back(new CommentLine(lineIndex, line.size()));
+        lineIndex++;
     }
 
 }

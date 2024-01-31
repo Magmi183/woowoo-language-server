@@ -72,7 +72,9 @@ pybind11_add_module(${PROJECT_NAME}
         template/Wobject.cpp
         components/Hoverer.cpp
         components/Highlighter.cpp
+        components/Navigator.cpp
         parser/Parser.cpp
+        utils/utils.cpp
 )
 target_include_directories(${PROJECT_NAME} PRIVATE ${TREE_SITTER_INCLUDE_DIRS}) # Include Tree-sitter headers
 target_link_libraries(${PROJECT_NAME} PUBLIC yaml-cpp::yaml-cpp)
@@ -104,7 +106,9 @@ add_executable(WooWooTest
         template/Wobject.cpp
         components/Hoverer.cpp
         components/Highlighter.cpp
+        components/Navigator.cpp
         parser/Parser.cpp
+        utils/utils.cpp
 )
 target_include_directories(WooWooTest PRIVATE ${TREE_SITTER_INCLUDE_DIRS})
 target_link_libraries(WooWooTest PUBLIC yaml-cpp::yaml-cpp pybind11::embed)

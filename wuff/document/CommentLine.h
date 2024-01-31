@@ -5,13 +5,15 @@
 #ifndef WUFF_COMMENTLINE_H
 #define WUFF_COMMENTLINE_H
 
+#include <cstdint>
+
 class CommentLine {
 public:
-    CommentLine(int lineNumber, int lineLength)
+    CommentLine(uint32_t lineNumber, uint32_t lineLength)
             : lineNumber(lineNumber), lineLength(lineLength) {}
 
-    int lineNumber;
-    int lineLength;
+    uint32_t lineNumber;
+    uint32_t lineLength;
 };
 
 

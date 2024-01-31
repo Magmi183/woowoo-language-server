@@ -10,7 +10,7 @@
 Parser::Parser() : WooWooParser(ts_parser_new()), YAMLParser(ts_parser_new()) {
     // Set the language for the parser to WooWoo
     ts_parser_set_language(WooWooParser, tree_sitter_woowoo());
-    ts_parser_set_language(YAMLParser, tree_sitter_woowoo());
+    ts_parser_set_language(YAMLParser, tree_sitter_yaml());
 }
 
 Parser::~Parser() {
@@ -44,7 +44,7 @@ std::vector<MetaContext *> Parser::parseMetas(TSTree *WooWooTree, const std::str
     while (ts_query_cursor_next_capture(queryCursor, &match, &captureIndex)) {
         // Get the meta block node from the capture
         TSNode metaBlockNode = match.captures[captureIndex].node;
-
+        
         // Get the parent of the meta block node
         TSNode parent = ts_node_parent(metaBlockNode);
 
@@ -85,7 +85,7 @@ std::string Parser::extractStructureName(const TSNode &node, const std::string &
 
     std::string childWithNameType;
     if (nodeType == "document_part") {
-        childWithNameType = "document_part_title";
+        childWithNameType = "document_part_type";
     } else if (nodeType.find("outer_environment") != std::string::npos) {
         childWithNameType = "outer_environment_type";
     } else if (nodeType == "object") {

@@ -31,7 +31,7 @@ public:
     WooWooAnalyzer();
     ~WooWooAnalyzer(); 
     void setTemplate(const std::string& templatePath);
-    bool loadWorkspace(const std::string& workspacePath);
+    bool loadWorkspace(const std::string& workspaceUri);
     WooWooDocument * getDocument(const std::string& pathToDoc);
     TemplateManager* templateManager;
     

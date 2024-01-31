@@ -81,14 +81,24 @@ uint32_t UTF8toUTF16Mapping::utf8ToCodePoint(const std::string& utf8, int& offse
 
 std::pair<int, int> UTF8toUTF16Mapping::utf8ToUtf16(int lineNum, int utf8Offset) const {
     if (lineNum >= 0 && lineNum < utf8ToUtf16Mappings.size()) {
-        return {lineNum, utf8ToUtf16Mappings[lineNum].at(utf8Offset)};
+        const auto& mapping = utf8ToUtf16Mappings[lineNum];
+        auto it = mapping.find(utf8Offset);
+        if (it != mapping.end()) {
+            return {lineNum, it->second};
+        }
     }
+    // Return the original offset if the line number or utf8Offset is out of range or not found
     return {lineNum, utf8Offset};
 }
 
 std::pair<int, int> UTF8toUTF16Mapping::utf16ToUtf8(int lineNum, int utf16Offset) const {
     if (lineNum >= 0 && lineNum < utf16ToUtf8Mappings.size()) {
-        return {lineNum, utf16ToUtf8Mappings[lineNum].at(utf16Offset)};
+        const auto& mapping = utf16ToUtf8Mappings[lineNum];
+        auto it = mapping.find(utf16Offset);
+        if (it != mapping.end()) {
+            return {lineNum, it->second};
+        }
     }
+    // Return the original offset if the line number or utf16Offset is out of range or not found
     return {lineNum, utf16Offset};
 }
