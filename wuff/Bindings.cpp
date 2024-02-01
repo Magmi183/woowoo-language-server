@@ -16,10 +16,13 @@ PYBIND11_MODULE(Wuff, m) {
             .def("set_template", &WooWooAnalyzer::setTemplate)
             .def("load_workspace", &WooWooAnalyzer::loadWorkspace)
             .def("hover", &WooWooAnalyzer::hover)
-            .def("semantic_tokens", &WooWooAnalyzer::semanticTokens);
+            .def("semantic_tokens", &WooWooAnalyzer::semanticTokens)
+            .def("go_to_definition", &WooWooAnalyzer::goToDefinition)
+            .def("complete", &WooWooAnalyzer::complete);
+
 
     py::class_<Position>(m, "Position")
-            .def(py::init<int, int>())
+            .def(py::init<uint32_t, uint32_t>())
             .def_readwrite("line", &Position::line)
             .def_readwrite("character", &Position::character);
 
@@ -33,9 +36,58 @@ PYBIND11_MODULE(Wuff, m) {
             .def_readwrite("uri", &Location::uri)
             .def_readwrite("range", &Location::range);
 
-    py::class_<DefinitionParams>(m, "DefinitionParams")
+    py::enum_<CompletionTriggerKind>(m, "CompletionTriggerKind")
+            .value("Invoked", CompletionTriggerKind::Invoked)
+            .value("TriggerCharacter", CompletionTriggerKind::TriggerCharacter)
+            .value("TriggerForIncompleteCompletions", CompletionTriggerKind::TriggerForIncompleteCompletions)
+            .export_values();
+    
+
+    py::class_<TextDocumentIdentifier>(m, "TextDocumentIdentifier")
+            .def(py::init<const std::string&>())
+            .def_readwrite("uri", &TextDocumentIdentifier::uri);
+
+
+    py::class_<TextDocumentPositionParams>(m, "TextDocumentPositionParams")
             .def(py::init<TextDocumentIdentifier, Position>())
-            .def_readwrite("textDocument", &DefinitionParams::textDocument)
-            .def_readwrite("position", &DefinitionParams::position);
+            .def_readwrite("text_document", &TextDocumentPositionParams::textDocument)
+            .def_readwrite("position", &TextDocumentPositionParams::position);
+
+    // just for clarity - internally, it is the same as TextDocumentPositionParams
+    py::class_<DefinitionParams, TextDocumentPositionParams>(m, "DefinitionParams")
+            .def(py::init<TextDocumentIdentifier, Position>());
+
+   
+
+    py::class_<CompletionContext>(m, "CompletionContext")
+            .def(py::init<CompletionTriggerKind, std::optional<std::string>>())
+            .def_readwrite("trigger_kind", &CompletionContext::triggerKind)
+            .def_readwrite("trigger_character", &CompletionContext::triggerCharacter);
+
+    py::class_<CompletionParams, TextDocumentPositionParams>(m, "CompletionParams")
+            .def(py::init<const TextDocumentIdentifier&, const Position&, std::optional<CompletionContext>>())
+            .def_readwrite("context", &CompletionParams::context);
+
+    py::enum_<CompletionItemKind>(m, "CompletionItemKind")
+            .value("Text", CompletionItemKind::Text)
+            .value("Snippet", CompletionItemKind::Snippet)
+                    // TODO: other possible values
+            .export_values();
+
+    py::enum_<InsertTextFormat>(m, "InsertTextFormat")
+            .value("PlainText", InsertTextFormat::PlainText)
+            .value("Snippet", InsertTextFormat::Snippet)
+            .export_values();
+
+    py::class_<CompletionItem>(m, "CompletionItem")
+            .def(py::init<std::string, std::optional<CompletionItemKind>,
+                         std::optional<InsertTextFormat>, std::optional<std::string>>(),
+                 py::arg("label"), py::arg("kind") = std::nullopt,
+                 py::arg("insertTextFormat") = std::nullopt, py::arg("insertText") = std::nullopt)
+            .def_readwrite("label", &CompletionItem::label)
+            .def_readwrite("kind", &CompletionItem::kind)
+            .def_readwrite("insertTextFormat", &CompletionItem::insertTextFormat)
+            .def_readwrite("insertText", &CompletionItem::insertText);
+
 }
 

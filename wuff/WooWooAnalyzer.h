@@ -9,15 +9,20 @@
 #include <filesystem>
 #include <string>
 #include <unordered_map>
+#include <pybind11/pytypes.h>
 #include "document/WooWooDocument.h"
 #include "parser/Parser.h"
 #include "template/TemplateManager.h"
+#include "lsp/LSPTypes.h"
 
 class Hoverer;
 class Highlighter;
+class Navigator;
+class Completer;
 
 
 namespace fs = std::filesystem;
+namespace py = pybind11;
 
 class WooWooAnalyzer {
 private:
@@ -26,6 +31,8 @@ private:
     Parser* parser;
     Hoverer* hoverer;
     Highlighter* highlighter;
+    Navigator * navigator;
+    Completer * completer;
 
 public:
     WooWooAnalyzer();
@@ -38,6 +45,9 @@ public:
     // LSP-like functionalities
     std::string hover(const std::string& pathToDoc, int line, int character);
     std::vector<int> semanticTokens(const std::string& pathToDoc);
+    Location goToDefinition(DefinitionParams params);
+    std::vector<CompletionItem> complete(const CompletionParams & params);
+    std::vector<WooWooDocument *> getDocumentsFromTheSameProject(WooWooDocument * document);
 
 private:
     std::vector<fs::path> findProjectFolders(const fs::path& rootPath);

@@ -5,6 +5,7 @@
 //#include <pybind11/pybind11.h>
 #include <filesystem>
 #include <string>
+#include <utility>
 
 #include "WooWooAnalyzer.h"
 #include "template/TemplateManager.h"
@@ -12,6 +13,8 @@
 
 #include "components/Hoverer.h"
 #include "components/Highlighter.h"
+#include "components/Navigator.h"
+#include "components/Completer.h"
 
 #include "utils/utils.h"
 
@@ -19,7 +22,9 @@ WooWooAnalyzer::WooWooAnalyzer() {
     parser = new Parser();
     
     highlighter = new Highlighter(this); 
-    hoverer = new Hoverer(this); 
+    hoverer = new Hoverer(this);
+    navigator = new Navigator(this);
+    completer = new Completer(this);
 }
 
 WooWooAnalyzer::~WooWooAnalyzer() {
@@ -68,15 +73,45 @@ void WooWooAnalyzer::loadDocument(const fs::path& projectPath, const fs::path& d
     docToProject[documentPath.string()] = projectPath.string();
 }
 
-std::string WooWooAnalyzer::hover(const std::string& pathToDoc, int line, int character) {
-    return hoverer->hover(pathToDoc, line, character);
-}
 
 
 WooWooDocument * WooWooAnalyzer::getDocument(const std::string &pathToDoc) {
     return projects[docToProject[pathToDoc]][pathToDoc];
 }
 
+std::vector<WooWooDocument *> WooWooAnalyzer::getDocumentsFromTheSameProject(WooWooDocument *document) {
+    std::vector<WooWooDocument *> documents;
+    auto project = docToProject[document->documentPath];
+    if (projects.find(project) != projects.end()) {
+        std::unordered_map<std::string, WooWooDocument*>& pathDocMap = projects[project];
+
+        for (const auto& pair : pathDocMap) {
+            documents.emplace_back(pair.second);
+        }
+    } else {
+        std::cerr << "Project with path '" << project << "' not found in projects map." << std::endl;
+    }
+    return documents;
+}
+
+// - LSP-like public interface - - -
+
+std::string WooWooAnalyzer::hover(const std::string& pathToDoc, int line, int character) {
+    return hoverer->hover(pathToDoc, line, character);
+}
+
 std::vector<int> WooWooAnalyzer::semanticTokens(const std::string &pathToDoc) {
     return highlighter->semanticTokens(pathToDoc);
 }
+
+Location WooWooAnalyzer::goToDefinition(DefinitionParams params) {
+    return navigator->goToDefinition(std::move(params));
+}
+
+std::vector<CompletionItem> WooWooAnalyzer::complete(const CompletionParams & params){
+    return completer->complete(params);
+}
+
+
+
+// - - - - - - - - - - - - - - - - - 

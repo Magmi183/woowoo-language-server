@@ -6,11 +6,20 @@
 #define WUFF_NAVIGATOR_H
 
 #include <string>
+#include "../WooWooAnalyzer.h"
+#include "../lsp/LSPTypes.h"
 
 
 class Navigator {
+
+public:
+    Navigator(WooWooAnalyzer * analyzer);
+
+    Location goToDefinition(DefinitionParams);
+
+private:
+    WooWooAnalyzer * analyzer;
     
-    //Location goToDefinition()
 
 };
 
