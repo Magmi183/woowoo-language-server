@@ -13,16 +13,33 @@ from components.navigator import Navigator
 
 from template_manager.template_manager import TemplateManager
 
+
+from Wuff import (
+    WooWooAnalyzer,
+    CompletionParams as WuffCompletionParams,
+    TextDocumentIdentifier as WuffTextDocumentIdentifier,
+    Position as WuffPosition,
+    CompletionContext as WuffCompletionContext,
+    CompletionTriggerKind as WuffCompletionTriggerKind,
+    CompletionItem as WuffCompletionItem,
+    InsertTextFormat as WuffInsertTextFormat,
+    CompletionItemKind as WuffCompletionItemKind
+)
+
 from lsprotocol.types import (
     TEXT_DOCUMENT_COMPLETION,
-    CompletionParams, DidOpenTextDocumentParams, DidChangeTextDocumentParams, TEXT_DOCUMENT_DID_OPEN,
+    CompletionParams as LSCompletionParams, DidOpenTextDocumentParams, DidChangeTextDocumentParams,
+    TEXT_DOCUMENT_DID_OPEN,
     TEXT_DOCUMENT_DID_CHANGE,
     CompletionOptions, INITIALIZED, TEXT_DOCUMENT_DEFINITION, TEXT_DOCUMENT_DID_SAVE,
     DidSaveTextDocumentParams, TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL, SemanticTokensParams,
     SemanticTokensLegend, InitializedParams, InitializeParams, INITIALIZE,
     WorkspaceFolder, DefinitionParams, TEXT_DOCUMENT_FOLDING_RANGE, FoldingRangeParams, WORKSPACE_DID_RENAME_FILES,
-    RenameFilesParams, WORKSPACE_WILL_RENAME_FILES, TEXT_DOCUMENT_HOVER, TextDocumentPositionParams
+    RenameFilesParams, WORKSPACE_WILL_RENAME_FILES, TEXT_DOCUMENT_HOVER, TextDocumentPositionParams, MarkupContent,
+    MarkupKind, Hover, SemanticTokens, CompletionList
 )
+
+from convertors import *
 
 from templatedwoowoodocument import TemplatedWooWooDocument
 
@@ -50,9 +67,14 @@ class WooWooLanguageServer(LanguageServer):
         self.docs = {}
         self.doc_to_project = {}
 
+        self.analyzer = WooWooAnalyzer()
+
     def load_workspace(self, workspace: WorkspaceFolder):
+
+        self.analyzer.load_workspace(workspace.uri)
         root_path = utils.uri_to_path(workspace.uri)
         project_folders = self.find_project_folders(root_path)
+        
 
         for project_folder in project_folders:
             woo_files = project_folder.rglob('*.woo')
@@ -63,6 +85,9 @@ class WooWooLanguageServer(LanguageServer):
         for woo_file in root_path.glob('*.woo'):
             if woo_file not in self.doc_to_project:
                 self.load_document(woo_file, None)
+
+
+        
 
     def find_project_folders(self, root_path: Path):
         # Find all folders containing a Woofile
@@ -134,23 +159,6 @@ class WooWooLanguageServer(LanguageServer):
         # Update the path of the document
         self.docs[new_project_folder][new_path].path = new_path
 
-    """
-    def handle_document_change(self, params: DidChangeTextDocumentParams):
-        import time
-        start_time = time.time()
-        uri = params.text_document.uri
-        path = utils.uri_to_path(uri)
-        doc = self.workspace.get_document(uri)
-
-        # NOTE: As of now, re-parsing the whole file on every change. TODO FIX!!
-        self.docs[self.doc_to_project[path]][path].update_source(doc.source)
-
-        end_time = time.time()
-        parse_duration = end_time - start_time
-        logger.debug(f"Parsing of {params.text_document.uri} took {parse_duration} seconds.")
-    """
-
-
     def handle_document_change(self, params: DidChangeTextDocumentParams):
         import time
         start_time = time.time()
@@ -168,9 +176,12 @@ class WooWooLanguageServer(LanguageServer):
         # TODO: better fallback mechanisms and error handling + handle default template better
         if template_file_path != "":
             self.template_manager.load_template(template_file_path)
+            self.analyzer.set_template(template_file_path)
         else:
             import utils
             self.template_manager.load_template(utils.get_absolute_path("templates/fit_math.yaml"))
+            self.analyzer.set_template(utils.get_absolute_path("templates/fit_math.yaml"))
+
 
 SERVER = WooWooLanguageServer('woowoo-language-SERVER', 'v0.1')
 
@@ -238,20 +249,32 @@ def did_rename_files(ls: WooWooLanguageServer, params: RenameFilesParams):
 @SERVER.feature(TEXT_DOCUMENT_DID_CHANGE)
 def did_change(ls: WooWooLanguageServer, params: DidChangeTextDocumentParams):
     logger.debug("[TEXT_DOCUMENT_DID_CHANGE] SERVER.feature called")
+    doc_uri = params.text_document.uri
+    doc = ls.workspace.get_document(params.text_document.uri)
+    ls.analyzer.document_did_change(WuffTextDocumentIdentifier(doc_uri), doc.source)
     ls.handle_document_change(params)
     ls.linter.diagnose(params)
 
 
+
 @SERVER.feature(TEXT_DOCUMENT_COMPLETION, CompletionOptions(trigger_characters=Completer.trigger_characters))
-def completions(ls: WooWooLanguageServer, params: CompletionParams):
+def completions(ls: WooWooLanguageServer, params: LSCompletionParams):
     logger.debug("[TEXT_DOCUMENT_COMPLETION] SERVER.feature called")
-    return ls.completer.complete(params)
+    #return ls.completer.complete(params)
+    params = completion_params_ls_to_wuff(params)
+    completion_items_result = ls.analyzer.complete(params)
+    items = []
+    for item in completion_items_result:
+        items.append(wuff_completion_item_to_ls(item))
+    return CompletionList(is_incomplete=False, items=items)
 
 
 @SERVER.feature(TEXT_DOCUMENT_HOVER)
 def on_hover(ls: WooWooLanguageServer, params: TextDocumentPositionParams):
     logger.debug("[TEXT_DOCUMENT_HOVER] SERVER.feature called")
-    return ls.hoverer.hover(params)
+    result = ls.analyzer.hover(params.text_document.uri, params.position.line, params.position.character)
+    content = MarkupContent(MarkupKind.Markdown, value=result)
+    return Hover(contents=content)
 
 
 @SERVER.feature(TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
@@ -259,7 +282,8 @@ def on_hover(ls: WooWooLanguageServer, params: TextDocumentPositionParams):
                                      token_modifiers=Highlighter.token_modifiers))
 def semantic_tokens(ls: WooWooLanguageServer, params: SemanticTokensParams):
     logger.debug("[TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL] SERVER.feature called")
-    return ls.highlighter.semantic_tokens(params)
+    data = ls.analyzer.semantic_tokens(params.text_document.uri)
+    return SemanticTokens(data=data)
 
 
 @SERVER.feature(TEXT_DOCUMENT_DEFINITION)
@@ -274,6 +298,7 @@ def folding_range(ls: WooWooLanguageServer, params: FoldingRangeParams):
     logger.debug("[TEXT_DOCUMENT_FOLDING_RANGE] SERVER.feature called")
 
     return ls.folder.folding_ranges(params)
+
 
 
 def start() -> None:
