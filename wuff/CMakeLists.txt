@@ -74,6 +74,7 @@ pybind11_add_module(${PROJECT_NAME}
         components/Highlighter.cpp
         components/Navigator.cpp
         components/Completer.cpp
+        components/Linter.cpp
         parser/Parser.cpp
         utils/utils.cpp
 )
@@ -109,6 +110,7 @@ add_executable(WooWooTest
         components/Highlighter.cpp
         components/Navigator.cpp
         components/Completer.cpp
+        components/Linter.cpp
         parser/Parser.cpp
         utils/utils.cpp
 )

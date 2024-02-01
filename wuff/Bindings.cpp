@@ -19,7 +19,8 @@ PYBIND11_MODULE(Wuff, m) {
             .def("semantic_tokens", &WooWooAnalyzer::semanticTokens)
             .def("go_to_definition", &WooWooAnalyzer::goToDefinition)
             .def("complete", &WooWooAnalyzer::complete)
-            .def("document_did_change", &WooWooAnalyzer::documentDidChange);
+            .def("document_did_change", &WooWooAnalyzer::documentDidChange)
+            .def("diagnose", &WooWooAnalyzer::diagnose);
 
 
     py::class_<Position>(m, "Position")
@@ -89,6 +90,20 @@ PYBIND11_MODULE(Wuff, m) {
             .def_readwrite("kind", &CompletionItem::kind)
             .def_readwrite("insertTextFormat", &CompletionItem::insertTextFormat)
             .def_readwrite("insertText", &CompletionItem::insertText);
+
+    py::enum_<DiagnosticSeverity>(m, "DiagnosticSeverity")
+            .value("Error", DiagnosticSeverity::Error)
+            .value("Warning", DiagnosticSeverity::Warning)
+            .value("Information", DiagnosticSeverity::Information)
+            .value("Hint", DiagnosticSeverity::Hint)
+            .export_values();
+
+    py::class_<Diagnostic>(m, "Diagnostic")
+            .def(py::init<Range, std::string, std::string, DiagnosticSeverity>())
+            .def_readwrite("range", &Diagnostic::range)
+            .def_readwrite("message", &Diagnostic::message)
+            .def_readwrite("source", &Diagnostic::source)
+            .def_readwrite("severity", &Diagnostic::severity);
 
 }
 

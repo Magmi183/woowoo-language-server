@@ -107,4 +107,22 @@ struct CompletionItem {
             : label(std::move(label)), kind(kind), insertTextFormat(insertTextFormat), insertText(insertText) {}
 };
 
+
+enum class DiagnosticSeverity {
+    Error = 1,
+    Warning = 2,
+    Information = 3,
+    Hint = 4
+};
+
+struct Diagnostic {
+    Range range;
+    std::string message;
+    std::string source;
+    DiagnosticSeverity severity;
+
+    Diagnostic(Range range, std::string message, std::string source, DiagnosticSeverity severity)
+            : range(range), message(std::move(message)), source(std::move(source)), severity(severity) {}
+};
+
 #endif //WUFF_LSPTYPES_H

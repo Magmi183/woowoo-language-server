@@ -19,6 +19,7 @@ class Hoverer;
 class Highlighter;
 class Navigator;
 class Completer;
+class Linter;
 
 
 namespace fs = std::filesystem;
@@ -33,23 +34,28 @@ private:
     Highlighter* highlighter;
     Navigator * navigator;
     Completer * completer;
+    Linter * linter;
 
 public:
     WooWooAnalyzer();
     ~WooWooAnalyzer(); 
     void setTemplate(const std::string& templatePath);
     bool loadWorkspace(const std::string& workspaceUri);
+    WooWooDocument * getDocumentByUri(const std::string & docUri);
     WooWooDocument * getDocument(const std::string& pathToDoc);
     TemplateManager* templateManager;
+    
+    std::vector<WooWooDocument *> getDocumentsFromTheSameProject(WooWooDocument * document);
     
     // LSP-like functionalities
     std::string hover(const std::string& docUri, int line, int character);
     std::vector<int> semanticTokens(const std::string& docUri);
     Location goToDefinition(DefinitionParams params);
     std::vector<CompletionItem> complete(const CompletionParams & params);
-    std::vector<WooWooDocument *> getDocumentsFromTheSameProject(WooWooDocument * document);
+    std::vector<Diagnostic> diagnose(const TextDocumentIdentifier & tdi); 
 
     void documentDidChange(const TextDocumentIdentifier & tdi, std::string &source);
+    
 private:
 
     std::vector<fs::path> findProjectFolders(const fs::path& rootPath);

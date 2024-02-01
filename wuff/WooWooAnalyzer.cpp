@@ -15,39 +15,41 @@
 #include "components/Highlighter.h"
 #include "components/Navigator.h"
 #include "components/Completer.h"
+#include "components/Linter.h"
 
 #include "utils/utils.h"
 
 WooWooAnalyzer::WooWooAnalyzer() {
     parser = new Parser();
-    
-    highlighter = new Highlighter(this); 
+
+    highlighter = new Highlighter(this);
     hoverer = new Hoverer(this);
     navigator = new Navigator(this);
     completer = new Completer(this);
+    linter = new Linter(this);
 }
 
 WooWooAnalyzer::~WooWooAnalyzer() {
     delete parser;
     delete hoverer;
-    
-    for (auto& project : projects) {
-        for (auto& docPair : project.second) {
+
+    for (auto &project: projects) {
+        for (auto &docPair: project.second) {
             delete docPair.second;
         }
     }
 }
 
-void WooWooAnalyzer::setTemplate(const std::string& templatePath) {
+void WooWooAnalyzer::setTemplate(const std::string &templatePath) {
     templateManager = new TemplateManager(templatePath);
 }
 
-bool WooWooAnalyzer::loadWorkspace(const std::string& workspaceUri) {
+bool WooWooAnalyzer::loadWorkspace(const std::string &workspaceUri) {
     fs::path rootPath = utils::uriToPath(workspaceUri);
     auto projectFolders = findProjectFolders(rootPath);
 
-    for (const fs::path& projectFolderPath : projectFolders) {
-        for (const auto& entry : fs::recursive_directory_iterator(projectFolderPath)) {
+    for (const fs::path &projectFolderPath: projectFolders) {
+        for (const auto &entry: fs::recursive_directory_iterator(projectFolderPath)) {
             if (entry.is_regular_file() && entry.path().extension() == ".woo") {
                 loadDocument(projectFolderPath, entry.path());
             }
@@ -57,10 +59,10 @@ bool WooWooAnalyzer::loadWorkspace(const std::string& workspaceUri) {
     return true;
 }
 
-std::vector<fs::path> WooWooAnalyzer::findProjectFolders(const fs::path& rootPath) {
-    
+std::vector<fs::path> WooWooAnalyzer::findProjectFolders(const fs::path &rootPath) {
+
     std::vector<fs::path> projectFolders;
-    for (const auto& entry : fs::recursive_directory_iterator(rootPath)) {
+    for (const auto &entry: fs::recursive_directory_iterator(rootPath)) {
         if (entry.is_regular_file() && entry.path().filename() == "Woofile") {
             projectFolders.push_back(entry.path().parent_path());
         }
@@ -68,14 +70,17 @@ std::vector<fs::path> WooWooAnalyzer::findProjectFolders(const fs::path& rootPat
     return projectFolders;
 }
 
-void WooWooAnalyzer::loadDocument(const fs::path& projectPath, const fs::path& documentPath) {
+void WooWooAnalyzer::loadDocument(const fs::path &projectPath, const fs::path &documentPath) {
     projects[projectPath.string()][documentPath.string()] = new WooWooDocument(documentPath, parser);
     docToProject[documentPath.string()] = projectPath.string();
 }
 
+WooWooDocument * WooWooAnalyzer::getDocumentByUri(const std::string & docUri){
+    auto path = utils::uriToPath(docUri);
+    return getDocument(path);
+}
 
-
-WooWooDocument * WooWooAnalyzer::getDocument(const std::string &pathToDoc) {
+WooWooDocument *WooWooAnalyzer::getDocument(const std::string &pathToDoc) {
     return projects[docToProject[pathToDoc]][pathToDoc];
 }
 
@@ -83,9 +88,9 @@ std::vector<WooWooDocument *> WooWooAnalyzer::getDocumentsFromTheSameProject(Woo
     std::vector<WooWooDocument *> documents;
     auto project = docToProject[document->documentPath];
     if (projects.find(project) != projects.end()) {
-        std::unordered_map<std::string, WooWooDocument*>& pathDocMap = projects[project];
+        std::unordered_map<std::string, WooWooDocument *> &pathDocMap = projects[project];
 
-        for (const auto& pair : pathDocMap) {
+        for (const auto &pair: pathDocMap) {
             documents.emplace_back(pair.second);
         }
     } else {
@@ -101,7 +106,7 @@ void WooWooAnalyzer::handleDocumentChange(const TextDocumentIdentifier &tdi, std
 }
 // - LSP-like public interface - - -
 
-std::string WooWooAnalyzer::hover(const std::string& docUri, int line, int character) {
+std::string WooWooAnalyzer::hover(const std::string &docUri, int line, int character) {
     return hoverer->hover(docUri, line, character);
 }
 
@@ -113,12 +118,16 @@ Location WooWooAnalyzer::goToDefinition(DefinitionParams params) {
     return navigator->goToDefinition(std::move(params));
 }
 
-std::vector<CompletionItem> WooWooAnalyzer::complete(const CompletionParams & params){
+std::vector<CompletionItem> WooWooAnalyzer::complete(const CompletionParams &params) {
     return completer->complete(params);
 }
 
-void WooWooAnalyzer::documentDidChange(const TextDocumentIdentifier & tdi, std::string &source){
+void WooWooAnalyzer::documentDidChange(const TextDocumentIdentifier &tdi, std::string &source) {
     handleDocumentChange(tdi, source);
+}
+
+std::vector<Diagnostic> WooWooAnalyzer::diagnose(const TextDocumentIdentifier &tdi) {
+    return linter->diagnose(tdi);
 }
 
 
