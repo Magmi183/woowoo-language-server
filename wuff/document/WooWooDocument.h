@@ -33,8 +33,9 @@ public:
     ~WooWooDocument();
 
     void updateSource();
+    void updateSource(std::string &source);
     std::string getNodeText(TSNode node);
-    std::string substr(uint8_t startByte, uint8_t endByte);
+    std::string substr(uint32_t startByte, uint32_t endByte) const;
 };
 
 

@@ -14,25 +14,29 @@ WooWooDocument::WooWooDocument(fs::path documentPath1, Parser *parser1) {
     updateSource();
 }
 
-
 void WooWooDocument::updateSource() {
-    deleteCommentsAndMetas();
     std::ifstream file(documentPath, std::ios::in | std::ios::binary);
     if (file) {
         std::stringstream buffer;
         buffer << file.rdbuf();
         file.close();
-
-        // Convert the file content into a std::string
-        source = buffer.str();
-        tree = parser->parseWooWoo(source);
-        metaBlocks = parser->parseMetas(tree, source);
-        utfMappings->buildMappings(source);
-        updateComments();
+        std::string source = buffer.str();
+        updateSource(source);
 
     } else {
         std::cerr << "Could not open file: " << documentPath << std::endl;
     }
+}
+
+
+void WooWooDocument::updateSource(std::string &newSource) {
+    this->source = std::move(newSource);
+    deleteCommentsAndMetas();
+    tree = parser->parseWooWoo(source);
+    metaBlocks = parser->parseMetas(tree, source);
+    utfMappings->buildMappings(source);
+    updateComments();
+
 }
 
 void WooWooDocument::updateComments() {
@@ -41,14 +45,14 @@ void WooWooDocument::updateComments() {
     std::string line;
     int lineIndex = 0;
     while (std::getline(stream, line)) {
-        if(!line.empty() && line[0] == '%')
+        if (!line.empty() && line[0] == '%')
             commentLines.emplace_back(new CommentLine(lineIndex, line.size()));
         lineIndex++;
     }
 
 }
 
-std::string WooWooDocument::substr(uint8_t startByte, uint8_t endByte) {
+std::string WooWooDocument::substr(uint32_t startByte, uint32_t endByte) const {
     return source.substr(startByte, endByte - startByte);
 }
 
@@ -68,6 +72,7 @@ void WooWooDocument::deleteCommentsAndMetas() {
     for (CommentLine *commentLine: commentLines) {
         delete commentLine;
     }
+    commentLines.clear();
 
 }
 

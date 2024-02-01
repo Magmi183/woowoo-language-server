@@ -24,7 +24,9 @@ private:
 
     void prepareQueries();
     static const std::string includeCollisionQueryString;
+    static const std::string shortInnerEnvironmentQueryString;
     TSQuery * includeCollisionQuery;
+    TSQuery * shortInnerEnvironmentQuery;
     //CompletionParams createCompletionParamsFromPyObject(const py::object & params);
 };
 

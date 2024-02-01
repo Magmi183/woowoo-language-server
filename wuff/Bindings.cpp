@@ -18,7 +18,8 @@ PYBIND11_MODULE(Wuff, m) {
             .def("hover", &WooWooAnalyzer::hover)
             .def("semantic_tokens", &WooWooAnalyzer::semanticTokens)
             .def("go_to_definition", &WooWooAnalyzer::goToDefinition)
-            .def("complete", &WooWooAnalyzer::complete);
+            .def("complete", &WooWooAnalyzer::complete)
+            .def("document_did_change", &WooWooAnalyzer::documentDidChange);
 
 
     py::class_<Position>(m, "Position")

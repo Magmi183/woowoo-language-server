@@ -3,7 +3,9 @@
 //
 
 #include "Highlighter.h"
+#include "../utils/utils.h"
 #include <algorithm>
+
 
 const std::vector<std::string> Highlighter::tokenTypes = {
         "namespace", "type", "class", "enum", "interface", "struct", "typeParameter",
@@ -31,7 +33,8 @@ Highlighter::Highlighter(WooWooAnalyzer *analyzer) : analyzer(analyzer) {
     initializeMaps();
 }
 
-std::vector<int> Highlighter::semanticTokens(const std::string &documentPath) {
+std::vector<int> Highlighter::semanticTokens(const std::string &docUri) {
+    auto documentPath = utils::uriToPath(docUri);
     WooWooDocument *document = analyzer->getDocument(documentPath);
 
     std::vector<int> data;

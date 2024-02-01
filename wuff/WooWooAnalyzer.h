@@ -43,15 +43,18 @@ public:
     TemplateManager* templateManager;
     
     // LSP-like functionalities
-    std::string hover(const std::string& pathToDoc, int line, int character);
-    std::vector<int> semanticTokens(const std::string& pathToDoc);
+    std::string hover(const std::string& docUri, int line, int character);
+    std::vector<int> semanticTokens(const std::string& docUri);
     Location goToDefinition(DefinitionParams params);
     std::vector<CompletionItem> complete(const CompletionParams & params);
     std::vector<WooWooDocument *> getDocumentsFromTheSameProject(WooWooDocument * document);
 
+    void documentDidChange(const TextDocumentIdentifier & tdi, std::string &source);
 private:
+
     std::vector<fs::path> findProjectFolders(const fs::path& rootPath);
     void loadDocument(const fs::path& projectPath, const fs::path& documentPath);
+    void handleDocumentChange(const TextDocumentIdentifier & tdi, std::string & source);
 };
 
 

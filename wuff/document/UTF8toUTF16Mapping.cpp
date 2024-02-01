@@ -5,6 +5,8 @@
 // UTF8toUTF16Mapping.cpp
 #include "UTF8toUTF16Mapping.h"
 void UTF8toUTF16Mapping::buildMappings(const std::string& source) {
+    utf8ToUtf16Mappings.clear();
+    utf16ToUtf8Mappings.clear();
     std::istringstream stream(source);
     std::string line;
     while (std::getline(stream, line)) {

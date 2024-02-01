@@ -10,10 +10,10 @@
 Completer::Completer(WooWooAnalyzer *analyzer) : analyzer(analyzer) {
 
     prepareQueries();
-    
+
 }
 
-std::vector<CompletionItem> Completer::complete(const CompletionParams & params) {
+std::vector<CompletionItem> Completer::complete(const CompletionParams &params) {
 
     std::vector<CompletionItem> completionItems;
 
@@ -21,6 +21,8 @@ std::vector<CompletionItem> Completer::complete(const CompletionParams & params)
 
         if (params.context->triggerCharacter == ".") {
             completeInclude(completionItems, params);
+        } else if (params.context->triggerCharacter == ":"){
+            completeInnerEnvs(completionItems, params);
         }
 
     }
@@ -30,11 +32,11 @@ std::vector<CompletionItem> Completer::complete(const CompletionParams & params)
 }
 
 
-void Completer::completeInclude(std::vector<CompletionItem> &completionItems, const CompletionParams & params) {
+void Completer::completeInclude(std::vector<CompletionItem> &completionItems, const CompletionParams &params) {
 
     auto docPath = utils::uriToPath(params.textDocument.uri);
     auto document = analyzer->getDocument(docPath);
-    
+
     TSQueryCursor *cursor = ts_query_cursor_new();
     TSPoint start_point = {params.position.line, params.position.character};
     TSPoint end_point = {params.position.line, params.position.character + 1};
@@ -43,8 +45,8 @@ void Completer::completeInclude(std::vector<CompletionItem> &completionItems, co
 
     TSQueryMatch match;
     bool hasMatch = ts_query_cursor_next_match(cursor, &match);
-    
-    if (hasMatch){
+
+    if (hasMatch) {
         // include statement is not valid here
         return;
     }
@@ -52,7 +54,7 @@ void Completer::completeInclude(std::vector<CompletionItem> &completionItems, co
     std::vector<std::string> relativePaths;
     std::string currentDocDir = std::filesystem::path(document->documentPath).parent_path().string();
 
-    for (WooWooDocument* doc : analyzer->getDocumentsFromTheSameProject(document)) {
+    for (WooWooDocument *doc: analyzer->getDocumentsFromTheSameProject(document)) {
         if (doc != nullptr && !doc->documentPath.empty()) {
             std::string relPath = std::filesystem::relative(doc->documentPath, currentDocDir).string();
             relativePaths.push_back(relPath);
@@ -80,11 +82,28 @@ void Completer::completeInclude(std::vector<CompletionItem> &completionItems, co
     ts_query_cursor_delete(cursor);
 }
 
-void Completer::completeInnerEnvs(std::vector<CompletionItem> &completionItems, const CompletionParams & params) {
+void Completer::completeInnerEnvs(std::vector<CompletionItem> &completionItems, const CompletionParams &params) {
 
+    auto docPath = utils::uriToPath(params.textDocument.uri);
+    auto document = analyzer->getDocument(docPath);
+
+    TSQueryCursor *cursor = ts_query_cursor_new();
+    TSPoint start_point = {params.position.line, params.position.character};
+    TSPoint end_point = {params.position.line, params.position.character + 1};
+    ts_query_cursor_set_point_range(cursor, start_point, end_point);
+    ts_query_cursor_exec(cursor, shortInnerEnvironmentQuery, ts_tree_root_node(document->tree));
+
+    TSQueryMatch match;
+    if (ts_query_cursor_next_match(cursor, &match)){
+        TSNode node = match.captures[0].node;
+        std::string shortInnerEnvType = document->getNodeText(node);
+        // TODO: The remaining part. (after consultation?)
+        
+    }
+    
 }
 
-void Completer::completeShorthand(std::vector<CompletionItem> &completionItems, const CompletionParams & params) {
+void Completer::completeShorthand(std::vector<CompletionItem> &completionItems, const CompletionParams &params) {
 
 }
 
@@ -99,12 +118,26 @@ void Completer::prepareQueries() {
             &errorOffset,
             &errorType
     );
-    if (!includeCollisionQuery) {
+    
+    shortInnerEnvironmentQuery = ts_query_new(
+            tree_sitter_woowoo(),
+            shortInnerEnvironmentQueryString.c_str(),
+            shortInnerEnvironmentQueryString.size(),
+            &errorOffset,
+            &errorType
+    );
+
+    if (!includeCollisionQuery || !shortInnerEnvironmentQuery) {
         throw std::runtime_error("COMPLETER: Failed to compile Tree-sitter query.");
     }
+            
 }
 
 const std::string Completer::includeCollisionQueryString = R"(
 (block) @b
 (object) @ob
+)";
+
+const std::string Completer::shortInnerEnvironmentQueryString = R"(
+(short_inner_environment_type) @siet
 )";

@@ -94,14 +94,19 @@ std::vector<WooWooDocument *> WooWooAnalyzer::getDocumentsFromTheSameProject(Woo
     return documents;
 }
 
+void WooWooAnalyzer::handleDocumentChange(const TextDocumentIdentifier &tdi, std::string &source) {
+    auto docPath = utils::uriToPath(tdi.uri);
+    auto document = getDocument(docPath);
+    document->updateSource(source);
+}
 // - LSP-like public interface - - -
 
-std::string WooWooAnalyzer::hover(const std::string& pathToDoc, int line, int character) {
-    return hoverer->hover(pathToDoc, line, character);
+std::string WooWooAnalyzer::hover(const std::string& docUri, int line, int character) {
+    return hoverer->hover(docUri, line, character);
 }
 
-std::vector<int> WooWooAnalyzer::semanticTokens(const std::string &pathToDoc) {
-    return highlighter->semanticTokens(pathToDoc);
+std::vector<int> WooWooAnalyzer::semanticTokens(const std::string &docUri) {
+    return highlighter->semanticTokens(docUri);
 }
 
 Location WooWooAnalyzer::goToDefinition(DefinitionParams params) {
@@ -112,6 +117,9 @@ std::vector<CompletionItem> WooWooAnalyzer::complete(const CompletionParams & pa
     return completer->complete(params);
 }
 
+void WooWooAnalyzer::documentDidChange(const TextDocumentIdentifier & tdi, std::string &source){
+    handleDocumentChange(tdi, source);
+}
 
 
 // - - - - - - - - - - - - - - - - - 
