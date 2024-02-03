@@ -20,6 +20,8 @@ PYBIND11_MODULE(Wuff, m) {
             .def("go_to_definition", &WooWooAnalyzer::goToDefinition)
             .def("complete", &WooWooAnalyzer::complete)
             .def("document_did_change", &WooWooAnalyzer::documentDidChange)
+            .def("open_document", &WooWooAnalyzer::openDocument)
+            .def("rename_document", &WooWooAnalyzer::renameDocument)
             .def("diagnose", &WooWooAnalyzer::diagnose);
 
 

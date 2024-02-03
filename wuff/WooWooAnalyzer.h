@@ -55,12 +55,18 @@ public:
     std::vector<Diagnostic> diagnose(const TextDocumentIdentifier & tdi); 
 
     void documentDidChange(const TextDocumentIdentifier & tdi, std::string &source);
+    void renameDocument(const std::string & oldUri, const std::string & newUri);
+    void openDocument(const TextDocumentIdentifier & tdi);
     
 private:
 
     std::vector<fs::path> findProjectFolders(const fs::path& rootPath);
+    std::optional<fs::path> findProjectFolder(const fs::path& uri);
+    
     void loadDocument(const fs::path& projectPath, const fs::path& documentPath);
     void handleDocumentChange(const TextDocumentIdentifier & tdi, std::string & source);
+    bool endsWith(const std::string &str, const std::string &suffix) const;
+    std::vector<fs::path> findAllWooFiles(const fs::path  & rootPath);
 };
 
 

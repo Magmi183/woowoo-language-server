@@ -56,7 +56,30 @@ bool WooWooAnalyzer::loadWorkspace(const std::string &workspaceUri) {
         }
     }
 
+    // now find and load all .woo files without a project
+    auto wooFiles = findAllWooFiles(rootPath);
+
+    for (auto &wooFile: wooFiles) {
+        if (!docToProject.contains(wooFile.string())) {
+            loadDocument("", wooFile);
+        }
+    }
+
     return true;
+}
+
+std::vector<fs::path> WooWooAnalyzer::findAllWooFiles(const fs::path &rootPath) {
+    std::vector<fs::path> wooFiles;
+
+    if (fs::exists(rootPath) && fs::is_directory(rootPath)) {
+        for (const auto &entry: fs::recursive_directory_iterator(rootPath)) {
+            if (entry.is_regular_file() && entry.path().extension() == ".woo") {
+                wooFiles.push_back(entry.path());
+            }
+        }
+    }
+
+    return wooFiles;
 }
 
 std::vector<fs::path> WooWooAnalyzer::findProjectFolders(const fs::path &rootPath) {
@@ -70,12 +93,28 @@ std::vector<fs::path> WooWooAnalyzer::findProjectFolders(const fs::path &rootPat
     return projectFolders;
 }
 
+std::optional<fs::path> WooWooAnalyzer::findProjectFolder(const fs::path &uri) {
+    fs::path path = utils::uriToPath(uri);
+    // Start from the given URI and move up the directory hierarchy
+    for (fs::path parent = path.parent_path(); parent!=parent.parent_path(); parent = parent.parent_path()) {
+        fs::path woofilePath = parent / "Woofile";
+
+        // Check if "Woofile" exists in this directory
+        if (fs::exists(woofilePath)) {
+            return parent; // Return the first parent directory containing "Woofile"
+        }
+        
+    }
+
+    return std::nullopt; // Return an empty optional if no project folder is found
+}
+
 void WooWooAnalyzer::loadDocument(const fs::path &projectPath, const fs::path &documentPath) {
     projects[projectPath.string()][documentPath.string()] = new WooWooDocument(documentPath, parser);
     docToProject[documentPath.string()] = projectPath.string();
 }
 
-WooWooDocument * WooWooAnalyzer::getDocumentByUri(const std::string & docUri){
+WooWooDocument *WooWooAnalyzer::getDocumentByUri(const std::string &docUri) {
     auto path = utils::uriToPath(docUri);
     return getDocument(path);
 }
@@ -104,6 +143,40 @@ void WooWooAnalyzer::handleDocumentChange(const TextDocumentIdentifier &tdi, std
     auto document = getDocument(docPath);
     document->updateSource(source);
 }
+
+void WooWooAnalyzer::renameDocument(const std::string &oldUri, const std::string &newUri) {
+
+    auto oldPath = utils::uriToPath(oldUri);
+    auto newPath = utils::uriToPath(newUri);
+
+    if (endsWith(newUri, ".woo")) {
+        std::optional<fs::path> newProjectFolder = findProjectFolder(newUri);
+        std::string oldProjectFolder = docToProject[oldPath];
+        std::string newProjectFolderPathString = newProjectFolder.has_value() ? newProjectFolder.value() : "";
+
+        docToProject[newPath] = newProjectFolderPathString;
+        docToProject.erase(oldPath);
+        projects[newProjectFolderPathString][newPath] = projects[oldProjectFolder][oldPath];
+        projects[oldProjectFolder].erase(oldPath);
+
+
+    } else {
+        // the file is no longer a WooWoo document
+        // TODO: Delete it.
+    }
+
+}
+
+
+
+bool WooWooAnalyzer::endsWith(const std::string &str, const std::string &suffix) const {
+    if (str.length() >= suffix.length()) {
+        return (str.rfind(suffix) == (str.length() - suffix.length()));
+    } else {
+        return false;
+    }
+}
+
 // - LSP-like public interface - - -
 
 std::string WooWooAnalyzer::hover(const std::string &docUri, int line, int character) {
@@ -130,5 +203,14 @@ std::vector<Diagnostic> WooWooAnalyzer::diagnose(const TextDocumentIdentifier &t
     return linter->diagnose(tdi);
 }
 
+void WooWooAnalyzer::openDocument(const TextDocumentIdentifier &tdi) {
+    auto docPath = utils::uriToPath(tdi.uri);
+    if (!docToProject.contains(docPath)) {
+        // unknown document opened
+        std::optional<fs::path> projectFolder = findProjectFolder(tdi.uri);
+        std::string projectFolderPathString = projectFolder.has_value() ? projectFolder.value() : "";
+        loadDocument(projectFolderPathString, docPath);
+    }
+}
 
-// - - - - - - - - - - - - - - - - - 
+// - - - - - - - - - - - - - - - - -
