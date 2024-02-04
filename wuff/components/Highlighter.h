@@ -33,6 +33,7 @@ class Highlighter {
 
 public:
     Highlighter(WooWooAnalyzer * analyzer);
+    ~Highlighter();
     
     std::vector<int> semanticTokens(const std::string& documentPath);
     
@@ -44,8 +45,13 @@ private:
     WooWooAnalyzer * analyzer;
     std::vector<std::string> tokenTypes;
     std::vector<std::string> tokenModifiers;
-    static const std::string woowooHighlightQueries;
-    static const std::string yamlHighlightQueries;
+    
+    void prepareQueries();
+    static const std::string woowooHighlightQueryString;
+    static const std::string yamlHighlightQueryString;
+    TSQuery * woowooHighlightQuery;
+    TSQuery * yamlHighlightQuery;
+    
     
     std::unordered_map<std::string, size_t> tokenTypeIndices;
     std::unordered_map<std::string, size_t> tokenModifierIndices;

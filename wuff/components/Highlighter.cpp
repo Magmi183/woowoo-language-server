@@ -8,7 +8,26 @@
 #include <utility>
 
 
-Highlighter::Highlighter(WooWooAnalyzer *analyzer) : analyzer(analyzer) {}
+Highlighter::Highlighter(WooWooAnalyzer *analyzer) : analyzer(analyzer) {
+    prepareQueries();
+}
+
+Highlighter::~Highlighter() {
+    ts_query_delete(woowooHighlightQuery);
+    ts_query_delete(yamlHighlightQuery);
+}
+
+void Highlighter::prepareQueries() {
+    uint32_t error_offset;
+    TSQueryError error_type;
+    TSQuery *query = ts_query_new(tree_sitter_woowoo(), woowooHighlightQueryString.c_str(), woowooHighlightQueryString.size(),
+                                  &error_offset, &error_type);
+    woowooHighlightQuery = query;
+    
+    TSQuery *metaQuery = ts_query_new(tree_sitter_yaml(), yamlHighlightQueryString.c_str(), yamlHighlightQueryString.size(),
+                                      &error_offset, &error_type);
+    yamlHighlightQuery = metaQuery;
+}
 
 std::vector<int> Highlighter::semanticTokens(const std::string &docUri) {
     auto documentPath = utils::uriToPath(docUri);
@@ -17,13 +36,9 @@ std::vector<int> Highlighter::semanticTokens(const std::string &docUri) {
     std::vector<int> data;
     std::vector<NodeInfo> nodes;
 
-    // - - Adding nodes from WooWoo highlights
-    uint32_t error_offset;
-    TSQueryError error_type;
-    TSQuery *query = ts_query_new(tree_sitter_woowoo(), woowooHighlightQueries.c_str(), woowooHighlightQueries.size(),
-                                  &error_offset, &error_type);
+    
     TSQueryCursor *wooCursor = ts_query_cursor_new();
-    ts_query_cursor_exec(wooCursor, query, ts_tree_root_node(document->tree));
+    ts_query_cursor_exec(wooCursor, woowooHighlightQuery, ts_tree_root_node(document->tree));
 
     TSQueryMatch match;
     while (ts_query_cursor_next_match(wooCursor, &match)) {
@@ -32,7 +47,7 @@ std::vector<int> Highlighter::semanticTokens(const std::string &docUri) {
             TSNode capturedNode = match.captures[i].node;
 
             uint32_t capture_name_length;
-            const char *capture_name_chars = ts_query_capture_name_for_id(query, capture_index, &capture_name_length);
+            const char *capture_name_chars = ts_query_capture_name_for_id(woowooHighlightQuery, capture_index, &capture_name_length);
             std::string capture_name(capture_name_chars, capture_name_length);
 
             TSPoint start_point = ts_node_start_point(capturedNode);
@@ -41,6 +56,7 @@ std::vector<int> Highlighter::semanticTokens(const std::string &docUri) {
             nodes.emplace_back(start_point, end_point, capture_name);
         }
     }
+    ts_query_cursor_delete(wooCursor);
 
 
     // - - Adding nodes from YAML highlights
@@ -103,18 +119,10 @@ std::vector<int> Highlighter::semanticTokens(const std::string &docUri) {
 
 void Highlighter::addMetaBlocksNodes(WooWooDocument *document, std::vector<NodeInfo> &nodes) {
 
-    uint32_t error_offset;
-    TSQueryError error_type;
-    TSQuery *metaQuery = ts_query_new(tree_sitter_yaml(), yamlHighlightQueries.c_str(), yamlHighlightQueries.size(),
-                                      &error_offset, &error_type);
-    if (!metaQuery) {
-        std::cerr << "Failed to compile query with error " << error_type << " at offset " << error_offset
-                  << std::endl;
-        // TODO handle?
-    }
+    
     for (MetaContext *metaContext: document->metaBlocks) {
         TSQueryCursor *yamlCursor = ts_query_cursor_new();
-        ts_query_cursor_exec(yamlCursor, metaQuery, ts_tree_root_node(metaContext->tree));
+        ts_query_cursor_exec(yamlCursor, yamlHighlightQuery, ts_tree_root_node(metaContext->tree));
 
         TSQueryMatch match;
         while (ts_query_cursor_next_match(yamlCursor, &match)) {
@@ -125,7 +133,7 @@ void Highlighter::addMetaBlocksNodes(WooWooDocument *document, std::vector<NodeI
 
                 // Get the capture name using the capture ID
                 uint32_t capture_name_length;
-                const char *capture_name_chars = ts_query_capture_name_for_id(metaQuery, capture_id,
+                const char *capture_name_chars = ts_query_capture_name_for_id(yamlHighlightQuery, capture_id,
                                                                               &capture_name_length);
                 std::string capture_name(capture_name_chars, capture_name_length);
 
@@ -141,7 +149,6 @@ void Highlighter::addMetaBlocksNodes(WooWooDocument *document, std::vector<NodeI
 
         ts_query_cursor_delete(yamlCursor);
     }
-    ts_query_delete(metaQuery);
 
 }
 
@@ -177,7 +184,7 @@ void Highlighter::setTokenModifiers (std::vector<std::string> tokenModifiersFrom
 // Inline queries - easier+faster than reading from file
 // - - - - - - - - - - - - - 
 
-const std::string Highlighter::woowooHighlightQueries = R"(
+const std::string Highlighter::woowooHighlightQueryString = R"(
 ; Include statement
 
 (include) @keyword
@@ -227,7 +234,7 @@ const std::string Highlighter::woowooHighlightQueries = R"(
 )";
 
 
-const std::string Highlighter::yamlHighlightQueries = R"(
+const std::string Highlighter::yamlHighlightQueryString = R"(
 ; Queries are from https://github.com/nvim-treesitter/nvim-treesitter/blob/master/queries/yaml/highlights.scm , but the order of queries was changed.
 ; The order of the query reflects the priority - if a given node is retrieved by multiple queries,
 ; the type that counts is the type given by the first query that retrieved the given node.

@@ -1,4 +1,3 @@
-
 from Wuff import (
     WooWooAnalyzer,
     CompletionParams as WuffCompletionParams,
@@ -10,7 +9,8 @@ from Wuff import (
     InsertTextFormat as WuffInsertTextFormat,
     CompletionItemKind as WuffCompletionItemKind,
     Diagnostic as WuffDiagnostic,
-    DiagnosticSeverity as WuffDiagnosticSeverity
+    DiagnosticSeverity as WuffDiagnosticSeverity,
+    FoldingRange as WuffFoldingRange
 )
 
 from lsprotocol.types import (
@@ -24,7 +24,7 @@ from lsprotocol.types import (
     WorkspaceFolder, DefinitionParams, TEXT_DOCUMENT_FOLDING_RANGE, FoldingRangeParams, WORKSPACE_DID_RENAME_FILES,
     RenameFilesParams, WORKSPACE_WILL_RENAME_FILES, TEXT_DOCUMENT_HOVER, TextDocumentPositionParams, MarkupContent,
     MarkupKind, Hover, SemanticTokens, CompletionList, CompletionParams, CompletionItem, CompletionItemKind,
-    InsertTextFormat, Diagnostic, Range, Position, DiagnosticSeverity
+    InsertTextFormat, Diagnostic, Range, Position, DiagnosticSeverity, FoldingRange, FoldingRangeKind
 )
 
 
@@ -39,7 +39,8 @@ def completion_params_ls_to_wuff(ls_params: CompletionParams):
     context = None
     if hasattr(ls_params, 'context') and ls_params.context is not None:
         trigger_kind = ls_params.context.trigger_kind
-        trigger_character = ls_params.context.trigger_character if hasattr(ls_params.context, 'trigger_character') else None
+        trigger_character = ls_params.context.trigger_character if hasattr(ls_params.context,
+                                                                           'trigger_character') else None
 
         if trigger_kind == 1:
             my_trigger_kind = WuffCompletionTriggerKind.Invoked
@@ -55,7 +56,6 @@ def completion_params_ls_to_wuff(ls_params: CompletionParams):
     return WuffCompletionParams(text_document, position, context)
 
 
-
 def wuff_completion_item_to_ls(wuff_item: WuffCompletionItem) -> CompletionItem:
     label = wuff_item.label
 
@@ -67,7 +67,6 @@ def wuff_completion_item_to_ls(wuff_item: WuffCompletionItem) -> CompletionItem:
         elif wuff_item.kind == WuffCompletionItemKind.Text:
             kind = CompletionItemKind.Text
 
-
     insert_text_format = InsertTextFormat.PlainText
     if wuff_item.insertTextFormat:
 
@@ -75,7 +74,6 @@ def wuff_completion_item_to_ls(wuff_item: WuffCompletionItem) -> CompletionItem:
             insert_text_format = InsertTextFormat.Snippet
         elif wuff_item.insertTextFormat == WuffInsertTextFormat.PlainText:
             insert_text_format = InsertTextFormat.PlainText
-
 
     insert_text = wuff_item.insertText if wuff_item.insertText else ''
 
@@ -106,3 +104,11 @@ def wuff_diagnostic_to_ls(wuff_diagnostic: WuffDiagnostic) -> Diagnostic:
         severity=severity,
         source=wuff_diagnostic.source
     )
+
+
+def wuff_folding_range_to_ls(wuff_folding_range: WuffFoldingRange) -> FoldingRange:
+    return FoldingRange(start_line=wuff_folding_range.start_line,
+                        start_character=wuff_folding_range.start_character,
+                        end_line=wuff_folding_range.end_line,
+                        end_character=wuff_folding_range.end_character,
+                        kind=FoldingRangeKind(wuff_folding_range.kind))

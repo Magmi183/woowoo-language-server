@@ -19,6 +19,7 @@ PYBIND11_MODULE(Wuff, m) {
             .def("semantic_tokens", &WooWooAnalyzer::semanticTokens)
             .def("go_to_definition", &WooWooAnalyzer::goToDefinition)
             .def("complete", &WooWooAnalyzer::complete)
+            .def("folding_ranges", &WooWooAnalyzer::foldingRanges)
             .def("document_did_change", &WooWooAnalyzer::documentDidChange)
             .def("open_document", &WooWooAnalyzer::openDocument)
             .def("rename_document", &WooWooAnalyzer::renameDocument)
@@ -108,6 +109,13 @@ PYBIND11_MODULE(Wuff, m) {
             .def_readwrite("message", &Diagnostic::message)
             .def_readwrite("source", &Diagnostic::source)
             .def_readwrite("severity", &Diagnostic::severity);
+    
+    py::class_<FoldingRange>(m, "FoldingRange")
+            .def_readwrite("start_line", &FoldingRange::startLine)
+            .def_readwrite("start_character", &FoldingRange::startCharacter)
+            .def_readwrite("end_line", &FoldingRange::endLine)
+            .def_readwrite("end_character", &FoldingRange::endCharacter)
+            .def_readwrite("kind", &FoldingRange::foldingRangeKind);
 
 }
 

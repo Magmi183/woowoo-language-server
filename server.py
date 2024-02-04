@@ -5,12 +5,10 @@ from pygls.server import LanguageServer
 
 import utils
 from components.completer import Completer
-from components.folder import Folder
-from components.highlighter import Highlighter
 from components.navigator import Navigator
 
 from template_manager.template_manager import TemplateManager
-
+from constants import *
 
 from Wuff import (
     WooWooAnalyzer,
@@ -58,14 +56,18 @@ class WooWooLanguageServer(LanguageServer):
         self.template_manager = TemplateManager()
 
         self.completer = Completer(self)
-        self.highlighter = Highlighter(self)
         self.navigator = Navigator(self)
-        self.folder = Folder(self)
 
         self.docs = {}
         self.doc_to_project = {}
 
-        self.analyzer = WooWooAnalyzer()
+        self.analyzer = self.initialize_analyzer()
+
+    def initialize_analyzer(self):
+        analyzer = WooWooAnalyzer()
+        analyzer.set_token_types(token_types)
+        analyzer.set_token_modifiers(token_modifiers)
+        return analyzer
 
     def load_workspace(self, workspace: WorkspaceFolder):
 
@@ -274,9 +276,7 @@ def completions(ls: WooWooLanguageServer, params: LSCompletionParams):
     #return ls.completer.complete(params)
     params = completion_params_ls_to_wuff(params)
     completion_items_result = ls.analyzer.complete(params)
-    items = []
-    for item in completion_items_result:
-        items.append(wuff_completion_item_to_ls(item))
+    items = [wuff_completion_item_to_ls(item) for item in completion_items_result]
     return CompletionList(is_incomplete=False, items=items)
 
 
@@ -289,8 +289,8 @@ def on_hover(ls: WooWooLanguageServer, params: TextDocumentPositionParams):
 
 
 @SERVER.feature(TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
-                SemanticTokensLegend(token_types=Highlighter.token_types,
-                                     token_modifiers=Highlighter.token_modifiers))
+                SemanticTokensLegend(token_types=token_types,
+                                     token_modifiers=token_modifiers))
 def semantic_tokens(ls: WooWooLanguageServer, params: SemanticTokensParams):
     logger.debug("[TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL] SERVER.feature called")
     data = ls.analyzer.semantic_tokens(params.text_document.uri)
@@ -308,7 +308,9 @@ def definition(ls: WooWooLanguageServer, params: DefinitionParams):
 def folding_range(ls: WooWooLanguageServer, params: FoldingRangeParams):
     logger.debug("[TEXT_DOCUMENT_FOLDING_RANGE] SERVER.feature called")
 
-    return ls.folder.folding_ranges(params)
+    folding_ranges = ls.analyzer.folding_ranges(WuffTextDocumentIdentifier(params.text_document.uri))
+    data = [wuff_folding_range_to_ls(item) for item in folding_ranges]
+    return data
 
 
 

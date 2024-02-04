@@ -125,4 +125,18 @@ struct Diagnostic {
             : range(range), message(std::move(message)), source(std::move(source)), severity(severity) {}
 };
 
+
+struct FoldingRange {
+    uint32_t startLine;
+    uint32_t startCharacter;
+    uint32_t endLine;
+    uint32_t endCharacter;
+    std::string foldingRangeKind;
+
+    FoldingRange(uint32_t startLine, uint32_t startCharacter, uint32_t endLine, uint32_t endCharacter,
+                 const std::string &foldingRangeKind) : startLine(startLine), startCharacter(startCharacter),
+                                                        endLine(endLine), endCharacter(endCharacter),
+                                                        foldingRangeKind(foldingRangeKind) {}
+};
+
 #endif //WUFF_LSPTYPES_H

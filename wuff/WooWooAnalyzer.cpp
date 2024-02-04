@@ -16,6 +16,7 @@
 #include "components/Navigator.h"
 #include "components/Completer.h"
 #include "components/Linter.h"
+#include "components/Folder.h"
 
 #include "utils/utils.h"
 
@@ -27,6 +28,7 @@ WooWooAnalyzer::WooWooAnalyzer() {
     navigator = new Navigator(this);
     completer = new Completer(this);
     linter = new Linter(this);
+    folder = new Folder(this);
 }
 
 WooWooAnalyzer::~WooWooAnalyzer() {
@@ -193,6 +195,10 @@ Location WooWooAnalyzer::goToDefinition(DefinitionParams params) {
 
 std::vector<CompletionItem> WooWooAnalyzer::complete(const CompletionParams &params) {
     return completer->complete(params);
+}
+
+std::vector<FoldingRange> WooWooAnalyzer::foldingRanges(const TextDocumentIdentifier &tdi) {
+    return folder->foldingRanges(tdi);
 }
 
 void WooWooAnalyzer::documentDidChange(const TextDocumentIdentifier &tdi, std::string &source) {

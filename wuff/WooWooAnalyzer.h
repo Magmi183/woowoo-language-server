@@ -20,6 +20,7 @@ class Highlighter;
 class Navigator;
 class Completer;
 class Linter;
+class Folder;
 
 
 namespace fs = std::filesystem;
@@ -35,6 +36,7 @@ private:
     Navigator * navigator;
     Completer * completer;
     Linter * linter;
+    Folder * folder;
 
 public:
     WooWooAnalyzer();
@@ -53,7 +55,8 @@ public:
     Location goToDefinition(DefinitionParams params);
     std::vector<CompletionItem> complete(const CompletionParams & params);
     std::vector<Diagnostic> diagnose(const TextDocumentIdentifier & tdi); 
-
+    std::vector<FoldingRange> foldingRanges(const TextDocumentIdentifier & tdi);
+    
     // LSP support functions
 
     void setTokenTypes(std::vector<std::string> tokenTypes);
