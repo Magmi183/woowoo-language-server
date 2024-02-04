@@ -6,7 +6,7 @@
 #define WUFF_WOOWOODOCUMENT_H
 
 #include <filesystem>
-#include "tree_sitter/api.h"
+#include <tree_sitter/api.h>
 #include "../parser/Parser.h"
 #include "UTF8toUTF16Mapping.h"
 #include "CommentLine.h"

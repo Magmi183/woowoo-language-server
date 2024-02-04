@@ -5,7 +5,7 @@
 #ifndef WUFF_METACONTEXT_H
 #define WUFF_METACONTEXT_H
 
-#include "tree_sitter/api.h"
+#include <tree_sitter/api.h>
 #include <string>
 
 

@@ -4,6 +4,7 @@
 
 #include "Parser.h"
 #include <iostream>
+#include <cstring>
 
 
 
@@ -28,7 +29,7 @@ std::vector<MetaContext *> Parser::parseMetas(TSTree *WooWooTree, const std::str
     uint32_t errorOffset;
     TSQueryError errorType;
 
-    TSQuery* query = ts_query_new(tree_sitter_woowoo(), queryString, std::strlen(queryString), &errorOffset, &errorType);
+    TSQuery* query = ts_query_new(tree_sitter_woowoo(), queryString, strlen(queryString), &errorOffset, &errorType);
 
     if (errorType != TSQueryErrorNone) {
         std::cerr << "Failed to compile query at offset " << errorOffset << " with error type " << errorType << std::endl;

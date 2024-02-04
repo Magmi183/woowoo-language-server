@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(Wuff)
 set(CMAKE_CXX_STANDARD 20)
+find_package(Python COMPONENTS Interpreter Development)
 
 # - - - YAML-CPP
 include(FetchContent)
@@ -31,23 +32,29 @@ if(NOT tree_sitter_POPULATED)
     FetchContent_Populate(tree_sitter)
     # Since Tree-sitter does not use CMake, we manually add its source and include directories
     set(TREE_SITTER_SRC ${tree_sitter_SOURCE_DIR}/lib/src/lib.c)
-    set(TREE_SITTER_INCLUDE_DIRS ${tree_sitter_SOURCE_DIR}/lib/include ${tree_sitter_SOURCE_DIR}/lib/src)
+    set(TREE_SITTER_INCLUDE_DIRS ${tree_sitter_SOURCE_DIR}/lib/include ${tree_sitter_SOURCE_DIR}/lib/src ${tree_sitter_SOURCE_DIR}/lib/src/unicode)
+    message(STATUS "Include directories: ${TREE_SITTER_INCLUDE_DIRS}")
 endif()
 
 # Tree-Sitter WooWoo
-set(WOOWOO_PARSER_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../tree-sitter/tree-sitter-woowoo/src/parser.c)
-set(WOOWOO_SCANNER_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../tree-sitter/tree-sitter-woowoo/src/scanner.cc)
+set(WOOWOO_PARSER_SRC ${CMAKE_CURRENT_SOURCE_DIR}/tree-sitter/woowoo/parser.c)
+set(WOOWOO_SCANNER_SRC ${CMAKE_CURRENT_SOURCE_DIR}/tree-sitter/woowoo/scanner.cc)
 
 # Tree-Sitter YAML
-set(YAML_PARSER_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../tree-sitter/tree-sitter-yaml/src/parser.c)
-set(YAML_SCANNER_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../tree-sitter/tree-sitter-yaml/src/scanner.cc)
+set(YAML_PARSER_SRC ${CMAKE_CURRENT_SOURCE_DIR}/tree-sitter/yaml/parser.c)
+set(YAML_SCANNER_SRC ${CMAKE_CURRENT_SOURCE_DIR}/tree-sitter/yaml/scanner.cc)
 
 # - - - - -
 
-# Set the Python version
-find_package(Python3 3.9 EXACT REQUIRED Interpreter Development)
+FetchContent_Declare(
+        pybind11
+        GIT_REPOSITORY https://github.com/pybind/pybind11.git
+        GIT_TAG        v2.11.1 
+)
 
-add_subdirectory(external/pybind11)
+# Make pybind11 available for use
+FetchContent_MakeAvailable(pybind11)
+
 pybind11_add_module(${PROJECT_NAME}
         ${TREE_SITTER_SRC} # Add Tree-sitter lib.c source
         ${WOOWOO_PARSER_SRC}
@@ -79,7 +86,7 @@ pybind11_add_module(${PROJECT_NAME}
         parser/Parser.cpp
         utils/utils.cpp
 )
-target_include_directories(${PROJECT_NAME} PRIVATE ${TREE_SITTER_INCLUDE_DIRS}) # Include Tree-sitter headers
+target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ${TREE_SITTER_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PUBLIC yaml-cpp::yaml-cpp)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE VERSION_INFO=${EXAMPLE_VERSION_INFO})
@@ -116,5 +123,5 @@ add_executable(WooWooTest
         parser/Parser.cpp
         utils/utils.cpp
 )
-target_include_directories(WooWooTest PRIVATE ${TREE_SITTER_INCLUDE_DIRS})
+target_include_directories(WooWooTest SYSTEM PRIVATE ${TREE_SITTER_INCLUDE_DIRS})
 target_link_libraries(WooWooTest PUBLIC yaml-cpp::yaml-cpp pybind11::embed)

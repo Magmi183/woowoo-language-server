@@ -3,7 +3,7 @@ stages:
   - combine
 
 variables:
-  BUILD_DIR: "tree-sitter/builds" # when change, "paths:" has to be changed manually
+  BUILD_DIR: "wuff/builds" # when change, "paths:" has to be changed manually
   GIT_SUBMODULE_STRATEGY: normal # pull just top-level submodules (tree-sitter repos)
 
 
@@ -19,10 +19,10 @@ variables:
 # cross-compile tree-sitter parsers (WooWoo + yaml) using Dockcross images
 
 .build_script: &build_script
-  - mkdir -p $BUILD_DIR/woowoo/ $BUILD_DIR/yaml/
-  - $CC -o $BUILD_DIR/woowoo/${OS}-${ARCH}.$EXT -shared -fPIC tree-sitter/tree-sitter-woowoo/src/parser.c tree-sitter/tree-sitter-woowoo/src/scanner.cc -I./tree-sitter/tree-sitter-woowoo/src -lstdc++
-  - $CC -o $BUILD_DIR/yaml/${OS}-${ARCH}.$EXT -shared -fPIC tree-sitter/tree-sitter-yaml/src/parser.c tree-sitter/tree-sitter-yaml/src/scanner.cc -I./tree-sitter/tree-sitter-yaml/src -lstdc++
-
+  - mkdir -p $BUILD_DIR/${OS}-${ARCH}/
+  - cmake -Bbuild -H./wuff -DCMAKE_BUILD_TYPE=Release
+  - cmake --build build --target all
+  - cp build/Wuff $BUILD_DIR/${OS}-${ARCH}/Wuff
 
 build-windows-x64:
   stage: build
@@ -35,8 +35,7 @@ build-windows-x64:
     - *build_script
   artifacts:
     paths:
-      - tree-sitter/builds/woowoo/windows-x64.dll
-      - tree-sitter/builds/yaml/windows-x64.dll
+      - wuff/builds/woowoo/windows-x64/
     expire_in: 1 hour
   only:
     - web
@@ -54,8 +53,7 @@ build-windows-arm64:
     - *build_script
   artifacts:
     paths:
-      - tree-sitter/builds/woowoo/windows-arm64.dll
-      - tree-sitter/builds/yaml/windows-arm64.dll
+      - wuff/builds/windows-arm64
     expire_in: 1 hour
   only:
     - web
@@ -72,8 +70,7 @@ build-linux-x64:
     - *build_script
   artifacts:
     paths:
-      - tree-sitter/builds/woowoo/linux-x64.so
-      - tree-sitter/builds/yaml/linux-x64.so
+      - wuff/builds/linux-x64
     expire_in: 1 hour
   only:
     - web
@@ -91,8 +88,7 @@ build-linux-arm64:
     - *build_script
   artifacts:
     paths:
-      - tree-sitter/builds/woowoo/linux-arm64.so
-      - tree-sitter/builds/yaml/linux-arm64.so
+      - wuff/builds/linux-arm64
     expire_in: 1 hour
   only:
     - web
@@ -102,12 +98,10 @@ build-linux-arm64:
 combine-and-commit:
   stage: combine
   script:
-    - ls -la
     - ls -la $BUILD_DIR
-    - ls -la $BUILD_DIR/woowoo/
     - *gitconfig
     - git add $BUILD_DIR
-    - git commit -m "Generated parser binaries."
+    - git commit -m "Generated Wuff binaries."
     - git push origin $CI_COMMIT_BRANCH
   dependencies:
     - build-windows-x64
