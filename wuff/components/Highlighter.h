@@ -36,16 +36,19 @@ public:
     
     std::vector<int> semanticTokens(const std::string& documentPath);
     
+    void setTokenTypes(std::vector<std::string>);
+    void setTokenModifiers (std::vector<std::string>);
+    
+    
 private:
     WooWooAnalyzer * analyzer;
-    static const std::vector<std::string> tokenTypes;
-    static const std::vector<std::string> tokenModifiers;
+    std::vector<std::string> tokenTypes;
+    std::vector<std::string> tokenModifiers;
     static const std::string woowooHighlightQueries;
     static const std::string yamlHighlightQueries;
     
     std::unordered_map<std::string, size_t> tokenTypeIndices;
     std::unordered_map<std::string, size_t> tokenModifierIndices;
-    void initializeMaps();
     
     void addMetaBlocksNodes(WooWooDocument * document,  std::vector<NodeInfo> & nodes);
     void addCommentNodes(WooWooDocument * document,  std::vector<NodeInfo> & nodes);

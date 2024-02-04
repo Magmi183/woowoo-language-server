@@ -4,3 +4,6 @@
 [submodule "tree-sitter/tree-sitter-yaml"]
     path = tree-sitter/tree-sitter-yaml
     url = https://github.com/ikatyang/tree-sitter-yaml.git
+[submodule "tree-sitter/tree-sitter-latex"]
+	path = tree-sitter/tree-sitter-latex
+	url = https://github.com/latex-lsp/tree-sitter-latex.git

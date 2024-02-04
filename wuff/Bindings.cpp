@@ -22,7 +22,9 @@ PYBIND11_MODULE(Wuff, m) {
             .def("document_did_change", &WooWooAnalyzer::documentDidChange)
             .def("open_document", &WooWooAnalyzer::openDocument)
             .def("rename_document", &WooWooAnalyzer::renameDocument)
-            .def("diagnose", &WooWooAnalyzer::diagnose);
+            .def("diagnose", &WooWooAnalyzer::diagnose)
+            .def("set_token_types", &WooWooAnalyzer::setTokenTypes)
+            .def("set_token_modifiers", &WooWooAnalyzer::setTokenModifiers);
 
 
     py::class_<Position>(m, "Position")

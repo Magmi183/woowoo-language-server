@@ -8,7 +8,9 @@ from Wuff import (
     CompletionTriggerKind as WuffCompletionTriggerKind,
     CompletionItem as WuffCompletionItem,
     InsertTextFormat as WuffInsertTextFormat,
-    CompletionItemKind as WuffCompletionItemKind
+    CompletionItemKind as WuffCompletionItemKind,
+    Diagnostic as WuffDiagnostic,
+    DiagnosticSeverity as WuffDiagnosticSeverity
 )
 
 from lsprotocol.types import (
@@ -22,7 +24,7 @@ from lsprotocol.types import (
     WorkspaceFolder, DefinitionParams, TEXT_DOCUMENT_FOLDING_RANGE, FoldingRangeParams, WORKSPACE_DID_RENAME_FILES,
     RenameFilesParams, WORKSPACE_WILL_RENAME_FILES, TEXT_DOCUMENT_HOVER, TextDocumentPositionParams, MarkupContent,
     MarkupKind, Hover, SemanticTokens, CompletionList, CompletionParams, CompletionItem, CompletionItemKind,
-    InsertTextFormat
+    InsertTextFormat, Diagnostic, Range, Position, DiagnosticSeverity
 )
 
 
@@ -78,3 +80,29 @@ def wuff_completion_item_to_ls(wuff_item: WuffCompletionItem) -> CompletionItem:
     insert_text = wuff_item.insertText if wuff_item.insertText else ''
 
     return CompletionItem(label=label, kind=kind, insert_text=insert_text, insert_text_format=insert_text_format)
+
+
+def wuff_diagnostic_to_ls(wuff_diagnostic: WuffDiagnostic) -> Diagnostic:
+    # Convert start and end positions
+    start_position = Position(line=wuff_diagnostic.range.start.line, character=wuff_diagnostic.range.start.character)
+    end_position = Position(line=wuff_diagnostic.range.end.line, character=wuff_diagnostic.range.end.character)
+    diagnostic_range = Range(start=start_position, end=end_position)
+
+    # Map the severity (assuming WuffDiagnosticSeverity is similar to DiagnosticSeverity)
+    severity = None
+    if wuff_diagnostic.severity:
+        severity_map = {
+            WuffDiagnosticSeverity.Error: DiagnosticSeverity.Error,
+            WuffDiagnosticSeverity.Warning: DiagnosticSeverity.Warning,
+            WuffDiagnosticSeverity.Information: DiagnosticSeverity.Information,
+            WuffDiagnosticSeverity.Hint: DiagnosticSeverity.Hint
+        }
+        severity = severity_map.get(wuff_diagnostic.severity, None)
+
+    # Construct and return the LSP Diagnostic object
+    return Diagnostic(
+        range=diagnostic_range,
+        message=wuff_diagnostic.message,
+        severity=severity,
+        source=wuff_diagnostic.source
+    )

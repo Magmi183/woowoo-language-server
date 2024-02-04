@@ -5,33 +5,10 @@
 #include "Highlighter.h"
 #include "../utils/utils.h"
 #include <algorithm>
+#include <utility>
 
 
-const std::vector<std::string> Highlighter::tokenTypes = {
-        "namespace", "type", "class", "enum", "interface", "struct", "typeParameter",
-        "parameter", "variable", "variable.other", "storage.type.struct", "property",
-        "enumMember", "event", "function", "method", "macro", "keyword", "modifier",
-        "comment", "string", "number", "regexp", "operator", "decorator"
-};
-
-const std::vector<std::string> Highlighter::tokenModifiers = {
-        "declaration", "definition", "readonly", "static", "deprecated",
-        "abstract", "async", "modification", "documentation", "defaultLibrary"
-};
-
-void Highlighter::initializeMaps() {
-    for (size_t i = 0; i < tokenTypes.size(); ++i) {
-        tokenTypeIndices[tokenTypes[i]] = i;
-    }
-
-    for (size_t i = 0; i < tokenModifiers.size(); ++i) {
-        tokenModifierIndices[tokenModifiers[i]] = i;
-    }
-}
-
-Highlighter::Highlighter(WooWooAnalyzer *analyzer) : analyzer(analyzer) {
-    initializeMaps();
-}
+Highlighter::Highlighter(WooWooAnalyzer *analyzer) : analyzer(analyzer) {}
 
 std::vector<int> Highlighter::semanticTokens(const std::string &docUri) {
     auto documentPath = utils::uriToPath(docUri);
@@ -178,6 +155,23 @@ void Highlighter::addCommentNodes(WooWooDocument *document, std::vector<NodeInfo
 
 }
 
+
+void Highlighter::setTokenTypes(std::vector<std::string> tokenTypesFromClient){
+    this->tokenTypes = std::move(tokenTypesFromClient);
+
+    // build a map for fast access
+    for (size_t i = 0; i < tokenTypes.size(); ++i) {
+        tokenTypeIndices[tokenTypes[i]] = i;
+    }
+}
+void Highlighter::setTokenModifiers (std::vector<std::string> tokenModifiersFromClient){
+    this->tokenModifiers = std::move(tokenModifiersFromClient);
+    
+    // build a map for fast access
+    for (size_t i = 0; i < tokenModifiers.size(); ++i) {
+        tokenModifierIndices[tokenModifiers[i]] = i;
+    }
+}
 
 
 // Inline queries - easier+faster than reading from file

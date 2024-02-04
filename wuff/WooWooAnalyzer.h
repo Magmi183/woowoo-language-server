@@ -54,6 +54,10 @@ public:
     std::vector<CompletionItem> complete(const CompletionParams & params);
     std::vector<Diagnostic> diagnose(const TextDocumentIdentifier & tdi); 
 
+    // LSP support functions
+
+    void setTokenTypes(std::vector<std::string> tokenTypes);
+    void setTokenModifiers (std::vector<std::string> tokenModifiers);
     void documentDidChange(const TextDocumentIdentifier & tdi, std::string &source);
     void renameDocument(const std::string & oldUri, const std::string & newUri);
     void openDocument(const TextDocumentIdentifier & tdi);

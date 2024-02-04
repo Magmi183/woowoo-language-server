@@ -7,8 +7,6 @@ import utils
 from components.completer import Completer
 from components.folder import Folder
 from components.highlighter import Highlighter
-from components.hoverer import Hoverer
-from components.linter import Linter
 from components.navigator import Navigator
 
 from template_manager.template_manager import TemplateManager
@@ -23,7 +21,9 @@ from Wuff import (
     CompletionTriggerKind as WuffCompletionTriggerKind,
     CompletionItem as WuffCompletionItem,
     InsertTextFormat as WuffInsertTextFormat,
-    CompletionItemKind as WuffCompletionItemKind
+    CompletionItemKind as WuffCompletionItemKind,
+    Diagnostic as WuffDiagnostic,
+    DiagnosticSeverity as WuffDiagnosticSeverity
 )
 
 from lsprotocol.types import (
@@ -57,9 +57,7 @@ class WooWooLanguageServer(LanguageServer):
 
         self.template_manager = TemplateManager()
 
-        self.linter = Linter(self)
         self.completer = Completer(self)
-        self.hoverer = Hoverer(self)
         self.highlighter = Highlighter(self)
         self.navigator = Navigator(self)
         self.folder = Folder(self)
@@ -182,6 +180,17 @@ class WooWooLanguageServer(LanguageServer):
             self.template_manager.load_template(utils.get_absolute_path("templates/fit_math.yaml"))
             self.analyzer.set_template(utils.get_absolute_path("templates/fit_math.yaml"))
 
+    def diagnose(self, doc_uri):
+        diagnostics = self.analyzer.diagnose(WuffTextDocumentIdentifier(doc_uri))
+        lsdiagnostics = []
+        for diagnostic in diagnostics:
+            lsdiagnostic = wuff_diagnostic_to_ls(diagnostic)
+            lsdiagnostic.source = self.name
+            lsdiagnostics.append(lsdiagnostic)
+
+        self.publish_diagnostics(doc_uri, lsdiagnostics)
+
+
 
 SERVER = WooWooLanguageServer('woowoo-language-SERVER', 'v0.1')
 
@@ -212,14 +221,15 @@ def did_open(ls: WooWooLanguageServer, params: DidOpenTextDocumentParams):
         document_path = utils.uri_to_path(params.text_document.uri)
         ls.load_document(document_path)
 
-    ls.linter.diagnose(params)
+    ls.analyzer.open_document(WuffTextDocumentIdentifier(params.text_document.uri))
+    ls.diagnose(params.text_document.uri)
 
 
 @SERVER.feature(TEXT_DOCUMENT_DID_SAVE)
 def did_save(ls: WooWooLanguageServer, params: DidSaveTextDocumentParams) -> None:
     logger.debug("[TEXT_DOCUMENT_DID_SAVE] SERVER.feature called")
 
-    ls.linter.diagnose(params)
+    ls.diagnose(params.text_document.uri)
 
 
 @SERVER.feature(WORKSPACE_WILL_RENAME_FILES)
@@ -233,9 +243,10 @@ def will_rename_files(ls: WooWooLanguageServer, params: RenameFilesParams):
 @SERVER.feature(WORKSPACE_DID_RENAME_FILES)
 def did_rename_files(ls: WooWooLanguageServer, params: RenameFilesParams):
     logger.debug("[WORKSPACE_DID_RENAME_FILES] notification received")
-
+    # TODO: Test  (analyzer).
     for file_rename in params.files:
         old_uri, new_uri = file_rename.old_uri, file_rename.new_uri
+        ls.analyzer.rename_document(old_uri, new_uri)
         old_path, new_path = map(utils.uri_to_path, (old_uri, new_uri))
         if str(new_path).endswith(".woo"):
             ls.rename_document(old_path, new_path)
@@ -252,8 +263,8 @@ def did_change(ls: WooWooLanguageServer, params: DidChangeTextDocumentParams):
     doc_uri = params.text_document.uri
     doc = ls.workspace.get_document(params.text_document.uri)
     ls.analyzer.document_did_change(WuffTextDocumentIdentifier(doc_uri), doc.source)
+    ls.diagnose(doc_uri)
     ls.handle_document_change(params)
-    ls.linter.diagnose(params)
 
 
 

@@ -213,4 +213,8 @@ void WooWooAnalyzer::openDocument(const TextDocumentIdentifier &tdi) {
     }
 }
 
+
+void WooWooAnalyzer::setTokenTypes(std::vector<std::string> tokenTypes) { return highlighter->setTokenTypes(tokenTypes); }
+void WooWooAnalyzer::setTokenModifiers (std::vector<std::string> tokenModifiers) { return highlighter->setTokenModifiers(tokenModifiers); }
+
 // - - - - - - - - - - - - - - - - -
