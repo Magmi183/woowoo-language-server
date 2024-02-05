@@ -3,6 +3,7 @@
 #include <vector>
 #include <cstring> // Required for memcpy
 #include <iostream>
+#include <cwctype>
 
 using std::vector;
 using std::iswspace;
@@ -640,7 +641,7 @@ struct Scanner {
         }
 
         // after operator, a lowercase letter must follow
-        if (islower(lexer->lookahead)) {
+        if (lexer->lookahead != EOF && (unsigned char)lexer->lookahead <= UCHAR_MAX && islower((unsigned char)lexer->lookahead)) {
             advance(lexer);
             consumed++;
         } else {
@@ -648,7 +649,7 @@ struct Scanner {
         }
 
         // the rest of the type is a sequence of any-cased letters
-        while (isalpha(lexer->lookahead)) {
+        if (lexer->lookahead != EOF && (unsigned char)lexer->lookahead <= UCHAR_MAX && isalpha((unsigned char)lexer->lookahead)) {
             advance(lexer);
             consumed++;
         }

@@ -4,3 +4,6 @@
 [submodule "tree-sitter/tree-sitter-yaml"]
     path = tree-sitter/tree-sitter-yaml
     url = https://github.com/ikatyang/tree-sitter-yaml.git
+[submodule "wuff/pybind11"]
+	path = wuff/pybind11
+	url = https://github.com/pybind/pybind11.git
