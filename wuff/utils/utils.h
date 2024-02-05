@@ -10,7 +10,7 @@
 namespace utils {
 
     std::string percentDecode(const std::string& encoded);
-    std::string uriToPath(const std::string& uri);
+    std::string uriToPathString(const std::string& uri);
 
 } // namespace utils
 

@@ -29,7 +29,7 @@ void Folder::prepareQueries() {
 
 std::vector<FoldingRange> Folder::foldingRanges(const TextDocumentIdentifier &tdi) {
 
-    auto docPath = utils::uriToPath(tdi.uri);
+    auto docPath = utils::uriToPathString(tdi.uri);
     auto document = analyzer->getDocument(docPath);
     
     std::vector<FoldingRange> ranges;

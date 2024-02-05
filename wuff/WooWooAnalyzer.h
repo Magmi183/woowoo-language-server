@@ -68,7 +68,7 @@ public:
 private:
 
     std::vector<fs::path> findProjectFolders(const fs::path& rootPath);
-    std::optional<fs::path> findProjectFolder(const fs::path& uri);
+    std::optional<fs::path> findProjectFolder(const std::string& uri);
     
     void loadDocument(const fs::path& projectPath, const fs::path& documentPath);
     void handleDocumentChange(const TextDocumentIdentifier & tdi, std::string & source);

@@ -47,7 +47,7 @@ void WooWooAnalyzer::setTemplate(const std::string &templatePath) {
 }
 
 bool WooWooAnalyzer::loadWorkspace(const std::string &workspaceUri) {
-    fs::path rootPath = utils::uriToPath(workspaceUri);
+    fs::path rootPath = utils::uriToPathString(workspaceUri);
     auto projectFolders = findProjectFolders(rootPath);
 
     for (const fs::path &projectFolderPath: projectFolders) {
@@ -95,8 +95,8 @@ std::vector<fs::path> WooWooAnalyzer::findProjectFolders(const fs::path &rootPat
     return projectFolders;
 }
 
-std::optional<fs::path> WooWooAnalyzer::findProjectFolder(const fs::path &uri) {
-    fs::path path = utils::uriToPath(uri);
+std::optional<fs::path> WooWooAnalyzer::findProjectFolder(const std::string &uri) {
+    fs::path path = utils::uriToPathString(uri);
     // Start from the given URI and move up the directory hierarchy
     for (fs::path parent = path.parent_path(); parent!=parent.parent_path(); parent = parent.parent_path()) {
         fs::path woofilePath = parent / "Woofile";
@@ -117,7 +117,7 @@ void WooWooAnalyzer::loadDocument(const fs::path &projectPath, const fs::path &d
 }
 
 WooWooDocument *WooWooAnalyzer::getDocumentByUri(const std::string &docUri) {
-    auto path = utils::uriToPath(docUri);
+    auto path = utils::uriToPathString(docUri);
     return getDocument(path);
 }
 
@@ -127,7 +127,7 @@ WooWooDocument *WooWooAnalyzer::getDocument(const std::string &pathToDoc) {
 
 std::vector<WooWooDocument *> WooWooAnalyzer::getDocumentsFromTheSameProject(WooWooDocument *document) {
     std::vector<WooWooDocument *> documents;
-    auto project = docToProject[document->documentPath];
+    auto project = docToProject[document->documentPath.generic_string()];
     if (projects.find(project) != projects.end()) {
         std::unordered_map<std::string, WooWooDocument *> &pathDocMap = projects[project];
 
@@ -141,20 +141,20 @@ std::vector<WooWooDocument *> WooWooAnalyzer::getDocumentsFromTheSameProject(Woo
 }
 
 void WooWooAnalyzer::handleDocumentChange(const TextDocumentIdentifier &tdi, std::string &source) {
-    auto docPath = utils::uriToPath(tdi.uri);
+    auto docPath = utils::uriToPathString(tdi.uri);
     auto document = getDocument(docPath);
     document->updateSource(source);
 }
 
 void WooWooAnalyzer::renameDocument(const std::string &oldUri, const std::string &newUri) {
 
-    auto oldPath = utils::uriToPath(oldUri);
-    auto newPath = utils::uriToPath(newUri);
+    auto oldPath = utils::uriToPathString(oldUri);
+    auto newPath = utils::uriToPathString(newUri);
 
     if (endsWith(newUri, ".woo")) {
         std::optional<fs::path> newProjectFolder = findProjectFolder(newUri);
         std::string oldProjectFolder = docToProject[oldPath];
-        std::string newProjectFolderPathString = newProjectFolder.has_value() ? newProjectFolder.value() : "";
+        std::string newProjectFolderPathString = newProjectFolder.has_value() ? newProjectFolder.value().generic_string() : "";
 
         docToProject[newPath] = newProjectFolderPathString;
         docToProject.erase(oldPath);
@@ -210,11 +210,11 @@ std::vector<Diagnostic> WooWooAnalyzer::diagnose(const TextDocumentIdentifier &t
 }
 
 void WooWooAnalyzer::openDocument(const TextDocumentIdentifier &tdi) {
-    auto docPath = utils::uriToPath(tdi.uri);
+    auto docPath = utils::uriToPathString(tdi.uri);
     if (!docToProject.contains(docPath)) {
         // unknown document opened
         std::optional<fs::path> projectFolder = findProjectFolder(tdi.uri);
-        std::string projectFolderPathString = projectFolder.has_value() ? projectFolder.value() : "";
+        std::string projectFolderPathString = projectFolder.has_value() ? projectFolder.value().generic_string() : "";
         loadDocument(projectFolderPathString, docPath);
     }
 }

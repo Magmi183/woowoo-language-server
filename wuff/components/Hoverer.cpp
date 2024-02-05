@@ -7,7 +7,7 @@
 #include "../utils/utils.h"
 
 std::string Hoverer::hover(const std::string &docUri, uint32_t line, uint32_t character) {
-    auto docPath = utils::uriToPath(docUri);
+    auto docPath = utils::uriToPathString(docUri);
     WooWooDocument * document = analyzer->getDocument(docPath);
     auto pos = document->utfMappings->utf16ToUtf8(line, character);
     line = pos.first;

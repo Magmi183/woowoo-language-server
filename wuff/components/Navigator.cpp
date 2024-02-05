@@ -11,7 +11,7 @@ Navigator::Navigator(WooWooAnalyzer *analyzer) : analyzer(analyzer) {
 
 Location Navigator::goToDefinition(DefinitionParams params) {
 
-    auto docPath = utils::uriToPath(params.textDocument.uri);
+    auto docPath = utils::uriToPathString(params.textDocument.uri);
     // TODO: Finish this after completer is finished.
     return Location();
 }

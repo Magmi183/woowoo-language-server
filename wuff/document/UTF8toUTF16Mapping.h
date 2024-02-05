@@ -6,7 +6,7 @@
 #define WUFF_UTF8TOUTF16MAPPING_H
 
 
-
+#include <cstdint>
 #include <iostream>
 #include <sstream>
 #include <string>

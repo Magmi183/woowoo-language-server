@@ -24,7 +24,7 @@ namespace utils {
         return decoded.str();
     }
 
-    std::string uriToPath(const std::string& uri) {
+    std::string uriToPathString(const std::string& uri) {
         // Assuming the URI starts with 'file://'
         if (uri.substr(0, 7) != "file://") {
             throw std::invalid_argument("URI does not start with 'file://'");

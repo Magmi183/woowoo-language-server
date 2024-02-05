@@ -30,7 +30,7 @@ void Highlighter::prepareQueries() {
 }
 
 std::vector<int> Highlighter::semanticTokens(const std::string &docUri) {
-    auto documentPath = utils::uriToPath(docUri);
+    auto documentPath = utils::uriToPathString(docUri);
     WooWooDocument *document = analyzer->getDocument(documentPath);
 
     std::vector<int> data;

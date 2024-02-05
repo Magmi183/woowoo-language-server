@@ -34,7 +34,7 @@ std::vector<CompletionItem> Completer::complete(const CompletionParams &params) 
 
 void Completer::completeInclude(std::vector<CompletionItem> &completionItems, const CompletionParams &params) {
 
-    auto docPath = utils::uriToPath(params.textDocument.uri);
+    auto docPath = utils::uriToPathString(params.textDocument.uri);
     auto document = analyzer->getDocument(docPath);
 
     TSQueryCursor *cursor = ts_query_cursor_new();
@@ -84,7 +84,7 @@ void Completer::completeInclude(std::vector<CompletionItem> &completionItems, co
 
 void Completer::completeInnerEnvs(std::vector<CompletionItem> &completionItems, const CompletionParams &params) {
 
-    auto docPath = utils::uriToPath(params.textDocument.uri);
+    auto docPath = utils::uriToPathString(params.textDocument.uri);
     auto document = analyzer->getDocument(docPath);
 
     TSQueryCursor *cursor = ts_query_cursor_new();
