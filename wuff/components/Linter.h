@@ -19,6 +19,7 @@ private:
     WooWooAnalyzer *analyzer;
     void diagnoseErrors(WooWooDocument * doc, std::vector<Diagnostic> & d);
     void diagnoseMissingNodes(WooWooDocument * doc, std::vector<Diagnostic> & d);
+    void diagnoseMetaBlocks(WooWooDocument * doc, std::vector<Diagnostic> & d);
     void prepareQueries();
     
     TSQuery * errorNodeQuery;

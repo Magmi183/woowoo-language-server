@@ -155,12 +155,12 @@ void WooWooAnalyzer::renameDocument(const std::string &oldUri, const std::string
         std::optional<fs::path> newProjectFolder = findProjectFolder(newUri);
         std::string oldProjectFolder = docToProject[oldPath];
         std::string newProjectFolderPathString = newProjectFolder.has_value() ? newProjectFolder.value().generic_string() : "";
-
+        
         docToProject[newPath] = newProjectFolderPathString;
         docToProject.erase(oldPath);
         projects[newProjectFolderPathString][newPath] = projects[oldProjectFolder][oldPath];
         projects[oldProjectFolder].erase(oldPath);
-
+        projects[newProjectFolderPathString][newPath]->documentPath = fs::path(newPath);
 
     } else {
         // the file is no longer a WooWoo document

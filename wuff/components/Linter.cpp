@@ -16,6 +16,8 @@ std::vector<Diagnostic> Linter::diagnose(const TextDocumentIdentifier &tdi) {
     diagnoseErrors(doc, diagnostics);;
     diagnoseMissingNodes(doc, diagnostics);
 
+    diagnoseMetaBlocks(doc, diagnostics);
+    
     return diagnostics;
 }
 

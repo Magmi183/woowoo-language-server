@@ -18,6 +18,8 @@ struct Range {
 struct Location {
     std::string uri;
     Range range;
+
+    Location(std::string uri, Range range) : uri(uri), range(range){}
 };
 
 struct TextDocumentIdentifier {
