@@ -2,8 +2,8 @@
 // Created by Michal Janecek on 27.01.2024.
 //
 
-#ifndef WUFF_TEMPLATE_H
-#define WUFF_TEMPLATE_H
+#ifndef WUFF_DIALECT_H
+#define WUFF_DIALECT_H
 
 
 #include <yaml-cpp/yaml.h>
@@ -17,7 +17,7 @@
 #include "InnerEnvironment.h"
 #include "Shorthand.h"
 
-class Template {
+class Dialect {
 public:
     std::string name;
     std::string version_code;
@@ -40,4 +40,4 @@ public:
 
 
 
-#endif //WUFF_TEMPLATE_H
+#endif //WUFF_DIALECT_H

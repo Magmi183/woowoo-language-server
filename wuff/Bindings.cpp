@@ -13,7 +13,7 @@ namespace py = pybind11;
 PYBIND11_MODULE(Wuff, m) {
     py::class_<WooWooAnalyzer>(m, "WooWooAnalyzer")
             .def(py::init<>())
-            .def("set_template", &WooWooAnalyzer::setTemplate)
+            .def("set_dialect", &WooWooAnalyzer::setDialect)
             .def("load_workspace", &WooWooAnalyzer::loadWorkspace)
             .def("hover", &WooWooAnalyzer::hover)
             .def("semantic_tokens", &WooWooAnalyzer::semanticTokens)

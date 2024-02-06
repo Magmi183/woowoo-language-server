@@ -22,7 +22,9 @@ from Wuff import (
     InsertTextFormat as WuffInsertTextFormat,
     CompletionItemKind as WuffCompletionItemKind,
     Diagnostic as WuffDiagnostic,
-    DiagnosticSeverity as WuffDiagnosticSeverity
+    DiagnosticSeverity as WuffDiagnosticSeverity,
+    DefinitionParams as WuffDefinitionParams,
+    TextDocumentPositionParams as WuffTextDocumentPositionParams
 )
 
 from lsprotocol.types import (
@@ -75,7 +77,6 @@ class WooWooLanguageServer(LanguageServer):
         self.analyzer.load_workspace(unquote(workspace.uri))
         root_path = utils.uri_to_path(workspace.uri)
         project_folders = self.find_project_folders(root_path)
-        
 
         for project_folder in project_folders:
             woo_files = project_folder.rglob('*.woo')
@@ -86,9 +87,6 @@ class WooWooLanguageServer(LanguageServer):
         for woo_file in root_path.glob('*.woo'):
             if woo_file not in self.doc_to_project:
                 self.load_document(woo_file, None)
-
-
-        
 
     def find_project_folders(self, root_path: Path):
         # Find all folders containing a Woofile
@@ -171,13 +169,13 @@ class WooWooLanguageServer(LanguageServer):
 
         end_time = time.time()
         parse_duration = end_time - start_time
-        #logger.debug(f"Parsing of {params.text_document.uri} took {parse_duration} seconds.")
+        # logger.debug(f"Parsing of {params.text_document.uri} took {parse_duration} seconds.")
 
     def set_template(self, template_file_path):
         # TODO: better fallback mechanisms and error handling + handle default template better
         if template_file_path != "":
             self.template_manager.load_template(template_file_path)
-            self.analyzer.set_template(template_file_path)
+            self.analyzer.set_dialect(template_file_path)
         else:
             import utils
             self.template_manager.load_template(utils.get_absolute_path("templates/fit_math.yaml"))
@@ -193,6 +191,14 @@ class WooWooLanguageServer(LanguageServer):
             lsdiagnostics.append(lsdiagnostic)
 
         self.publish_diagnostics(doc_uri, lsdiagnostics)
+
+    def go_to_definition(self, params: DefinitionParams):
+
+        wuff_params = WuffDefinitionParams(WuffTextDocumentIdentifier(params.text_document.uri),
+                                           WuffPosition(params.position.line, params.position.character))
+
+        return wuff_location_to_ls(self.analyzer.go_to_definition(wuff_params))
+
 
 
 
@@ -258,7 +264,6 @@ def did_rename_files(ls: WooWooLanguageServer, params: RenameFilesParams):
             ls.delete_document(old_path)
 
 
-
 # TODO: Handle file deletion!
 
 @SERVER.feature(TEXT_DOCUMENT_DID_CHANGE)
@@ -271,11 +276,10 @@ def did_change(ls: WooWooLanguageServer, params: DidChangeTextDocumentParams):
     ls.handle_document_change(params)
 
 
-
 @SERVER.feature(TEXT_DOCUMENT_COMPLETION, CompletionOptions(trigger_characters=Completer.trigger_characters))
 def completions(ls: WooWooLanguageServer, params: LSCompletionParams):
     logger.debug("[TEXT_DOCUMENT_COMPLETION] SERVER.feature called")
-    #return ls.completer.complete(params)
+    # return ls.completer.complete(params)
     params = completion_params_ls_to_wuff(params)
     completion_items_result = ls.analyzer.complete(params)
     items = [wuff_completion_item_to_ls(item) for item in completion_items_result]
@@ -304,7 +308,7 @@ def semantic_tokens(ls: WooWooLanguageServer, params: SemanticTokensParams):
 def definition(ls: WooWooLanguageServer, params: DefinitionParams):
     logger.debug("[TEXT_DOCUMENT_DEFINITION] SERVER.feature called")
 
-    return ls.navigator.go_to_definition(params)
+    return ls.go_to_definition(params)
 
 
 @SERVER.feature(TEXT_DOCUMENT_FOLDING_RANGE)
@@ -314,7 +318,6 @@ def folding_range(ls: WooWooLanguageServer, params: FoldingRangeParams):
     folding_ranges = ls.analyzer.folding_ranges(WuffTextDocumentIdentifier(unquote(params.text_document.uri)))
     data = [wuff_folding_range_to_ls(item) for item in folding_ranges]
     return data
-
 
 
 def start() -> None:

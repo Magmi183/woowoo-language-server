@@ -2,7 +2,7 @@ name: "FIT Math"
 version_code: 1
 version_name: "1.0.0"
 description: |-
-  This template is used for writing almost all of the math courses on FIT CTU.
+  This dialect is used for writing almost all of the math courses on FIT CTU.
   Blocks are rendered as paragraphs.
   Indented blocks are unnumbered equations.
   It was developed by Tomas Kalvoda.

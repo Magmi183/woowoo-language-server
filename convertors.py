@@ -10,7 +10,10 @@ from Wuff import (
     CompletionItemKind as WuffCompletionItemKind,
     Diagnostic as WuffDiagnostic,
     DiagnosticSeverity as WuffDiagnosticSeverity,
-    FoldingRange as WuffFoldingRange
+    FoldingRange as WuffFoldingRange,
+    Location as WuffLocation,
+    Position as WuffPosition,
+    Range as WuffRange
 )
 
 from lsprotocol.types import (
@@ -24,7 +27,7 @@ from lsprotocol.types import (
     WorkspaceFolder, DefinitionParams, TEXT_DOCUMENT_FOLDING_RANGE, FoldingRangeParams, WORKSPACE_DID_RENAME_FILES,
     RenameFilesParams, WORKSPACE_WILL_RENAME_FILES, TEXT_DOCUMENT_HOVER, TextDocumentPositionParams, MarkupContent,
     MarkupKind, Hover, SemanticTokens, CompletionList, CompletionParams, CompletionItem, CompletionItemKind,
-    InsertTextFormat, Diagnostic, Range, Position, DiagnosticSeverity, FoldingRange, FoldingRangeKind
+    InsertTextFormat, Diagnostic, Range, Position, DiagnosticSeverity, FoldingRange, FoldingRangeKind, Location
 )
 
 
@@ -112,3 +115,23 @@ def wuff_folding_range_to_ls(wuff_folding_range: WuffFoldingRange) -> FoldingRan
                         end_line=wuff_folding_range.end_line,
                         end_character=wuff_folding_range.end_character,
                         kind=FoldingRangeKind(wuff_folding_range.kind))
+
+
+def wuff_location_to_ls(wuff_location: WuffLocation):
+    if wuff_location.uri == "":
+        return None
+    
+    return Location(
+        uri=wuff_location.uri,
+        range=wuff_range_to_ls(wuff_location.range)
+    )
+
+
+def wuff_position_to_ls(wuff_position: WuffPosition):
+    return Position(line=wuff_position.line,
+                    character=wuff_position.character)
+
+
+def wuff_range_to_ls(wuff_range: WuffRange):
+    return Range(start=wuff_position_to_ls(wuff_range.start),
+                 end=wuff_position_to_ls(wuff_range.end))

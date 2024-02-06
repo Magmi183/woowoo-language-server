@@ -48,7 +48,7 @@ std::string Hoverer::hover(const std::string &docUri, uint32_t line, uint32_t ch
     ts_query_delete(query);
 
     
-    return analyzer->templateManager->getDescription(nodeType, nodeText);
+    return analyzer->dialectManager->getDescription(nodeType, nodeText);
 }
 
 Hoverer::Hoverer(WooWooAnalyzer* analyzer) : analyzer(analyzer) {}

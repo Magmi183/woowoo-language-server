@@ -15,10 +15,16 @@ class Navigator {
 public:
     Navigator(WooWooAnalyzer * analyzer);
 
-    Location goToDefinition(DefinitionParams);
+    Location goToDefinition(const DefinitionParams & params);
 
 private:
     WooWooAnalyzer * analyzer;
+
+    void prepareQueries();
+    static const std::string goToDefinitionQueryString;
+    TSQuery * goToDefinitionQuery;
+
+    Location navigateToFile(const DefinitionParams &params, const std::string & relativeFilePath);
     
 
 };

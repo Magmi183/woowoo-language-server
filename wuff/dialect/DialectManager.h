@@ -2,27 +2,27 @@
 // Created by Michal Janecek on 27.01.2024.
 //
 
-#ifndef WUFF_TEMPLATEMANAGER_H
-#define WUFF_TEMPLATEMANAGER_H
+#ifndef WUFF_DIALECTMANAGER_H
+#define WUFF_DIALECTMANAGER_H
 
 
 #include <string>
 #include <memory>
-#include "Template.h"
+#include "Dialect.h"
 
-class TemplateManager {
+class DialectManager {
     
 private:
     template<typename T>
     std::string scanForDescriptionByName(const std::vector<std::shared_ptr<T>>& describables, const std::string& name);
     
 public:
-    std::unique_ptr<Template> activeTemplate;
+    std::unique_ptr<Dialect> activeDialect;
 
-    TemplateManager(const std::string& templateFilePath = "");
+    DialectManager(const std::string& dialectFilePath = "");
 
-    void loadTemplate(const std::string& templateFilePath);
-    void processTemplate(); 
+    void loadDialect(const std::string& dialectFilePath);
+    void processDialect(); 
     
     std::string getDescription(const std::string & type, const std::string & name);
     
@@ -30,4 +30,4 @@ public:
 
 
 
-#endif //WUFF_TEMPLATEMANAGER_H
+#endif //WUFF_DIALECTMANAGER_H
