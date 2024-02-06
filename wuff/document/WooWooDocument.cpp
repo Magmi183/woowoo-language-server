@@ -15,7 +15,7 @@ WooWooDocument::WooWooDocument(fs::path documentPath1, Parser *parser1) {
 }
 
 void WooWooDocument::updateSource() {
-    std::ifstream file(documentPath, std::ios::in | std::ios::binary);
+    std::ifstream file(documentPath, std::ios::in);
     if (file) {
         std::stringstream buffer;
         buffer << file.rdbuf();
@@ -43,7 +43,7 @@ void WooWooDocument::updateComments() {
 
     std::istringstream stream(source);
     std::string line;
-    int lineIndex = 0;
+    uint32_t lineIndex = 0;
     while (std::getline(stream, line)) {
         if (!line.empty() && line[0] == '%')
             commentLines.emplace_back(new CommentLine(lineIndex, line.size()));

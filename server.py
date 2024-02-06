@@ -179,7 +179,7 @@ class WooWooLanguageServer(LanguageServer):
         else:
             import utils
             self.template_manager.load_template(utils.get_absolute_path("templates/fit_math.yaml"))
-            self.analyzer.set_template(utils.get_absolute_path("templates/fit_math.yaml"))
+            self.analyzer.set_dialect(utils.get_absolute_path("templates/fit_math.yaml"))
 
     def diagnose(self, doc_uri):
         doc_uri = unquote(doc_uri)

@@ -112,8 +112,8 @@ std::optional<fs::path> WooWooAnalyzer::findProjectFolder(const std::string &uri
 }
 
 void WooWooAnalyzer::loadDocument(const fs::path &projectPath, const fs::path &documentPath) {
-    projects[projectPath.string()][documentPath.string()] = new WooWooDocument(documentPath, parser);
-    docToProject[documentPath.string()] = projectPath.string();
+    projects[projectPath.generic_string()][documentPath.generic_string()] = new WooWooDocument(documentPath, parser);
+    docToProject[documentPath.generic_string()] = projectPath.generic_string();
 }
 
 WooWooDocument *WooWooAnalyzer::getDocumentByUri(const std::string &docUri) {

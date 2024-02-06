@@ -31,7 +31,7 @@ void Linter::diagnoseErrors(WooWooDocument *doc, std::vector<Diagnostic> &diagno
     while (ts_query_cursor_next_match(errorCursor, &match)) {
         for (unsigned i = 0; i < match.capture_count; ++i) {
             TSNode error_node = match.captures[i].node;
-
+            auto text = doc->getNodeText(error_node);
             // Construct the range
             TSPoint start_point = ts_node_start_point(error_node);
             TSPoint end_point = ts_node_end_point(error_node);
@@ -78,6 +78,11 @@ void Linter::diagnoseMissingNodes(WooWooDocument *doc, std::vector<Diagnostic> &
     // Start the tree traversal from the root node
     traverseTree(ts_tree_root_node(doc->tree));
 }
+
+void Linter::diagnoseMetaBlocks(WooWooDocument *doc, std::vector<Diagnostic> &d) {
+
+}
+
 
 
 void Linter::prepareQueries() {
