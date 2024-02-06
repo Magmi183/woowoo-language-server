@@ -176,7 +176,7 @@ class WooWooLanguageServer(LanguageServer):
         # TODO: better fallback mechanisms and error handling + handle default template better
         if template_file_path != "":
             self.template_manager.load_template(template_file_path)
-            self.analyzer.set_template(template_file_path)
+            self.analyzer.set_dialect(template_file_path)
         else:
             import utils
             self.template_manager.load_template(utils.get_absolute_path("templates/fit_math.yaml"))

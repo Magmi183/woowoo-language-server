@@ -8,7 +8,7 @@
 #include <utility>
 
 #include "WooWooAnalyzer.h"
-#include "template/TemplateManager.h"
+#include "dialect/DialectManager.h"
 #include "document/WooWooDocument.h"
 
 #include "components/Hoverer.h"
@@ -42,8 +42,8 @@ WooWooAnalyzer::~WooWooAnalyzer() {
     }
 }
 
-void WooWooAnalyzer::setTemplate(const std::string &templatePath) {
-    templateManager = new TemplateManager(templatePath);
+void WooWooAnalyzer::setDialect(const std::string &dialectPath) {
+    dialectManager = new DialectManager(dialectPath);
 }
 
 bool WooWooAnalyzer::loadWorkspace(const std::string &workspaceUri) {

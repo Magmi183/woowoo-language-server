@@ -2,9 +2,9 @@
 // Created by Michal Janecek on 27.01.2024.
 //
 
-#include "Template.h"
+#include "Dialect.h"
 
-void Template::deserialize(const YAML::Node& node) {
+void Dialect::deserialize(const YAML::Node& node) {
     if (!node["name"] || !node["version_code"] || !node["version_name"] || !node["description"] || !node["implicit_outer_environment"]) {
         throw std::runtime_error("Template YAML node is missing one or more required fields.");
     }

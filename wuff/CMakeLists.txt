@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(Wuff)
 set(CMAKE_CXX_STANDARD 20)
-find_package(Python COMPONENTS Interpreter Development)
+set(PYTHON_EXECUTABLE python3.12)
 
 # - - - YAML-CPP
 include(FetchContent)
@@ -54,7 +54,7 @@ FetchContent_Declare(
 
 # Make pybind11 available for use
 FetchContent_MakeAvailable(pybind11)
-
+set (PYBIND11_PYTHON_VERSION "3.9")
 pybind11_add_module(${PROJECT_NAME}
         ${TREE_SITTER_SRC} # Add Tree-sitter lib.c source
         ${WOOWOO_PARSER_SRC}
@@ -67,16 +67,16 @@ pybind11_add_module(${PROJECT_NAME}
         document/MetaContext.cpp
         document/CommentLine.cpp
         document/UTF8toUTF16Mapping.cpp
-        template/TemplateManager.cpp
-        template/DocumentPart.cpp
-        template/Template.cpp
-        template/MetaBlock.cpp
-        template/Field.cpp
-        template/Shorthand.cpp
-        template/Reference.cpp
-        template/InnerEnvironment.cpp
-        template/OuterEnvironment.cpp
-        template/Wobject.cpp
+        dialect/DialectManager.cpp
+        dialect/DocumentPart.cpp
+        dialect/Dialect.cpp
+        dialect/MetaBlock.cpp
+        dialect/Field.cpp
+        dialect/Shorthand.cpp
+        dialect/Reference.cpp
+        dialect/InnerEnvironment.cpp
+        dialect/OuterEnvironment.cpp
+        dialect/Wobject.cpp
         components/Hoverer.cpp
         components/Highlighter.cpp
         components/Navigator.cpp
@@ -104,16 +104,16 @@ add_executable(WooWooTest
         document/MetaContext.cpp
         document/CommentLine.cpp
         document/UTF8toUTF16Mapping.cpp
-        template/TemplateManager.cpp
-        template/DocumentPart.cpp
-        template/Template.cpp
-        template/MetaBlock.cpp
-        template/Field.cpp
-        template/Shorthand.cpp
-        template/Reference.cpp
-        template/InnerEnvironment.cpp
-        template/OuterEnvironment.cpp
-        template/Wobject.cpp
+        dialect/DialectManager.cpp
+        dialect/DocumentPart.cpp
+        dialect/Dialect.cpp
+        dialect/MetaBlock.cpp
+        dialect/Field.cpp
+        dialect/Shorthand.cpp
+        dialect/Reference.cpp
+        dialect/InnerEnvironment.cpp
+        dialect/OuterEnvironment.cpp
+        dialect/Wobject.cpp
         components/Hoverer.cpp
         components/Highlighter.cpp
         components/Navigator.cpp
