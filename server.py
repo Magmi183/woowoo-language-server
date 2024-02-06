@@ -9,6 +9,7 @@ from components.navigator import Navigator
 
 from template_manager.template_manager import TemplateManager
 from constants import *
+from urllib.parse import urlparse, unquote
 
 from Wuff import (
     WooWooAnalyzer,
@@ -71,7 +72,7 @@ class WooWooLanguageServer(LanguageServer):
 
     def load_workspace(self, workspace: WorkspaceFolder):
 
-        self.analyzer.load_workspace(workspace.uri)
+        self.analyzer.load_workspace(unquote(workspace.uri))
         root_path = utils.uri_to_path(workspace.uri)
         project_folders = self.find_project_folders(root_path)
         
@@ -183,6 +184,7 @@ class WooWooLanguageServer(LanguageServer):
             self.analyzer.set_template(utils.get_absolute_path("templates/fit_math.yaml"))
 
     def diagnose(self, doc_uri):
+        doc_uri = unquote(doc_uri)
         diagnostics = self.analyzer.diagnose(WuffTextDocumentIdentifier(doc_uri))
         lsdiagnostics = []
         for diagnostic in diagnostics:
@@ -223,15 +225,15 @@ def did_open(ls: WooWooLanguageServer, params: DidOpenTextDocumentParams):
         document_path = utils.uri_to_path(params.text_document.uri)
         ls.load_document(document_path)
 
-    ls.analyzer.open_document(WuffTextDocumentIdentifier(params.text_document.uri))
-    ls.diagnose(params.text_document.uri)
+    ls.analyzer.open_document(WuffTextDocumentIdentifier(unquote(params.text_document.uri)))
+    ls.diagnose(unquote(params.text_document.uri))
 
 
 @SERVER.feature(TEXT_DOCUMENT_DID_SAVE)
 def did_save(ls: WooWooLanguageServer, params: DidSaveTextDocumentParams) -> None:
     logger.debug("[TEXT_DOCUMENT_DID_SAVE] SERVER.feature called")
 
-    ls.diagnose(params.text_document.uri)
+    ls.diagnose(unquote(params.text_document.uri))
 
 
 @SERVER.feature(WORKSPACE_WILL_RENAME_FILES)
@@ -262,8 +264,8 @@ def did_rename_files(ls: WooWooLanguageServer, params: RenameFilesParams):
 @SERVER.feature(TEXT_DOCUMENT_DID_CHANGE)
 def did_change(ls: WooWooLanguageServer, params: DidChangeTextDocumentParams):
     logger.debug("[TEXT_DOCUMENT_DID_CHANGE] SERVER.feature called")
-    doc_uri = params.text_document.uri
-    doc = ls.workspace.get_document(params.text_document.uri)
+    doc_uri = unquote(params.text_document.uri)
+    doc = ls.workspace.get_document(doc_uri)
     ls.analyzer.document_did_change(WuffTextDocumentIdentifier(doc_uri), doc.source)
     ls.diagnose(doc_uri)
     ls.handle_document_change(params)
@@ -283,7 +285,8 @@ def completions(ls: WooWooLanguageServer, params: LSCompletionParams):
 @SERVER.feature(TEXT_DOCUMENT_HOVER)
 def on_hover(ls: WooWooLanguageServer, params: TextDocumentPositionParams):
     logger.debug("[TEXT_DOCUMENT_HOVER] SERVER.feature called")
-    result = ls.analyzer.hover(params.text_document.uri, params.position.line, params.position.character)
+    doc_uri = unquote(params.text_document.uri)
+    result = ls.analyzer.hover(doc_uri, params.position.line, params.position.character)
     content = MarkupContent(MarkupKind.Markdown, value=result)
     return Hover(contents=content)
 
@@ -293,7 +296,7 @@ def on_hover(ls: WooWooLanguageServer, params: TextDocumentPositionParams):
                                      token_modifiers=token_modifiers))
 def semantic_tokens(ls: WooWooLanguageServer, params: SemanticTokensParams):
     logger.debug("[TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL] SERVER.feature called")
-    data = ls.analyzer.semantic_tokens(params.text_document.uri)
+    data = ls.analyzer.semantic_tokens(unquote(params.text_document.uri))
     return SemanticTokens(data=data)
 
 
@@ -308,7 +311,7 @@ def definition(ls: WooWooLanguageServer, params: DefinitionParams):
 def folding_range(ls: WooWooLanguageServer, params: FoldingRangeParams):
     logger.debug("[TEXT_DOCUMENT_FOLDING_RANGE] SERVER.feature called")
 
-    folding_ranges = ls.analyzer.folding_ranges(WuffTextDocumentIdentifier(params.text_document.uri))
+    folding_ranges = ls.analyzer.folding_ranges(WuffTextDocumentIdentifier(unquote(params.text_document.uri)))
     data = [wuff_folding_range_to_ls(item) for item in folding_ranges]
     return data
 
