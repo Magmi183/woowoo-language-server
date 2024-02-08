@@ -21,13 +21,13 @@ private:
     void completeInclude(std::vector<CompletionItem> & completionItems, const CompletionParams & params);
     void completeInnerEnvs(std::vector<CompletionItem> & completionItems, const CompletionParams & params);
     void completeShorthand(std::vector<CompletionItem> & completionItems, const CompletionParams & params);
-
+    
     void prepareQueries();
     static const std::string includeCollisionQueryString;
     static const std::string shortInnerEnvironmentQueryString;
     TSQuery * includeCollisionQuery;
     TSQuery * shortInnerEnvironmentQuery;
-    //CompletionParams createCompletionParamsFromPyObject(const py::object & params);
+    
 };
 
 

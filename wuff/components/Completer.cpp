@@ -19,6 +19,9 @@ std::vector<CompletionItem> Completer::complete(const CompletionParams &params) 
             completeInclude(completionItems, params);
         } else if (params.context->triggerCharacter == ":") {
             completeInnerEnvs(completionItems, params);
+        } else if(params.context->triggerCharacter == "#" ||
+                  params.context->triggerCharacter == "@") {
+            completeShorthand(completionItems, params);
         }
     }
 
@@ -80,6 +83,13 @@ void Completer::completeInclude(std::vector<CompletionItem> &completionItems, co
     ts_query_cursor_delete(cursor);
 }
 
+/**
+* Autocomplete the bodies of inner environments. Behaviour entirely given by the dialect.
+* For example, suggest possible "reference" values based on "labels" used in the document.
+* .reference:<autocomplete>
+ * \param completionItems 
+ * \param params 
+ */
 void Completer::completeInnerEnvs(std::vector<CompletionItem> &completionItems, const CompletionParams &params) {
     auto docPath = utils::uriToPathString(params.textDocument.uri);
     auto document = analyzer->getDocument(docPath);
@@ -108,6 +118,23 @@ void Completer::completeInnerEnvs(std::vector<CompletionItem> &completionItems, 
 }
 
 void Completer::completeShorthand(std::vector<CompletionItem> &completionItems, const CompletionParams &params) {
+    // NOTE: As of now, suggesting completion everytime, even out of context.
+
+    std::string shorthandName;
+    if(params.context->triggerCharacter == "#") shorthandName = "#";
+    if(params.context->triggerCharacter == "@") shorthandName = "@";
+    if(shorthandName.empty()) return;
+    
+    auto docPath = utils::uriToPathString(params.textDocument.uri);
+    auto document = analyzer->getDocument(docPath);
+    
+    for (auto doc: analyzer->getDocumentsFromTheSameProject(document)) {
+        for (auto referencable: doc->getReferencablesBy(shorthandName)) {
+            CompletionItem item(doc->getMetaNodeText(referencable.first, referencable.second));
+            completionItems.emplace_back(item);
+        }
+    }
+    
 }
 
 

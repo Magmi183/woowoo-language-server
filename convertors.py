@@ -61,7 +61,6 @@ def completion_params_ls_to_wuff(ls_params: CompletionParams):
 
 def wuff_completion_item_to_ls(wuff_item: WuffCompletionItem) -> CompletionItem:
     label = wuff_item.label
-
     kind = CompletionItemKind.Text
     if wuff_item.kind:
 

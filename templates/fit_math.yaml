@@ -253,6 +253,8 @@ inner_environments:
     meta_block:
       optional_fields:
         - name: ref
+          references:
+            - meta_key: label
         - name: link
     references:
       - meta_key: label

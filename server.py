@@ -4,7 +4,6 @@ from pathlib import Path
 from pygls.server import LanguageServer
 
 import utils
-from components.completer import Completer
 from components.navigator import Navigator
 
 from template_manager.template_manager import TemplateManager
@@ -58,7 +57,6 @@ class WooWooLanguageServer(LanguageServer):
 
         self.template_manager = TemplateManager()
 
-        self.completer = Completer(self)
         self.navigator = Navigator(self)
 
         self.docs = {}
@@ -276,10 +274,9 @@ def did_change(ls: WooWooLanguageServer, params: DidChangeTextDocumentParams):
     ls.handle_document_change(params)
 
 
-@SERVER.feature(TEXT_DOCUMENT_COMPLETION, CompletionOptions(trigger_characters=Completer.trigger_characters))
+@SERVER.feature(TEXT_DOCUMENT_COMPLETION, CompletionOptions(trigger_characters=trigger_characters))
 def completions(ls: WooWooLanguageServer, params: LSCompletionParams):
     logger.debug("[TEXT_DOCUMENT_COMPLETION] SERVER.feature called")
-    # return ls.completer.complete(params)
     params = completion_params_ls_to_wuff(params)
     completion_items_result = ls.analyzer.complete(params)
     items = [wuff_completion_item_to_ls(item) for item in completion_items_result]

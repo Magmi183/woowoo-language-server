@@ -37,3 +37,5 @@ token_modifiers = [
     'documentation',
     'defaultLibrary'
 ]
+
+trigger_characters = ['.', ':', '#', '@']

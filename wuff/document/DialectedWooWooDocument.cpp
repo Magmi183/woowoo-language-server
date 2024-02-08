@@ -19,6 +19,7 @@ DialectedWooWooDocument::~DialectedWooWooDocument() {
 }
 
 void DialectedWooWooDocument::index() {
+    referencablesByNode.clear();
     for (const std::string &typeName: dialectManager->getReferencingTypeNames()) {
         for (const Reference &ref: dialectManager->getPossibleReferencesByTypeName(typeName)) {
             for (MetaContext *mx: metaBlocks) {

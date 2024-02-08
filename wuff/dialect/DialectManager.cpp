@@ -98,16 +98,34 @@ std::vector<std::string> DialectManager::getReferencingTypeNames() {
             names.push_back(ie->name);
         }
     }
+
+    if (!activeDialect->shorthand_at->references.empty()) {
+        names.push_back("@");
+    }
+
+    if (!activeDialect->shorthand_hash->references.empty()) {
+        names.push_back("#");
+    }
+
     // TODO: Also add names of the metablock fields.
     return names;
 }
 
-std::vector<Reference> DialectManager::getPossibleReferencesByTypeName(const std::string& name) {
+std::vector<Reference> DialectManager::getPossibleReferencesByTypeName(const std::string &name) {
     for (const std::shared_ptr<InnerEnvironment> &ie: activeDialect->inner_environments) {
         if (ie->name == name) {
             return ie->references;
         }
     }
+
+    if (name == "@") {
+        return activeDialect->shorthand_at->references;
+    }
+
+    if (name == "#") {
+        return activeDialect->shorthand_hash->references;
+    }
+
 
     // TODO: Also add names of the metablock fields.
     return {};
