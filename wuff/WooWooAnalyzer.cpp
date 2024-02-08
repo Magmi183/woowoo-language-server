@@ -9,7 +9,7 @@
 
 #include "WooWooAnalyzer.h"
 #include "dialect/DialectManager.h"
-#include "document/WooWooDocument.h"
+#include "document/DialectedWooWooDocument.h"
 
 #include "components/Hoverer.h"
 #include "components/Highlighter.h"
@@ -112,24 +112,24 @@ std::optional<fs::path> WooWooAnalyzer::findProjectFolder(const std::string &uri
 }
 
 void WooWooAnalyzer::loadDocument(const fs::path &projectPath, const fs::path &documentPath) {
-    projects[projectPath.generic_string()][documentPath.generic_string()] = new WooWooDocument(documentPath, parser);
+    projects[projectPath.generic_string()][documentPath.generic_string()] = new DialectedWooWooDocument(documentPath, parser, dialectManager);
     docToProject[documentPath.generic_string()] = projectPath.generic_string();
 }
 
-WooWooDocument *WooWooAnalyzer::getDocumentByUri(const std::string &docUri) {
+DialectedWooWooDocument *WooWooAnalyzer::getDocumentByUri(const std::string &docUri) {
     auto path = utils::uriToPathString(docUri);
     return getDocument(path);
 }
 
-WooWooDocument *WooWooAnalyzer::getDocument(const std::string &pathToDoc) {
+DialectedWooWooDocument *WooWooAnalyzer::getDocument(const std::string &pathToDoc) {
     return projects[docToProject[pathToDoc]][pathToDoc];
 }
 
-std::vector<WooWooDocument *> WooWooAnalyzer::getDocumentsFromTheSameProject(WooWooDocument *document) {
-    std::vector<WooWooDocument *> documents;
+std::vector<DialectedWooWooDocument *> WooWooAnalyzer::getDocumentsFromTheSameProject(DialectedWooWooDocument *document) {
+    std::vector<DialectedWooWooDocument *> documents;
     auto project = docToProject[document->documentPath.generic_string()];
     if (projects.find(project) != projects.end()) {
-        std::unordered_map<std::string, WooWooDocument *> &pathDocMap = projects[project];
+        std::unordered_map<std::string, DialectedWooWooDocument *> &pathDocMap = projects[project];
 
         for (const auto &pair: pathDocMap) {
             documents.emplace_back(pair.second);

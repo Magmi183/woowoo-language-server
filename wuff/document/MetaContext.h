@@ -11,14 +11,15 @@
 
 class MetaContext {
 public:
-    MetaContext(TSTree* tree, uint32_t lineOffset, const std::string& parentType, const std::string& parentName);
+    MetaContext(TSTree *tree, uint32_t lineOffset, uint32_t byteOffset, const std::string &parentType,
+                const std::string &parentName);
 
-    TSTree* tree;
+    TSTree *tree;
     uint32_t lineOffset;
+    uint32_t byteOffset;
     std::string parentType;
     std::string parentName;
 };
-
 
 
 #endif //WUFF_METACONTEXT_H

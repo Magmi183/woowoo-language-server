@@ -10,7 +10,7 @@
 #include <string>
 #include <unordered_map>
 #include <pybind11/pytypes.h>
-#include "document/WooWooDocument.h"
+#include "document/DialectedWooWooDocument.h"
 #include "parser/Parser.h"
 #include "dialect/DialectManager.h"
 #include "lsp/LSPTypes.h"
@@ -28,7 +28,7 @@ namespace py = pybind11;
 
 class WooWooAnalyzer {
 private:
-    std::unordered_map<std::string, std::unordered_map<std::string, WooWooDocument*>> projects;
+    std::unordered_map<std::string, std::unordered_map<std::string, DialectedWooWooDocument*>> projects;
     std::unordered_map<std::string, std::string> docToProject;
     Parser* parser;
     Hoverer* hoverer;
@@ -43,11 +43,11 @@ public:
     ~WooWooAnalyzer(); 
     void setDialect(const std::string& dialectPath);
     bool loadWorkspace(const std::string& workspaceUri);
-    WooWooDocument * getDocumentByUri(const std::string & docUri);
-    WooWooDocument * getDocument(const std::string& pathToDoc);
+    DialectedWooWooDocument * getDocumentByUri(const std::string & docUri);
+    DialectedWooWooDocument * getDocument(const std::string& pathToDoc);
     DialectManager* dialectManager;
     
-    std::vector<WooWooDocument *> getDocumentsFromTheSameProject(WooWooDocument * document);
+    std::vector<DialectedWooWooDocument *> getDocumentsFromTheSameProject(DialectedWooWooDocument * document);
     
     // LSP-like functionalities
     std::string hover(const std::string& docUri, int line, int character);

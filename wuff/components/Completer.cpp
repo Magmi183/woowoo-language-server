@@ -8,23 +8,18 @@
 #include <pybind11/cast.h>
 
 Completer::Completer(WooWooAnalyzer *analyzer) : analyzer(analyzer) {
-
     prepareQueries();
-
 }
 
 std::vector<CompletionItem> Completer::complete(const CompletionParams &params) {
-
     std::vector<CompletionItem> completionItems;
 
     if (params.context->triggerKind == CompletionTriggerKind::TriggerCharacter) {
-
         if (params.context->triggerCharacter == ".") {
             completeInclude(completionItems, params);
-        } else if (params.context->triggerCharacter == ":"){
+        } else if (params.context->triggerCharacter == ":") {
             completeInnerEnvs(completionItems, params);
         }
-
     }
 
 
@@ -33,13 +28,15 @@ std::vector<CompletionItem> Completer::complete(const CompletionParams &params) 
 
 
 void Completer::completeInclude(std::vector<CompletionItem> &completionItems, const CompletionParams &params) {
-
     auto docPath = utils::uriToPathString(params.textDocument.uri);
     auto document = analyzer->getDocument(docPath);
 
     TSQueryCursor *cursor = ts_query_cursor_new();
-    TSPoint start_point = {params.position.line, params.position.character};
-    TSPoint end_point = {params.position.line, params.position.character + 1};
+    auto pos = document->utfMappings->utf16ToUtf8(params.position.line, params.position.character);
+    uint32_t line = pos.first;
+    uint32_t character = pos.second;
+    TSPoint start_point = {line, character};
+    TSPoint end_point = {line, character + 1};
     ts_query_cursor_set_point_range(cursor, start_point, end_point);
     ts_query_cursor_exec(cursor, includeCollisionQuery, ts_tree_root_node(document->tree));
 
@@ -64,7 +61,8 @@ void Completer::completeInclude(std::vector<CompletionItem> &completionItems, co
     std::stringstream ss;
     for (size_t i = 0; i < relativePaths.size(); ++i) {
         ss << relativePaths[i];
-        if (i != relativePaths.size() - 1) {  // Don't add a comma after the last element
+        if (i != relativePaths.size() - 1) {
+            // Don't add a comma after the last element
             ss << ",";
         }
     }
@@ -72,10 +70,10 @@ void Completer::completeInclude(std::vector<CompletionItem> &completionItems, co
 
     std::string insertText = "include ${1|" + pathsJoined + "|}";
     CompletionItem item{
-            ".include",                      // label
-            CompletionItemKind::Snippet,     // kind
-            InsertTextFormat::Snippet,       // insert_text_format
-            insertText                       // insert_text
+        ".include", // label
+        CompletionItemKind::Snippet, // kind
+        InsertTextFormat::Snippet, // insert_text_format
+        insertText // insert_text
     };
     completionItems.emplace_back(item);
 
@@ -83,7 +81,6 @@ void Completer::completeInclude(std::vector<CompletionItem> &completionItems, co
 }
 
 void Completer::completeInnerEnvs(std::vector<CompletionItem> &completionItems, const CompletionParams &params) {
-
     auto docPath = utils::uriToPathString(params.textDocument.uri);
     auto document = analyzer->getDocument(docPath);
 
@@ -94,17 +91,23 @@ void Completer::completeInnerEnvs(std::vector<CompletionItem> &completionItems, 
     ts_query_cursor_exec(cursor, shortInnerEnvironmentQuery, ts_tree_root_node(document->tree));
 
     TSQueryMatch match;
-    if (ts_query_cursor_next_match(cursor, &match)){
+    if (ts_query_cursor_next_match(cursor, &match)) {
         TSNode node = match.captures[0].node;
         std::string shortInnerEnvType = document->getNodeText(node);
-        // TODO: The remaining part. (after consultation?)
-        
+
+        // nodes that can be referenced by this env.
+        std::vector<TSNode> referencableNodes;
+        for (auto doc: analyzer->getDocumentsFromTheSameProject(document)) {
+            for (auto referencable: doc->getReferencablesBy(shortInnerEnvType)) {
+                CompletionItem item(doc->getMetaNodeText(referencable.first, referencable.second));
+                completionItems.emplace_back(item);
+                
+            }
+        }
     }
-    
 }
 
 void Completer::completeShorthand(std::vector<CompletionItem> &completionItems, const CompletionParams &params) {
-
 }
 
 
@@ -112,25 +115,24 @@ void Completer::prepareQueries() {
     uint32_t errorOffset;
     TSQueryError errorType;
     includeCollisionQuery = ts_query_new(
-            tree_sitter_woowoo(),
-            includeCollisionQueryString.c_str(),
-            includeCollisionQueryString.length(),
-            &errorOffset,
-            &errorType
+        tree_sitter_woowoo(),
+        includeCollisionQueryString.c_str(),
+        includeCollisionQueryString.length(),
+        &errorOffset,
+        &errorType
     );
-    
+
     shortInnerEnvironmentQuery = ts_query_new(
-            tree_sitter_woowoo(),
-            shortInnerEnvironmentQueryString.c_str(),
-            shortInnerEnvironmentQueryString.size(),
-            &errorOffset,
-            &errorType
+        tree_sitter_woowoo(),
+        shortInnerEnvironmentQueryString.c_str(),
+        shortInnerEnvironmentQueryString.size(),
+        &errorOffset,
+        &errorType
     );
 
     if (!includeCollisionQuery || !shortInnerEnvironmentQuery) {
         throw std::runtime_error("COMPLETER: Failed to compile Tree-sitter query.");
     }
-            
 }
 
 const std::string Completer::includeCollisionQueryString = R"(

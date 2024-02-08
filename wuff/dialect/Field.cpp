@@ -4,7 +4,7 @@
 
 #include "Field.h"
 
-Field::Field(const std::string& name) : name(name) {
+Field::Field(const std::string& name, const std::vector<Reference>& references) : name(name), references(references) {
 }
 
 void Field::deserialize(const YAML::Node& node) {
@@ -13,4 +13,15 @@ void Field::deserialize(const YAML::Node& node) {
     } else {
         throw std::runtime_error("Field node does not have a 'name' attribute.");
     }
+
+    // Deserialize 'references' if they exist
+    if (node["references"]) {
+        references.clear();  // Clear existing references before deserializing
+        for (const auto& refNode : node["references"]) {
+            Reference ref;
+            ref.deserialize(refNode);
+            references.push_back(ref);
+        }
+    }
+    
 }

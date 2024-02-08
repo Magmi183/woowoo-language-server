@@ -63,6 +63,13 @@ std::string WooWooDocument::getNodeText(TSNode node) {
     return substr(start_byte, end_byte);
 }
 
+std::string WooWooDocument::getMetaNodeText(MetaContext *mx, TSNode node) {
+    uint32_t meta_start_byte = ts_node_start_byte(node);
+    uint32_t meta_end_byte = ts_node_end_byte(node);
+    return substr(meta_start_byte + mx->byteOffset, meta_end_byte + mx->byteOffset);
+}
+
+
 void WooWooDocument::deleteCommentsAndMetas() {
     for (MetaContext *metaBlock: metaBlocks) {
         delete metaBlock;

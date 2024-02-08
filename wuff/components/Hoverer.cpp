@@ -6,6 +6,7 @@
 #include "../parser/Parser.h"
 #include "../utils/utils.h"
 
+// TODO: Prepare query beforehand.
 std::string Hoverer::hover(const std::string &docUri, uint32_t line, uint32_t character) {
     auto docPath = utils::uriToPathString(docUri);
     WooWooDocument * document = analyzer->getDocument(docPath);

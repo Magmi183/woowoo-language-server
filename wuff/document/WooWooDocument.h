@@ -33,8 +33,9 @@ public:
     ~WooWooDocument();
 
     void updateSource();
-    void updateSource(std::string &source);
+    virtual void updateSource(std::string &source);
     std::string getNodeText(TSNode node);
+    std::string getMetaNodeText(MetaContext * mx, TSNode node);
     std::string substr(uint32_t startByte, uint32_t endByte) const;
 };
 

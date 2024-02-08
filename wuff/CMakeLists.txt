@@ -64,6 +64,7 @@ pybind11_add_module(${PROJECT_NAME}
         Bindings.cpp
         WooWooAnalyzer.cpp
         document/WooWooDocument.cpp
+        document/DialectedWooWooDocument.cpp
         document/MetaContext.cpp
         document/CommentLine.cpp
         document/UTF8toUTF16Mapping.cpp
@@ -101,6 +102,7 @@ add_executable(WooWooTest
         main.cpp
         WooWooAnalyzer.cpp
         document/WooWooDocument.cpp
+        document/DialectedWooWooDocument.cpp
         document/MetaContext.cpp
         document/CommentLine.cpp
         document/UTF8toUTF16Mapping.cpp
