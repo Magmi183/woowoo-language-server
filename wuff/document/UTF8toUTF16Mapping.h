@@ -16,8 +16,10 @@
 class UTF8toUTF16Mapping {
 public:
     void buildMappings(const std::string& source);
-    std::pair<int, int> utf8ToUtf16(int lineNum, int utf8Offset) const;
-    std::pair<int, int> utf16ToUtf8(int lineNum, int utf16Offset) const;
+
+    std::pair<uint32_t, uint32_t> utf8ToUtf16(uint32_t lineNum, uint32_t utf8Offset) const;
+
+    std::pair<uint32_t, uint32_t> utf16ToUtf8(uint32_t lineNum, uint32_t utf16Offset) const;
 
 private:
     std::vector<std::unordered_map<int, int>> utf8ToUtf16Mappings;

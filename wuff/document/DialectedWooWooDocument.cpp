@@ -20,8 +20,13 @@ DialectedWooWooDocument::~DialectedWooWooDocument() {
 
 void DialectedWooWooDocument::index() {
     referencablesByNode.clear();
+    referencableNodes.clear();
     for (const std::string &typeName: dialectManager->getReferencingTypeNames()) {
         for (const Reference &ref: dialectManager->getPossibleReferencesByTypeName(typeName)) {
+
+            // create if not exist
+            referencableNodes[ref];
+            
             for (MetaContext *mx: metaBlocks) {
                 if ((ref.structureType.empty() || ref.structureType == mx->parentType) &&
                     (ref.structureName.empty() || ref.structureName == mx->parentName)) {
@@ -57,6 +62,7 @@ void DialectedWooWooDocument::index() {
                         }
                         if (!correctKey) continue;
                         referencablesByNode[typeName].push_back(std::make_pair(mx, valueNode));
+                        referencableNodes[ref][getMetaNodeText(mx, valueNode)] = std::make_pair(mx, valueNode);
                         
                     }
                     ts_query_cursor_delete(wooCursor);
@@ -101,6 +107,18 @@ std::vector<std::pair<MetaContext *, TSNode> > DialectedWooWooDocument::getRefer
     }
     return referencablesByNode[referencingTypeName];
 }
+
+std::optional<std::pair<MetaContext *, TSNode>> DialectedWooWooDocument::findReferencable(const std::vector<Reference> &references, const std::string &referenceValue) {
+
+    for (auto ref: references) {
+        if (referencableNodes[ref].contains(referenceValue)) {
+            return referencableNodes[ref][referenceValue];
+        }
+    }
+
+    return std::nullopt;
+}
+
 
 void DialectedWooWooDocument::updateSource(std::string &source) {
     WooWooDocument::updateSource(source);

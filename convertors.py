@@ -68,6 +68,8 @@ def wuff_completion_item_to_ls(wuff_item: WuffCompletionItem) -> CompletionItem:
             kind = CompletionItemKind.Snippet
         elif wuff_item.kind == WuffCompletionItemKind.Text:
             kind = CompletionItemKind.Text
+    else:
+        return CompletionItem(label=label)
 
     insert_text_format = InsertTextFormat.PlainText
     if wuff_item.insertTextFormat:

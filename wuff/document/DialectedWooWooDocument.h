@@ -21,14 +21,23 @@ public:
     virtual ~DialectedWooWooDocument();
     std::vector<std::pair<MetaContext *, TSNode>> getReferencablesBy(const std::string& referencingTypeName);
     void updateSource(std::string &source) override;
+
+    std::optional<std::pair<MetaContext *, TSNode>> findReferencable(const std::vector<Reference> & references, const std::string & referenceValue);
+    DialectManager * dialectManager;
+    
+
 private:
 
-    DialectManager * dialectManager;
 
     void prepareQueries();
     void index();
     std::unordered_map<std::string, TSQuery *> fieldQueries;
+
+    // given a typeName, get all nodes that can be referenced by that
     std::unordered_map<std::string, std::vector<std::pair<MetaContext *, TSNode>> > referencablesByNode;
+    
+    // given Reference and value (of a metablock field), store the node and MetaContext (this is what is being referenced, e.g. label value)
+    std::unordered_map<Reference, std::unordered_map<std::string, std::pair<MetaContext *, TSNode>>> referencableNodes;
 };
 
 #endif 
