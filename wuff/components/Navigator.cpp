@@ -40,6 +40,13 @@ Location Navigator::goToDefinition(const DefinitionParams &params) {
             if (nodeType == "short_inner_environment") {
                 return resolveShortInnerEnvironmentReference(params, node);
             }
+            if (nodeType == "verbose_inner_environment_hash_end") {
+                return resolveShorthandReference("#", params, node);
+            }
+            if (nodeType == "verbose_inner_environment_at_end") {
+                return resolveShorthandReference("@", params, node);
+            }
+            
         }
     }
     return Location("", Range{Position{0, 0}, Position{0, 0}});
@@ -74,6 +81,15 @@ Location Navigator::resolveShortInnerEnvironmentReference(const DefinitionParams
     auto value = utils::getChildText(node, "short_inner_environment_body", document);
 
     return findReference(params, referenceTargets, value);
+}
+
+Location Navigator::resolveShorthandReference(std::string shorthandType, const DefinitionParams &params, TSNode node) {
+    auto document = analyzer->getDocumentByUri(params.textDocument.uri);
+
+    // obtain what can be referenced by this environment
+    std::vector<Reference> referenceTargets = document->dialectManager->getPossibleReferencesByTypeName(shorthandType);
+
+    return findReference(params, referenceTargets, document->getNodeText(node));
 }
 
 

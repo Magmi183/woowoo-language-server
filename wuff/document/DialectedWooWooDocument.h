@@ -2,8 +2,8 @@
 // Created by Michal Janecek on 08.02.2024.
 //
 
-#ifndef TEMPLATED_WOOWOO_DOCUMENT_H
-#define TEMPLATED_WOOWOO_DOCUMENT_H
+#ifndef DIALECTED_WOOWOO_DOCUMENT_H
+#define DIALECTED_WOOWOO_DOCUMENT_H
 
 #include "WooWooDocument.h"
 #include "../dialect/DialectManager.h"

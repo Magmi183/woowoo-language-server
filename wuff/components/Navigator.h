@@ -26,6 +26,7 @@ private:
 
     Location navigateToFile(const DefinitionParams &params, const std::string & relativeFilePath);
     Location resolveShortInnerEnvironmentReference(const DefinitionParams &params, TSNode node);
+    Location resolveShorthandReference(std::string shorthandType, const DefinitionParams &params, TSNode node);
 
     Location findReference(const DefinitionParams &params, std::vector<Reference> possibleReferences, std::string referencingValue);
     

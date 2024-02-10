@@ -182,10 +182,7 @@ fabric.properties
 # idea folder, uncomment if you don't need it
 .idea
 
-# tree-sitter
-
-# files for local template testing
-templates/
 
 **/tmp.py
 wuff/main.cpp
+wuff/test.py
