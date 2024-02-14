@@ -11,6 +11,11 @@ Completer::Completer(WooWooAnalyzer *analyzer) : analyzer(analyzer) {
     prepareQueries();
 }
 
+Completer::~Completer() {
+    ts_query_delete(shortInnerEnvironmentQuery);
+    ts_query_delete(includeCollisionQuery);
+}
+
 std::vector<CompletionItem> Completer::complete(const CompletionParams &params) {
     std::vector<CompletionItem> completionItems;
 
@@ -106,14 +111,7 @@ void Completer::completeInnerEnvs(std::vector<CompletionItem> &completionItems, 
         std::string shortInnerEnvType = document->getNodeText(node);
 
         // nodes that can be referenced by this env.
-        std::vector<TSNode> referencableNodes;
-        for (auto doc: analyzer->getDocumentsFromTheSameProject(document)) {
-            for (auto referencable: doc->getReferencablesBy(shortInnerEnvType)) {
-                CompletionItem item(doc->getMetaNodeText(referencable.first, referencable.second));
-                completionItems.emplace_back(item);
-                
-            }
-        }
+        searchProjectForReferencables(completionItems, document, shortInnerEnvType);
     }
 }
 
@@ -127,16 +125,23 @@ void Completer::completeShorthand(std::vector<CompletionItem> &completionItems, 
     
     auto docPath = utils::uriToPathString(params.textDocument.uri);
     auto document = analyzer->getDocument(docPath);
+
+    searchProjectForReferencables(completionItems, document, shorthandName);
     
-    for (auto doc: analyzer->getDocumentsFromTheSameProject(document)) {
-        for (auto referencable: doc->getReferencablesBy(shorthandName)) {
-            CompletionItem item(doc->getMetaNodeText(referencable.first, referencable.second));
+}
+
+
+void Completer::searchProjectForReferencables(std::vector<CompletionItem> &completionItems, WooWooDocument *doc, std::string & referencingValue) {
+
+    for (auto projectDocument: analyzer->getDocumentsFromTheSameProject(doc)) {
+        for (auto referencable: projectDocument->getReferencablesBy(referencingValue)) {
+            CompletionItem item(projectDocument->getMetaNodeText(referencable.first, referencable.second));
             completionItems.emplace_back(item);
+
         }
     }
     
 }
-
 
 void Completer::prepareQueries() {
     uint32_t errorOffset;
@@ -156,7 +161,8 @@ void Completer::prepareQueries() {
         &errorOffset,
         &errorType
     );
-
+    
+    
     if (!includeCollisionQuery || !shortInnerEnvironmentQuery) {
         throw std::runtime_error("COMPLETER: Failed to compile Tree-sitter query.");
     }

@@ -65,13 +65,11 @@ void Navigator::prepareQueries() {
 
     metaFieldQuery = ts_query_new(
             tree_sitter_yaml(),
-            metaFieldQueryString.c_str(),
-            metaFieldQueryString.size(),
+            MetaContext::metaFieldQueryString.c_str(),
+            MetaContext::metaFieldQueryString.size(),
             &errorOffset,
             &errorType
     );
-
-    auto k = "l";
 }
 
 Location Navigator::navigateToFile(const DefinitionParams &params, const std::string &relativeFilePath) {
@@ -121,7 +119,6 @@ Location Navigator::resolveMetaBlockReference(const DefinitionParams &params, TS
     ts_query_cursor_set_point_range(cursor, start_point, end_point);
     ts_query_cursor_exec(cursor, metaFieldQuery, ts_tree_root_node(mx->tree));
 
-    auto text = document->getNodeText(node);
     TSQueryMatch match;
     while (ts_query_cursor_next_match(cursor, &match)) {
         std::string metaFieldName;
@@ -134,7 +131,6 @@ Location Navigator::resolveMetaBlockReference(const DefinitionParams &params, TS
             const char *capture_name_chars = ts_query_capture_name_for_id(metaFieldQuery, capture_id,
                                                                           &capture_name_length);
             std::string capture_name(capture_name_chars, capture_name_length);
-            auto test = document->getMetaNodeText(mx, capturedNode);
             if (capture_name == "key") {
                 metaFieldName = document->getMetaNodeText(mx, capturedNode);
             } else if (capture_name == "value") {
@@ -187,8 +183,3 @@ const std::string Navigator::goToDefinitionQueryString = R"(
 (meta_block) @type
 )";
 
-const std::string Navigator::metaFieldQueryString = R"(
-(block_mapping_pair 
-key: (flow_node [(double_quote_scalar) (single_quote_scalar) (plain_scalar)] @key) 
-value: (flow_node) @value )
-)";

@@ -23,7 +23,6 @@ private:
     void prepareQueries();
     static const std::string goToDefinitionQueryString;
     TSQuery * goToDefinitionQuery;
-    static const std::string metaFieldQueryString;
     TSQuery * metaFieldQuery;
 
     Location navigateToFile(const DefinitionParams &params, const std::string & relativeFilePath);

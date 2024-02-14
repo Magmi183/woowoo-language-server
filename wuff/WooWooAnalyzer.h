@@ -47,7 +47,7 @@ public:
     DialectedWooWooDocument * getDocument(const std::string& pathToDoc);
     DialectManager* dialectManager;
     
-    std::vector<DialectedWooWooDocument *> getDocumentsFromTheSameProject(DialectedWooWooDocument * document);
+    std::vector<DialectedWooWooDocument *> getDocumentsFromTheSameProject(WooWooDocument * document);
     
     // LSP-like functionalities
     std::string hover(const std::string& docUri, int line, int character);

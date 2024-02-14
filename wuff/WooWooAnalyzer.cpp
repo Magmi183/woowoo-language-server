@@ -125,7 +125,7 @@ DialectedWooWooDocument *WooWooAnalyzer::getDocument(const std::string &pathToDo
     return projects[docToProject[pathToDoc]][pathToDoc];
 }
 
-std::vector<DialectedWooWooDocument *> WooWooAnalyzer::getDocumentsFromTheSameProject(DialectedWooWooDocument *document) {
+std::vector<DialectedWooWooDocument *> WooWooAnalyzer::getDocumentsFromTheSameProject(WooWooDocument *document) {
     std::vector<DialectedWooWooDocument *> documents;
     auto project = docToProject[document->documentPath.generic_string()];
     if (projects.find(project) != projects.end()) {
