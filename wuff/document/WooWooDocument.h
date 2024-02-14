@@ -37,6 +37,7 @@ public:
     std::string getNodeText(TSNode node);
     std::string getMetaNodeText(MetaContext * mx, TSNode node);
     std::string substr(uint32_t startByte, uint32_t endByte) const;
+    MetaContext * getMetaContextByLine(uint32_t line);
 };
 
 

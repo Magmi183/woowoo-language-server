@@ -46,19 +46,32 @@ Location Navigator::goToDefinition(const DefinitionParams &params) {
             if (nodeType == "verbose_inner_environment_at_end") {
                 return resolveShorthandReference("@", params, node);
             }
-            
+            if (nodeType == "meta_block") {
+                return resolveMetaBlockReference(params, node);
+            }
+
         }
     }
     return Location("", Range{Position{0, 0}, Position{0, 0}});
 }
 
 void Navigator::prepareQueries() {
-    uint32_t error_offset;
-    TSQueryError error_type;
-    TSQuery *query = ts_query_new(tree_sitter_woowoo(), goToDefinitionQueryString.c_str(),
+    uint32_t errorOffset;
+    TSQueryError errorType;
+    
+    goToDefinitionQuery = ts_query_new(tree_sitter_woowoo(), goToDefinitionQueryString.c_str(),
                                   goToDefinitionQueryString.size(),
-                                  &error_offset, &error_type);
-    goToDefinitionQuery = query;
+                                  &errorOffset, &errorType);
+
+    metaFieldQuery = ts_query_new(
+            tree_sitter_yaml(),
+            metaFieldQueryString.c_str(),
+            metaFieldQueryString.size(),
+            &errorOffset,
+            &errorType
+    );
+
+    auto k = "l";
 }
 
 Location Navigator::navigateToFile(const DefinitionParams &params, const std::string &relativeFilePath) {
@@ -75,7 +88,8 @@ Location Navigator::resolveShortInnerEnvironmentReference(const DefinitionParams
     auto shortInnerEnvironmentType = utils::getChildText(node, "short_inner_environment_type", document);
 
     // obtain what can be referenced by this environment
-    std::vector<Reference> referenceTargets = document->dialectManager->getPossibleReferencesByTypeName(shortInnerEnvironmentType);
+    std::vector<Reference> referenceTargets = document->dialectManager->getPossibleReferencesByTypeName(
+            shortInnerEnvironmentType);
 
     // obtain the body part of the referencing environment 
     auto value = utils::getChildText(node, "short_inner_environment_body", document);
@@ -83,7 +97,8 @@ Location Navigator::resolveShortInnerEnvironmentReference(const DefinitionParams
     return findReference(params, referenceTargets, value);
 }
 
-Location Navigator::resolveShorthandReference(std::string shorthandType, const DefinitionParams &params, TSNode node) {
+Location
+Navigator::resolveShorthandReference(const std::string &shorthandType, const DefinitionParams &params, TSNode node) {
     auto document = analyzer->getDocumentByUri(params.textDocument.uri);
 
     // obtain what can be referenced by this environment
@@ -93,21 +108,69 @@ Location Navigator::resolveShorthandReference(std::string shorthandType, const D
 }
 
 
-Location Navigator::findReference(const DefinitionParams &params, std::vector<Reference> possibleReferences, std::string referencingValue) {
+Location Navigator::resolveMetaBlockReference(const DefinitionParams &params, TSNode node) {
+    auto document = analyzer->getDocumentByUri(params.textDocument.uri);
+    auto pos = document->utfMappings->utf16ToUtf8(params.position.line, params.position.character);
+    uint32_t line = pos.first;
+    uint32_t character = pos.second;
+    TSQueryCursor *cursor = ts_query_cursor_new();
+    MetaContext *mx = document->getMetaContextByLine(line);
+    // points adjusted by metablock position
+    TSPoint start_point = {line - mx->lineOffset, character};
+    TSPoint end_point = {line - mx->lineOffset, character + 1};
+    ts_query_cursor_set_point_range(cursor, start_point, end_point);
+    ts_query_cursor_exec(cursor, metaFieldQuery, ts_tree_root_node(mx->tree));
+
+    auto text = document->getNodeText(node);
+    TSQueryMatch match;
+    while (ts_query_cursor_next_match(cursor, &match)) {
+        std::string metaFieldName;
+        std::string metaFieldValue;
+        for (uint32_t i = 0; i < match.capture_count; ++i) {
+            TSNode capturedNode = match.captures[i].node;
+            uint32_t capture_id = match.captures[i].index;
+
+            uint32_t capture_name_length;
+            const char *capture_name_chars = ts_query_capture_name_for_id(metaFieldQuery, capture_id,
+                                                                          &capture_name_length);
+            std::string capture_name(capture_name_chars, capture_name_length);
+            auto test = document->getMetaNodeText(mx, capturedNode);
+            if (capture_name == "key") {
+                metaFieldName = document->getMetaNodeText(mx, capturedNode);
+            } else if (capture_name == "value") {
+                metaFieldValue = document->getMetaNodeText(mx, capturedNode);
+            }
+        }
+        if (!metaFieldValue.empty() && !metaFieldName.empty()) {
+            ts_query_cursor_delete(cursor);
+            return findReference(params, document->dialectManager->getPossibleReferencesByTypeName(metaFieldName),
+                                 metaFieldValue);
+        }
+    }
+
+    ts_query_cursor_delete(cursor);
+    return Location("", Range{Position{0, 0}, Position{0, 0}});
+
+}
+
+
+Location Navigator::findReference(const DefinitionParams &params, const std::vector<Reference> &possibleReferences,
+                                  const std::string &referencingValue) {
     auto document = analyzer->getDocumentByUri(params.textDocument.uri);
 
-    for (auto doc : analyzer->getDocumentsFromTheSameProject(document)) {
-        std::optional<std::pair<MetaContext *, TSNode>> foundRef = doc->findReferencable(possibleReferences, referencingValue);
-        
-        if(foundRef.has_value()) {
-            MetaContext * mx = foundRef.value().first;
+    for (auto doc: analyzer->getDocumentsFromTheSameProject(document)) {
+        std::optional<std::pair<MetaContext *, TSNode>> foundRef = doc->findReferencable(possibleReferences,
+                                                                                         referencingValue);
+
+        if (foundRef.has_value()) {
+            MetaContext *mx = foundRef.value().first;
             TSPoint start_point = ts_node_start_point(foundRef.value().second);
             TSPoint end_point = ts_node_end_point(foundRef.value().second);
             auto s = document->utfMappings->utf8ToUtf16(start_point.row + mx->lineOffset, start_point.column);
             auto e = document->utfMappings->utf8ToUtf16(end_point.row + mx->lineOffset, end_point.column);
-            
-            Range fieldRange = Range{Position{s.first, s.second}, Position{e.first, e.second}};
-            return Location(utils::pathToUri(doc->documentPath), fieldRange);
+
+            auto fieldRange = Range{Position{s.first, s.second}, Position{e.first, e.second}};
+            return {utils::pathToUri(doc->documentPath), fieldRange};
         }
     }
     return Location("", Range{Position{0, 0}, Position{0, 0}});
@@ -121,4 +184,11 @@ const std::string Navigator::goToDefinitionQueryString = R"(
 (short_inner_environment) @type
 (verbose_inner_environment_hash_end) @type
 (verbose_inner_environment_at_end) @type
+(meta_block) @type
+)";
+
+const std::string Navigator::metaFieldQueryString = R"(
+(block_mapping_pair 
+key: (flow_node [(double_quote_scalar) (single_quote_scalar) (plain_scalar)] @key) 
+value: (flow_node) @value )
 )";

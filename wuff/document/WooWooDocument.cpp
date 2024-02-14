@@ -88,3 +88,12 @@ WooWooDocument::~WooWooDocument() {
     ts_tree_delete(tree);
     tree = nullptr;
 }
+
+MetaContext *WooWooDocument::getMetaContextByLine(uint32_t line) {
+    for (MetaContext * mx : metaBlocks){
+        if(mx->lineOffset <= line && line <= (ts_node_end_point(ts_tree_root_node(mx->tree)).row + mx->lineOffset) ){
+            return mx;
+        }
+    }
+    return nullptr;
+}

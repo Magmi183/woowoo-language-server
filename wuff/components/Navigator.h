@@ -23,12 +23,15 @@ private:
     void prepareQueries();
     static const std::string goToDefinitionQueryString;
     TSQuery * goToDefinitionQuery;
+    static const std::string metaFieldQueryString;
+    TSQuery * metaFieldQuery;
 
     Location navigateToFile(const DefinitionParams &params, const std::string & relativeFilePath);
     Location resolveShortInnerEnvironmentReference(const DefinitionParams &params, TSNode node);
-    Location resolveShorthandReference(std::string shorthandType, const DefinitionParams &params, TSNode node);
+    Location resolveShorthandReference(const std::string& shorthandType, const DefinitionParams &params, TSNode node);
+    Location resolveMetaBlockReference( const DefinitionParams &params, TSNode node);
 
-    Location findReference(const DefinitionParams &params, std::vector<Reference> possibleReferences, std::string referencingValue);
+    Location findReference(const DefinitionParams &params, const std::vector<Reference>& possibleReferences, const std::string& referencingValue);
     
     
 

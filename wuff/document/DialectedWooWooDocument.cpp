@@ -61,7 +61,7 @@ void DialectedWooWooDocument::index() {
                             }
                         }
                         if (!correctKey) continue;
-                        referencablesByNode[typeName].push_back(std::make_pair(mx, valueNode));
+                        referencablesByNode[typeName].emplace_back(std::make_pair(mx, valueNode));
                         referencableNodes[ref][getMetaNodeText(mx, valueNode)] = std::make_pair(mx, valueNode);
                         
                     }
@@ -110,7 +110,7 @@ std::vector<std::pair<MetaContext *, TSNode> > DialectedWooWooDocument::getRefer
 
 std::optional<std::pair<MetaContext *, TSNode>> DialectedWooWooDocument::findReferencable(const std::vector<Reference> &references, const std::string &referenceValue) {
 
-    for (auto ref: references) {
+    for (auto & ref: references) {
         if (referencableNodes[ref].contains(referenceValue)) {
             return referencableNodes[ref][referenceValue];
         }
