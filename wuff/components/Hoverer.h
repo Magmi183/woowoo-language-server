@@ -9,24 +9,20 @@
 #include <vector>
 
 #include "../WooWooAnalyzer.h"
+#include "Component.h"
 
-class Hoverer {
+class Hoverer : Component {
 public:
-    Hoverer(WooWooAnalyzer* analyzer);
+    explicit Hoverer(WooWooAnalyzer* analyzer);
 
     std::string hover(const std::string& docUir, uint32_t line, uint32_t character);
 
 private:
-    WooWooAnalyzer * analyzer;
-    const char* hoverable_nodes_query_string = "(document_part_type) @node"
-                               "(object_type) @node"
-                               "(short_inner_environment_type) @node"
-                               "(verbose_inner_environment_type) @node"
-                               "(outer_environment_type) @node";
 
-    
+    [[nodiscard]] const std::unordered_map<std::string, std::pair<TSLanguage *, std::string>>& getQueryStringByName() const override;
 
-    std::string getHoverText(const std::string& nodeType, const std::string& nodeText);
+    static const std::string hoverableNodesQuery;
+    static const std::unordered_map<std::string, std::pair<TSLanguage*,std::string>> queryStringsByName;
 };
 
 #endif //WUFF_HOVERER_H

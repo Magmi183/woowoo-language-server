@@ -6,23 +6,22 @@
 #define WUFF_FOLDER_H
 
 #include "../WooWooAnalyzer.h"
+#include "Component.h"
 
-class Folder {
+class Folder : Component {
 
 public:
 
-    Folder(WooWooAnalyzer * analyzer);
-    ~Folder();
+    explicit Folder(WooWooAnalyzer * analyzer);
     
     std::vector<FoldingRange> foldingRanges (const TextDocumentIdentifier & tdi);
     
 private:
     
-    WooWooAnalyzer * analyzer;
+    [[nodiscard]] const std::unordered_map<std::string, std::pair<TSLanguage *, std::string>>& getQueryStringByName() const override;
+    static const std::unordered_map<std::string, std::pair<TSLanguage*,std::string>> queryStringsByName;
     
-    void prepareQueries();
-    static const std::string foldableTypesQueryString;
-    TSQuery * foldableTypesQuery;
+    static const std::string foldableTypesQuery;
 
 };
 

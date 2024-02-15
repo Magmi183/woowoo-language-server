@@ -3,32 +3,26 @@
 //
 
 #include "Hoverer.h"
-#include "../parser/Parser.h"
 #include "../utils/utils.h"
 
-// TODO: Prepare query beforehand.
+
+Hoverer::Hoverer(WooWooAnalyzer *analyzer) : Component(analyzer) {
+    prepareQueries();
+}
+
+
 std::string Hoverer::hover(const std::string &docUri, uint32_t line, uint32_t character) {
     auto docPath = utils::uriToPathString(docUri);
-    WooWooDocument * document = analyzer->getDocument(docPath);
+    WooWooDocument *document = analyzer->getDocument(docPath);
     auto pos = document->utfMappings->utf16ToUtf8(line, character);
     line = pos.first;
     character = pos.second;
-    
-    uint32_t error_offset;
-    TSQueryError error_type;
-    TSQuery* query = ts_query_new(tree_sitter_woowoo(), hoverable_nodes_query_string, strlen(hoverable_nodes_query_string), &error_offset, &error_type);
 
-    if (!query) {
-        // Handle query compilation error
-        std::cerr << "Failed to compile query at offset " << error_offset << " with error " << error_type << std::endl;
-        return "";
-    }
-
-    TSQueryCursor* cursor = ts_query_cursor_new();
+    TSQueryCursor *cursor = ts_query_cursor_new();
     TSPoint start_point = {line, character};
     TSPoint end_point = {line, character + 1};
     ts_query_cursor_set_point_range(cursor, start_point, end_point);
-    ts_query_cursor_exec(cursor, query, ts_tree_root_node(document->tree));
+    ts_query_cursor_exec(cursor, queries[hoverableNodesQuery], ts_tree_root_node(document->tree));
 
     TSQueryMatch match;
     std::string nodeType;
@@ -36,20 +30,29 @@ std::string Hoverer::hover(const std::string &docUri, uint32_t line, uint32_t ch
     if (ts_query_cursor_next_match(cursor, &match)) {
         if (match.capture_count > 0) {
             TSNode node = match.captures[0].node;
-            
-            
             nodeType = ts_node_type(node);
             nodeText = document->getNodeText(node);
-            
+
         }
     }
-    
-    
-    ts_query_cursor_delete(cursor);
-    ts_query_delete(query);
 
-    
+    ts_query_cursor_delete(cursor);
+    ts_query_delete(queries[hoverableNodesQuery]);
+
+
     return analyzer->dialectManager->getDescription(nodeType, nodeText);
 }
 
-Hoverer::Hoverer(WooWooAnalyzer* analyzer) : analyzer(analyzer) {}
+const std::unordered_map <std::string, std::pair<TSLanguage *, std::string>> &Hoverer::getQueryStringByName() const {
+    return queryStringsByName;
+}
+
+const std::string Hoverer::hoverableNodesQuery = "hoverableNodesQuery";
+const std::unordered_map <std::string, std::pair<TSLanguage *, std::string>> Hoverer::queryStringsByName = {
+        {hoverableNodesQuery, std::make_pair(tree_sitter_woowoo(), R"(
+(document_part_type) @node
+(object_type) @node
+(short_inner_environment_type) @node
+(verbose_inner_environment_type) @node
+(outer_environment_type) @node
+)")}};

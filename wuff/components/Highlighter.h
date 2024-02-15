@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "../WooWooAnalyzer.h"
+#include "Component.h"
 
 struct NodeInfo {
     TSPoint startPoint;
@@ -29,11 +30,10 @@ struct pairHash {
 };
 
 
-class Highlighter {
+class Highlighter : Component {
 
 public:
     Highlighter(WooWooAnalyzer * analyzer);
-    ~Highlighter();
     
     std::vector<int> semanticTokens(const std::string& documentPath);
     
@@ -42,15 +42,14 @@ public:
     
     
 private:
-    WooWooAnalyzer * analyzer;
     std::vector<std::string> tokenTypes;
     std::vector<std::string> tokenModifiers;
     
-    void prepareQueries();
-    static const std::string woowooHighlightQueryString;
-    static const std::string yamlHighlightQueryString;
-    TSQuery * woowooHighlightQuery;
-    TSQuery * yamlHighlightQuery;
+    [[nodiscard]] const std::unordered_map<std::string, std::pair<TSLanguage *, std::string>>& getQueryStringByName() const override;
+
+    static const std::string woowooHighlightQuery;
+    static const std::string yamlHighlightQuery;
+    static const std::unordered_map<std::string, std::pair<TSLanguage*,std::string>> queryStringsByName;
     
     
     std::unordered_map<std::string, size_t> tokenTypeIndices;

@@ -4,17 +4,11 @@
 
 #include "Completer.h"
 #include "../utils/utils.h"
-#include <cstdint>
-#include <pybind11/cast.h>
 
-Completer::Completer(WooWooAnalyzer *analyzer) : analyzer(analyzer) {
+Completer::Completer(WooWooAnalyzer *analyzer) : Component(analyzer) {
     prepareQueries();
 }
 
-Completer::~Completer() {
-    ts_query_delete(shortInnerEnvironmentQuery);
-    ts_query_delete(includeCollisionQuery);
-}
 
 std::vector<CompletionItem> Completer::complete(const CompletionParams &params) {
     std::vector<CompletionItem> completionItems;
@@ -24,12 +18,11 @@ std::vector<CompletionItem> Completer::complete(const CompletionParams &params) 
             completeInclude(completionItems, params);
         } else if (params.context->triggerCharacter == ":") {
             completeInnerEnvs(completionItems, params);
-        } else if(params.context->triggerCharacter == "#" ||
-                  params.context->triggerCharacter == "@") {
+        } else if (params.context->triggerCharacter == "#" ||
+                   params.context->triggerCharacter == "@") {
             completeShorthand(completionItems, params);
         }
     }
-
 
     return completionItems;
 }
@@ -46,7 +39,7 @@ void Completer::completeInclude(std::vector<CompletionItem> &completionItems, co
     TSPoint start_point = {line, character};
     TSPoint end_point = {line, character + 1};
     ts_query_cursor_set_point_range(cursor, start_point, end_point);
-    ts_query_cursor_exec(cursor, includeCollisionQuery, ts_tree_root_node(document->tree));
+    ts_query_cursor_exec(cursor, queries[includeCollisionQuery], ts_tree_root_node(document->tree));
 
     TSQueryMatch match;
     bool hasMatch = ts_query_cursor_next_match(cursor, &match);
@@ -78,10 +71,10 @@ void Completer::completeInclude(std::vector<CompletionItem> &completionItems, co
 
     std::string insertText = "include ${1|" + pathsJoined + "|}";
     CompletionItem item{
-        ".include", // label
-        CompletionItemKind::Snippet, // kind
-        InsertTextFormat::Snippet, // insert_text_format
-        insertText // insert_text
+            ".include", // label
+            CompletionItemKind::Snippet, // kind
+            InsertTextFormat::Snippet, // insert_text_format
+            insertText // insert_text
     };
     completionItems.emplace_back(item);
 
@@ -103,7 +96,7 @@ void Completer::completeInnerEnvs(std::vector<CompletionItem> &completionItems, 
     TSPoint start_point = {params.position.line, params.position.character};
     TSPoint end_point = {params.position.line, params.position.character + 1};
     ts_query_cursor_set_point_range(cursor, start_point, end_point);
-    ts_query_cursor_exec(cursor, shortInnerEnvironmentQuery, ts_tree_root_node(document->tree));
+    ts_query_cursor_exec(cursor, queries[shortInnerEnvironmentQuery], ts_tree_root_node(document->tree));
 
     TSQueryMatch match;
     if (ts_query_cursor_next_match(cursor, &match)) {
@@ -113,66 +106,49 @@ void Completer::completeInnerEnvs(std::vector<CompletionItem> &completionItems, 
         // nodes that can be referenced by this env.
         searchProjectForReferencables(completionItems, document, shortInnerEnvType);
     }
+    ts_query_cursor_delete(cursor);
 }
 
 void Completer::completeShorthand(std::vector<CompletionItem> &completionItems, const CompletionParams &params) {
     // NOTE: As of now, suggesting completion everytime, even out of context.
 
     std::string shorthandName;
-    if(params.context->triggerCharacter == "#") shorthandName = "#";
-    if(params.context->triggerCharacter == "@") shorthandName = "@";
-    if(shorthandName.empty()) return;
-    
+    if (params.context->triggerCharacter == "#") shorthandName = "#";
+    if (params.context->triggerCharacter == "@") shorthandName = "@";
+    if (shorthandName.empty()) return;
+
     auto docPath = utils::uriToPathString(params.textDocument.uri);
     auto document = analyzer->getDocument(docPath);
 
     searchProjectForReferencables(completionItems, document, shorthandName);
-    
+
 }
 
 
-void Completer::searchProjectForReferencables(std::vector<CompletionItem> &completionItems, WooWooDocument *doc, std::string & referencingValue) {
+void Completer::searchProjectForReferencables(std::vector<CompletionItem> &completionItems, WooWooDocument *doc,
+                                              std::string &referencingValue) {
 
     for (auto projectDocument: analyzer->getDocumentsFromTheSameProject(doc)) {
         for (auto referencable: projectDocument->getReferencablesBy(referencingValue)) {
             CompletionItem item(projectDocument->getMetaNodeText(referencable.first, referencable.second));
             completionItems.emplace_back(item);
-
         }
     }
-    
+
 }
 
-void Completer::prepareQueries() {
-    uint32_t errorOffset;
-    TSQueryError errorType;
-    includeCollisionQuery = ts_query_new(
-        tree_sitter_woowoo(),
-        includeCollisionQueryString.c_str(),
-        includeCollisionQueryString.length(),
-        &errorOffset,
-        &errorType
-    );
 
-    shortInnerEnvironmentQuery = ts_query_new(
-        tree_sitter_woowoo(),
-        shortInnerEnvironmentQueryString.c_str(),
-        shortInnerEnvironmentQueryString.size(),
-        &errorOffset,
-        &errorType
-    );
-    
-    
-    if (!includeCollisionQuery || !shortInnerEnvironmentQuery) {
-        throw std::runtime_error("COMPLETER: Failed to compile Tree-sitter query.");
-    }
+const std::unordered_map<std::string, std::pair<TSLanguage *, std::string>> &Completer::getQueryStringByName() const {
+    return queryStringsByName;
 }
 
-const std::string Completer::includeCollisionQueryString = R"(
+const std::string Completer::includeCollisionQuery = "includeCollisionQuery";
+const std::string Completer::shortInnerEnvironmentQuery = "shortInnerEnvironmentQuery";
+const std::unordered_map<std::string, std::pair<TSLanguage *, std::string>> Completer::queryStringsByName = {
+        {includeCollisionQuery,      std::make_pair(tree_sitter_woowoo(), R"(
 (block) @b
 (object) @ob
-)";
+)")},
+        {shortInnerEnvironmentQuery, std::make_pair(tree_sitter_woowoo(), "(short_inner_environment_type) @siet")}
+};
 
-const std::string Completer::shortInnerEnvironmentQueryString = R"(
-(short_inner_environment_type) @siet
-)";

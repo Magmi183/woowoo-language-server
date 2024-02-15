@@ -8,26 +8,10 @@
 #include <utility>
 
 
-Highlighter::Highlighter(WooWooAnalyzer *analyzer) : analyzer(analyzer) {
+Highlighter::Highlighter(WooWooAnalyzer *analyzer) : Component(analyzer) {
     prepareQueries();
 }
 
-Highlighter::~Highlighter() {
-    ts_query_delete(woowooHighlightQuery);
-    ts_query_delete(yamlHighlightQuery);
-}
-
-void Highlighter::prepareQueries() {
-    uint32_t error_offset;
-    TSQueryError error_type;
-    TSQuery *query = ts_query_new(tree_sitter_woowoo(), woowooHighlightQueryString.c_str(), woowooHighlightQueryString.size(),
-                                  &error_offset, &error_type);
-    woowooHighlightQuery = query;
-    
-    TSQuery *metaQuery = ts_query_new(tree_sitter_yaml(), yamlHighlightQueryString.c_str(), yamlHighlightQueryString.size(),
-                                      &error_offset, &error_type);
-    yamlHighlightQuery = metaQuery;
-}
 
 std::vector<int> Highlighter::semanticTokens(const std::string &docUri) {
     auto documentPath = utils::uriToPathString(docUri);
@@ -36,9 +20,9 @@ std::vector<int> Highlighter::semanticTokens(const std::string &docUri) {
     std::vector<int> data;
     std::vector<NodeInfo> nodes;
 
-    
+
     TSQueryCursor *wooCursor = ts_query_cursor_new();
-    ts_query_cursor_exec(wooCursor, woowooHighlightQuery, ts_tree_root_node(document->tree));
+    ts_query_cursor_exec(wooCursor, queries[woowooHighlightQuery], ts_tree_root_node(document->tree));
 
     TSQueryMatch match;
     while (ts_query_cursor_next_match(wooCursor, &match)) {
@@ -47,7 +31,8 @@ std::vector<int> Highlighter::semanticTokens(const std::string &docUri) {
             TSNode capturedNode = match.captures[i].node;
 
             uint32_t capture_name_length;
-            const char *capture_name_chars = ts_query_capture_name_for_id(woowooHighlightQuery, capture_index, &capture_name_length);
+            const char *capture_name_chars = ts_query_capture_name_for_id(queries[woowooHighlightQuery], capture_index,
+                                                                          &capture_name_length);
             std::string capture_name(capture_name_chars, capture_name_length);
 
             TSPoint start_point = ts_node_start_point(capturedNode);
@@ -65,9 +50,9 @@ std::vector<int> Highlighter::semanticTokens(const std::string &docUri) {
     addCommentNodes(document, nodes);
 
     // Filtering
-    std::vector < NodeInfo > unique;
+    std::vector<NodeInfo> unique;
     std::unordered_map<std::pair<int, int>, bool, pairHash> seen;
-    for (NodeInfo nodeInfo: nodes){
+    for (NodeInfo nodeInfo: nodes) {
         std::pair<int, int> startPoint = document->utfMappings->utf8ToUtf16(nodeInfo.startPoint.row,
                                                                             nodeInfo.startPoint.column);
         if (seen.find(startPoint) == seen.end()) {
@@ -80,7 +65,7 @@ std::vector<int> Highlighter::semanticTokens(const std::string &docUri) {
         }
     }
     nodes = std::move(unique);
-    
+
     std::sort(nodes.begin(), nodes.end(), [](const NodeInfo &a, const NodeInfo &b) {
         // First, compare by line
         if (a.startPoint.row != b.startPoint.row) {
@@ -92,8 +77,8 @@ std::vector<int> Highlighter::semanticTokens(const std::string &docUri) {
 
     uint32_t lastLine = 0;
     uint32_t lastStart = 0;
-    for (NodeInfo node: nodes) {
-        
+    for (const NodeInfo &node: nodes) {
+
         std::pair<int, int> startPoint = document->utfMappings->utf8ToUtf16(node.startPoint.row,
                                                                             node.startPoint.column);
         std::pair<int, int> endPoint = document->utfMappings->utf8ToUtf16(node.endPoint.row, node.endPoint.column);
@@ -119,10 +104,10 @@ std::vector<int> Highlighter::semanticTokens(const std::string &docUri) {
 
 void Highlighter::addMetaBlocksNodes(WooWooDocument *document, std::vector<NodeInfo> &nodes) {
 
-    
+
     for (MetaContext *metaContext: document->metaBlocks) {
         TSQueryCursor *yamlCursor = ts_query_cursor_new();
-        ts_query_cursor_exec(yamlCursor, yamlHighlightQuery, ts_tree_root_node(metaContext->tree));
+        ts_query_cursor_exec(yamlCursor, queries[yamlHighlightQuery], ts_tree_root_node(metaContext->tree));
 
         TSQueryMatch match;
         while (ts_query_cursor_next_match(yamlCursor, &match)) {
@@ -133,7 +118,7 @@ void Highlighter::addMetaBlocksNodes(WooWooDocument *document, std::vector<NodeI
 
                 // Get the capture name using the capture ID
                 uint32_t capture_name_length;
-                const char *capture_name_chars = ts_query_capture_name_for_id(yamlHighlightQuery, capture_id,
+                const char *capture_name_chars = ts_query_capture_name_for_id(queries[yamlHighlightQuery], capture_id,
                                                                               &capture_name_length);
                 std::string capture_name(capture_name_chars, capture_name_length);
 
@@ -163,7 +148,7 @@ void Highlighter::addCommentNodes(WooWooDocument *document, std::vector<NodeInfo
 }
 
 
-void Highlighter::setTokenTypes(std::vector<std::string> tokenTypesFromClient){
+void Highlighter::setTokenTypes(std::vector<std::string> tokenTypesFromClient) {
     this->tokenTypes = std::move(tokenTypesFromClient);
 
     // build a map for fast access
@@ -171,9 +156,10 @@ void Highlighter::setTokenTypes(std::vector<std::string> tokenTypesFromClient){
         tokenTypeIndices[tokenTypes[i]] = i;
     }
 }
-void Highlighter::setTokenModifiers (std::vector<std::string> tokenModifiersFromClient){
+
+void Highlighter::setTokenModifiers(std::vector<std::string> tokenModifiersFromClient) {
     this->tokenModifiers = std::move(tokenModifiersFromClient);
-    
+
     // build a map for fast access
     for (size_t i = 0; i < tokenModifiers.size(); ++i) {
         tokenModifierIndices[tokenModifiers[i]] = i;
@@ -181,10 +167,15 @@ void Highlighter::setTokenModifiers (std::vector<std::string> tokenModifiersFrom
 }
 
 
-// Inline queries - easier+faster than reading from file
-// - - - - - - - - - - - - - 
+const std::unordered_map<std::string, std::pair<TSLanguage*, std::string>> &Highlighter::getQueryStringByName() const {
+    return queryStringsByName;
+}
 
-const std::string Highlighter::woowooHighlightQueryString = R"(
+const std::string Highlighter::woowooHighlightQuery = "woowooHighlightQuery";
+const std::string Highlighter::yamlHighlightQuery = "yamlHighlightQuery";
+const std::unordered_map<std::string, std::pair<TSLanguage*, std::string>> Highlighter::queryStringsByName = {
+        {woowooHighlightQuery,
+                std::make_pair(tree_sitter_woowoo(), R"(
 ; Include statement
 
 (include) @keyword
@@ -231,10 +222,8 @@ const std::string Highlighter::woowooHighlightQueryString = R"(
 
 ;(math_environment "$" @function)
 ;(math_environment_body ) @number
-)";
-
-
-const std::string Highlighter::yamlHighlightQueryString = R"(
+)")},
+        {yamlHighlightQuery,std::make_pair(tree_sitter_yaml(), R"(
 ; Queries are from https://github.com/nvim-treesitter/nvim-treesitter/blob/master/queries/yaml/highlights.scm , but the order of queries was changed.
 ; The order of the query reflects the priority - if a given node is retrieved by multiple queries,
 ; the type that counts is the type given by the first query that retrieved the given node.
@@ -291,6 +280,9 @@ const std::string Highlighter::yamlHighlightQueryString = R"(
  "---"
  "..."
 ] @operator
-)";
+)") }
+};
+
+
 
 

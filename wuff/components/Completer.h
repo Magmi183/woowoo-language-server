@@ -7,28 +7,27 @@
 
 #include "../WooWooAnalyzer.h"
 #include "../lsp/LSPTypes.h"
+#include "Component.h"
 
 #include <vector>
 
-class Completer {
+class Completer : Component {
 
 public:
-    Completer(WooWooAnalyzer * analyzer);
-    ~Completer();
+    explicit Completer(WooWooAnalyzer *analyzer);
     std::vector<CompletionItem> complete(const CompletionParams & params);
     
 private:
-    WooWooAnalyzer * analyzer;
     void completeInclude(std::vector<CompletionItem> & completionItems, const CompletionParams & params);
     void completeInnerEnvs(std::vector<CompletionItem> & completionItems, const CompletionParams & params);
     void completeShorthand(std::vector<CompletionItem> & completionItems, const CompletionParams & params);
     void searchProjectForReferencables(std::vector<CompletionItem> & completionItems, WooWooDocument * doc, std::string & referencingValue);
+
+    [[nodiscard]] const std::unordered_map<std::string, std::pair<TSLanguage *, std::string>>& getQueryStringByName() const override;
     
-    void prepareQueries();
-    static const std::string includeCollisionQueryString;
-    static const std::string shortInnerEnvironmentQueryString;
-    TSQuery * includeCollisionQuery;
-    TSQuery * shortInnerEnvironmentQuery;
+    static const std::string includeCollisionQuery;
+    static const std::string shortInnerEnvironmentQuery;
+    static const std::unordered_map<std::string, std::pair<TSLanguage*,std::string>> queryStringsByName;
     
 };
 

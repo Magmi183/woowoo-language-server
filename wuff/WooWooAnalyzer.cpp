@@ -190,7 +190,7 @@ std::vector<int> WooWooAnalyzer::semanticTokens(const std::string &docUri) {
 }
 
 Location WooWooAnalyzer::goToDefinition(DefinitionParams params) {
-    return navigator->goToDefinition(std::move(params));
+    return navigator->goToDefinition(params);
 }
 
 std::vector<CompletionItem> WooWooAnalyzer::complete(const CompletionParams &params) {

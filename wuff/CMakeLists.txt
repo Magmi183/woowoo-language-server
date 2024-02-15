@@ -78,6 +78,7 @@ pybind11_add_module(${PROJECT_NAME}
         dialect/InnerEnvironment.cpp
         dialect/OuterEnvironment.cpp
         dialect/Wobject.cpp
+        components/Component.cpp
         components/Hoverer.cpp
         components/Highlighter.cpp
         components/Navigator.cpp
@@ -116,6 +117,7 @@ add_executable(WooWooTest
         dialect/InnerEnvironment.cpp
         dialect/OuterEnvironment.cpp
         dialect/Wobject.cpp
+        components/Component.cpp
         components/Hoverer.cpp
         components/Highlighter.cpp
         components/Navigator.cpp

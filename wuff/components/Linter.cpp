@@ -4,7 +4,7 @@
 
 #include "Linter.h"
 
-Linter::Linter(WooWooAnalyzer *analyzer) : analyzer(analyzer) {
+Linter::Linter(WooWooAnalyzer *analyzer) : Component(analyzer) {
     prepareQueries();
 }
 
@@ -25,7 +25,7 @@ std::vector<Diagnostic> Linter::diagnose(const TextDocumentIdentifier &tdi) {
 void Linter::diagnoseErrors(WooWooDocument *doc, std::vector<Diagnostic> &diagnostics) {
 
     TSQueryCursor *errorCursor = ts_query_cursor_new();
-    ts_query_cursor_exec(errorCursor, errorNodeQuery, ts_tree_root_node(doc->tree));
+    ts_query_cursor_exec(errorCursor, queries[errorNodesQuery], ts_tree_root_node(doc->tree));
 
     TSQueryMatch match;
     while (ts_query_cursor_next_match(errorCursor, &match)) {
@@ -83,12 +83,12 @@ void Linter::diagnoseMetaBlocks(WooWooDocument *doc, std::vector<Diagnostic> &d)
 
 }
 
-
-
-void Linter::prepareQueries() {
-    std::string errorQueryString = "(ERROR) @error";
-    uint32_t error_offset;
-    TSQueryError error_type;
-    errorNodeQuery = ts_query_new(tree_sitter_yaml(), errorQueryString.c_str(), errorQueryString.size(),
-                                  &error_offset, &error_type);
+const std::unordered_map<std::string, std::pair<TSLanguage*, std::string>> &Linter::getQueryStringByName() const {
+    return queryStringsByName;
 }
+
+const std::string Linter::errorNodesQuery = "errorNodesQuery";
+
+const std::unordered_map<std::string, std::pair<TSLanguage*, std::string>> Linter::queryStringsByName = {
+        {errorNodesQuery, std::make_pair(tree_sitter_woowoo(), "(ERROR) @error")}
+};

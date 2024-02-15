@@ -8,7 +8,7 @@
 
 #include "../utils/utils.h"
 
-Navigator::Navigator(WooWooAnalyzer *analyzer) : analyzer(analyzer) {
+Navigator::Navigator(WooWooAnalyzer *analyzer) : Component(analyzer) {
     prepareQueries();
 }
 
@@ -22,7 +22,7 @@ Location Navigator::goToDefinition(const DefinitionParams &params) {
     TSPoint start_point = {line, character};
     TSPoint end_point = {line, character + 1};
     ts_query_cursor_set_point_range(cursor, start_point, end_point);
-    ts_query_cursor_exec(cursor, goToDefinitionQuery, ts_tree_root_node(document->tree));
+    ts_query_cursor_exec(cursor, queries[goToDefinitionQuery], ts_tree_root_node(document->tree));
 
     TSQueryMatch match;
     std::string nodeType;
@@ -53,23 +53,6 @@ Location Navigator::goToDefinition(const DefinitionParams &params) {
         }
     }
     return Location("", Range{Position{0, 0}, Position{0, 0}});
-}
-
-void Navigator::prepareQueries() {
-    uint32_t errorOffset;
-    TSQueryError errorType;
-    
-    goToDefinitionQuery = ts_query_new(tree_sitter_woowoo(), goToDefinitionQueryString.c_str(),
-                                  goToDefinitionQueryString.size(),
-                                  &errorOffset, &errorType);
-
-    metaFieldQuery = ts_query_new(
-            tree_sitter_yaml(),
-            MetaContext::metaFieldQueryString.c_str(),
-            MetaContext::metaFieldQueryString.size(),
-            &errorOffset,
-            &errorType
-    );
 }
 
 Location Navigator::navigateToFile(const DefinitionParams &params, const std::string &relativeFilePath) {
@@ -117,7 +100,7 @@ Location Navigator::resolveMetaBlockReference(const DefinitionParams &params, TS
     TSPoint start_point = {line - mx->lineOffset, character};
     TSPoint end_point = {line - mx->lineOffset, character + 1};
     ts_query_cursor_set_point_range(cursor, start_point, end_point);
-    ts_query_cursor_exec(cursor, metaFieldQuery, ts_tree_root_node(mx->tree));
+    ts_query_cursor_exec(cursor, queries[metaFieldQuery], ts_tree_root_node(mx->tree));
 
     TSQueryMatch match;
     while (ts_query_cursor_next_match(cursor, &match)) {
@@ -128,7 +111,7 @@ Location Navigator::resolveMetaBlockReference(const DefinitionParams &params, TS
             uint32_t capture_id = match.captures[i].index;
 
             uint32_t capture_name_length;
-            const char *capture_name_chars = ts_query_capture_name_for_id(metaFieldQuery, capture_id,
+            const char *capture_name_chars = ts_query_capture_name_for_id(queries[metaFieldQuery], capture_id,
                                                                           &capture_name_length);
             std::string capture_name(capture_name_chars, capture_name_length);
             if (capture_name == "key") {
@@ -175,11 +158,22 @@ Location Navigator::findReference(const DefinitionParams &params, const std::vec
 
 // - - - - - - -
 
-const std::string Navigator::goToDefinitionQueryString = R"(
+const std::unordered_map<std::string, std::pair<TSLanguage *, std::string>> &Navigator::getQueryStringByName() const {
+    return queryStringsByName;
+}
+
+const std::string Navigator::metaFieldQuery = "metaFieldQuery";
+const std::string Navigator::goToDefinitionQuery = "goToDefinitionQuery";
+const std::unordered_map<std::string, std::pair<TSLanguage *, std::string>> Navigator::queryStringsByName = {
+        {metaFieldQuery,      std::make_pair(tree_sitter_yaml(), MetaContext::metaFieldQueryString)},
+        {goToDefinitionQuery, std::make_pair(tree_sitter_woowoo(),
+                                             R"(
 (filename) @type
 (short_inner_environment) @type
 (verbose_inner_environment_hash_end) @type
 (verbose_inner_environment_at_end) @type
 (meta_block) @type
-)";
+)")}
+};
+
 
