@@ -5,11 +5,10 @@
 #include "WooWooDocument.h"
 #include <fstream>
 #include <sstream>
+#include <utility>
 
 
-WooWooDocument::WooWooDocument(fs::path documentPath1, Parser *parser1) {
-    documentPath = documentPath1;
-    parser = parser1;
+WooWooDocument::WooWooDocument(fs::path documentPath, Parser *parser) : documentPath(std::move(documentPath)), parser(parser) {
     utfMappings = new UTF8toUTF16Mapping();
     updateSource();
 }
@@ -20,9 +19,8 @@ void WooWooDocument::updateSource() {
         std::stringstream buffer;
         buffer << file.rdbuf();
         file.close();
-        std::string source = buffer.str();
-        updateSource(source);
-
+        std::string fileContents = buffer.str();
+        updateSource(fileContents);
     } else {
         std::cerr << "Could not open file: " << documentPath << std::endl;
     }
@@ -36,7 +34,6 @@ void WooWooDocument::updateSource(std::string &newSource) {
     metaBlocks = parser->parseMetas(tree, source);
     utfMappings->buildMappings(source);
     updateComments();
-
 }
 
 void WooWooDocument::updateComments() {
@@ -56,14 +53,14 @@ std::string WooWooDocument::substr(uint32_t startByte, uint32_t endByte) const {
     return source.substr(startByte, endByte - startByte);
 }
 
-std::string WooWooDocument::getNodeText(TSNode node) {
+std::string WooWooDocument::getNodeText(TSNode node) const {
     // function assumes that the node is a part of this document!
     uint32_t start_byte = ts_node_start_byte(node);
     uint32_t end_byte = ts_node_end_byte(node);
     return substr(start_byte, end_byte);
 }
 
-std::string WooWooDocument::getMetaNodeText(MetaContext *mx, TSNode node) {
+std::string WooWooDocument::getMetaNodeText(MetaContext *mx, TSNode node) const {
     uint32_t meta_start_byte = ts_node_start_byte(node);
     uint32_t meta_end_byte = ts_node_end_byte(node);
     return substr(meta_start_byte + mx->byteOffset, meta_end_byte + mx->byteOffset);

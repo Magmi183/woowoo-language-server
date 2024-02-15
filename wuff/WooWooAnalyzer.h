@@ -52,7 +52,7 @@ public:
     // LSP-like functionalities
     std::string hover(const std::string& docUri, int line, int character);
     std::vector<int> semanticTokens(const std::string& docUri);
-    Location goToDefinition(DefinitionParams params);
+    Location goToDefinition(const DefinitionParams& params);
     std::vector<CompletionItem> complete(const CompletionParams & params);
     std::vector<Diagnostic> diagnose(const TextDocumentIdentifier & tdi); 
     std::vector<FoldingRange> foldingRanges(const TextDocumentIdentifier & tdi);
@@ -67,13 +67,13 @@ public:
     
 private:
 
-    std::vector<fs::path> findProjectFolders(const fs::path& rootPath);
-    std::optional<fs::path> findProjectFolder(const std::string& uri);
+    static static std::vector<fs::path> findProjectFolders(const fs::path& rootPath);
+    static std::optional<fs::path> findProjectFolder(const std::string& uri);
     
     void loadDocument(const fs::path& projectPath, const fs::path& documentPath);
     void handleDocumentChange(const TextDocumentIdentifier & tdi, std::string & source);
-    bool endsWith(const std::string &str, const std::string &suffix) const;
-    std::vector<fs::path> findAllWooFiles(const fs::path  & rootPath);
+    static bool endsWith(const std::string &str, const std::string &suffix) ;
+    static static std::vector<fs::path> findAllWooFiles(const fs::path  & rootPath);
 };
 
 

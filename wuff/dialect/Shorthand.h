@@ -19,7 +19,7 @@ public:
     MetaBlock metaBlock;
     
     Shorthand() = default;
-    Shorthand(const std::string& type, const std::string& description, const std::vector<Reference>& references = {}, const MetaBlock& metaBlock = MetaBlock());
+    Shorthand(std::string  type, std::string  description, const std::vector<Reference>& references = {}, MetaBlock  metaBlock = MetaBlock());
     void deserialize(const YAML::Node& node);
 
 };

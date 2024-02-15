@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 // Created by Michal Janecek on 31.01.2024.
 //
@@ -19,13 +21,13 @@ struct Location {
     std::string uri;
     Range range;
 
-    Location(std::string uri, Range range) : uri(uri), range(range){}
+    Location(std::string uri, Range range) : uri(std::move(uri)), range(range){}
 };
 
 struct TextDocumentIdentifier {
     std::string uri;
 
-    TextDocumentIdentifier(const std::string& uri) : uri(uri) {}
+    explicit TextDocumentIdentifier(std::string uri) : uri(std::move(uri)) {}
 };
 
 struct TextDocumentPositionParams {
@@ -51,8 +53,8 @@ struct CompletionContext {
     CompletionTriggerKind triggerKind;
     std::optional<std::string> triggerCharacter;
 
-    CompletionContext(CompletionTriggerKind triggerKind, std::optional<std::string> triggerCharacter = std::nullopt)
-            : triggerKind(triggerKind), triggerCharacter(triggerCharacter) {}
+    explicit CompletionContext(CompletionTriggerKind triggerKind, std::optional<std::string> triggerCharacter = std::nullopt)
+            : triggerKind(triggerKind), triggerCharacter(std::move(triggerCharacter)) {}
 };
 
 
@@ -60,7 +62,7 @@ struct CompletionParams : public TextDocumentPositionParams {
     std::optional<CompletionContext> context; // Context is optional
 
     CompletionParams(const TextDocumentIdentifier& textDocument, const Position& position, std::optional<CompletionContext> context = std::nullopt)
-            : TextDocumentPositionParams(textDocument, position), context(context) {}
+            : TextDocumentPositionParams(textDocument, position), context(std::move(context)) {}
 };
 
 
@@ -103,10 +105,10 @@ struct CompletionItem {
     std::optional<InsertTextFormat> insertTextFormat; 
     std::optional<std::string> insertText; 
     
-    CompletionItem(std::string label, std::optional<CompletionItemKind> kind = std::nullopt,
+    explicit CompletionItem(std::string label, std::optional<CompletionItemKind> kind = std::nullopt,
                    std::optional<InsertTextFormat> insertTextFormat = std::nullopt,
                    std::optional<std::string> insertText = std::nullopt)
-            : label(std::move(label)), kind(kind), insertTextFormat(insertTextFormat), insertText(insertText) {}
+            : label(std::move(label)), kind(kind), insertTextFormat(insertTextFormat), insertText(std::move(insertText)) {}
 };
 
 
@@ -136,9 +138,9 @@ struct FoldingRange {
     std::string foldingRangeKind;
 
     FoldingRange(uint32_t startLine, uint32_t startCharacter, uint32_t endLine, uint32_t endCharacter,
-                 const std::string &foldingRangeKind) : startLine(startLine), startCharacter(startCharacter),
+                 std::string foldingRangeKind) : startLine(startLine), startCharacter(startCharacter),
                                                         endLine(endLine), endCharacter(endCharacter),
-                                                        foldingRangeKind(foldingRangeKind) {}
+                                                        foldingRangeKind(std::move(foldingRangeKind)) {}
 };
 
 #endif //WUFF_LSPTYPES_H

@@ -3,6 +3,7 @@
 //
 
 #include "Component.h"
+#include "../utils/utils.h"
 
 Component::Component(WooWooAnalyzer *analyzer) : analyzer(analyzer) {}
 
@@ -24,29 +25,7 @@ void Component::prepareQueries() {
         );
 
         if (!query) {
-            std::string errorMessage = "Error compiling query '" + queryName + "': ";
-
-            switch (errorType) {
-                case TSQueryErrorSyntax:
-                    errorMessage += "Syntax error";
-                    break;
-                case TSQueryErrorNodeType:
-                    errorMessage += "Invalid node type";
-                    break;
-                case TSQueryErrorField:
-                    errorMessage += "Invalid field name";
-                    break;
-                case TSQueryErrorCapture:
-                    errorMessage += "Invalid capture name";
-                    break;
-                default:
-                    errorMessage += "Unknown error";
-                    break;
-            }
-
-            errorMessage += " at offset " + std::to_string(errorOffset) + ".";
-
-            throw std::runtime_error(errorMessage);
+            utils::reportQueryError(queryName, errorOffset, errorType);
         }
 
         queries[queryName] = query;

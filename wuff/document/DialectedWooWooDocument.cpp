@@ -5,17 +5,18 @@
 #include "DialectedWooWooDocument.h"
 #include <algorithm>
 #include "../dialect/DialectManager.h"
+#include "../utils/utils.h"
 
 DialectedWooWooDocument::DialectedWooWooDocument(const fs::path &documentPath1, Parser *parser1,
                                                  DialectManager *dialectManager)
-    : WooWooDocument(documentPath1, parser1), dialectManager(dialectManager) {
+        : WooWooDocument(documentPath1, parser1), dialectManager(dialectManager) {
     prepareQueries();
     index();
 }
 
 
 DialectedWooWooDocument::~DialectedWooWooDocument() {
-    // TODO: Delete queries
+    ts_query_delete(fieldQuery);
 }
 
 void DialectedWooWooDocument::index() {
@@ -26,14 +27,14 @@ void DialectedWooWooDocument::index() {
 
             // create if not exist
             referencableNodes[ref];
-            
+
             for (MetaContext *mx: metaBlocks) {
                 if ((ref.structureType.empty() || ref.structureType == mx->parentType) &&
                     (ref.structureName.empty() || ref.structureName == mx->parentName)) {
                     // this metablock is matching the requiremens by the reference
 
                     TSQueryCursor *wooCursor = ts_query_cursor_new();
-                    ts_query_cursor_exec(wooCursor, fieldQueries[ref.metaKey], ts_tree_root_node(mx->tree));
+                    ts_query_cursor_exec(wooCursor, fieldQuery, ts_tree_root_node(mx->tree));
 
                     TSQueryMatch match;
                     while (ts_query_cursor_next_match(wooCursor, &match)) {
@@ -45,7 +46,7 @@ void DialectedWooWooDocument::index() {
 
                             uint32_t valueCaptureName;
                             const char *valueCaptureNameChars = ts_query_capture_name_for_id(
-                                fieldQueries[ref.metaKey], capture_index, &valueCaptureName);
+                                    fieldQuery, capture_index, &valueCaptureName);
                             std::string valueCaptureNameStr(valueCaptureNameChars, valueCaptureName);
 
                             if (valueCaptureNameStr == "value") {
@@ -63,7 +64,7 @@ void DialectedWooWooDocument::index() {
                         if (!correctKey) continue;
                         referencablesByNode[typeName].emplace_back(std::make_pair(mx, valueNode));
                         referencableNodes[ref][getMetaNodeText(mx, valueNode)] = std::make_pair(mx, valueNode);
-                        
+
                     }
                     ts_query_cursor_delete(wooCursor);
                 }
@@ -74,33 +75,26 @@ void DialectedWooWooDocument::index() {
 
 
 void DialectedWooWooDocument::prepareQueries() {
-    // TODO: Remove and make just one query. Predicates are not supported directly by lib c treesitter.
-    for (const auto &reference: dialectManager->allReferences) {
-        if (fieldQueries.contains(reference.metaKey)) continue;
-
-        std::ostringstream queryStream;
-        queryStream << "(block_mapping_pair "
-                << "key: (flow_node [(double_quote_scalar) (single_quote_scalar) (plain_scalar)] @key) "
-                << "value: (flow_node) @value "
-                << "(#eq? @key \"" << reference.metaKey << "\"))";
-
-        std::string queryString = queryStream.str();
-        uint32_t errorOffset;
-        TSQueryError errorType;
-        TSQuery *query = ts_query_new(
+    uint32_t errorOffset;
+    TSQueryError errorType;
+    fieldQuery = ts_query_new(
             tree_sitter_yaml(),
-            queryString.c_str(),
-            queryString.size(),
+            MetaContext::metaFieldQueryString.c_str(),
+            MetaContext::metaFieldQueryString.size(),
             &errorOffset,
             &errorType
-        );
-        fieldQueries[reference.metaKey] = query;
+    );
+
+    if (!fieldQuery) {
+        utils::reportQueryError("fieldQuery", errorOffset, errorType);
     }
+
+
 }
 
 
 std::vector<std::pair<MetaContext *, TSNode> > DialectedWooWooDocument::getReferencablesBy(
-    const std::string &referencingTypeName) {
+        const std::string &referencingTypeName) {
     auto refTypes = dialectManager->getReferencingTypeNames();
     if (std::find(refTypes.begin(), refTypes.end(), referencingTypeName) == refTypes.end()) {
         return {};
@@ -108,9 +102,10 @@ std::vector<std::pair<MetaContext *, TSNode> > DialectedWooWooDocument::getRefer
     return referencablesByNode[referencingTypeName];
 }
 
-std::optional<std::pair<MetaContext *, TSNode>> DialectedWooWooDocument::findReferencable(const std::vector<Reference> &references, const std::string &referenceValue) {
+std::optional<std::pair<MetaContext *, TSNode>>
+DialectedWooWooDocument::findReferencable(const std::vector<Reference> &references, const std::string &referenceValue) {
 
-    for (auto & ref: references) {
+    for (auto &ref: references) {
         if (referencableNodes[ref].contains(referenceValue)) {
             return referencableNodes[ref][referenceValue];
         }

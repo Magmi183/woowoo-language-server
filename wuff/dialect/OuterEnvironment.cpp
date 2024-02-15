@@ -5,8 +5,10 @@
 
 #include "OuterEnvironment.h"
 
-OuterEnvironment::OuterEnvironment(const std::string& name, const std::string& description, const MetaBlock& metaBlock)
-        : name(name), description(description), metaBlock(metaBlock) {
+#include <utility>
+
+OuterEnvironment::OuterEnvironment(std::string  name, std::string  description, MetaBlock  metaBlock)
+        : name(std::move(name)), description(std::move(description)), metaBlock(std::move(metaBlock)) {
 }
 
 void OuterEnvironment::deserialize(const YAML::Node& node) {

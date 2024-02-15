@@ -4,8 +4,10 @@
 
 #include "Shorthand.h"
 
-Shorthand::Shorthand(const std::string& type, const std::string& description, const std::vector<Reference>& references, const MetaBlock& metaBlock)
-        : type(type), description(description), references(references), metaBlock(metaBlock) {
+#include <utility>
+
+Shorthand::Shorthand(std::string  type, std::string  description, const std::vector<Reference>& references, MetaBlock  metaBlock)
+        : type(std::move(type)), description(std::move(description)), references(references), metaBlock(std::move(metaBlock)) {
 }
 
 

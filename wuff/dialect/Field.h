@@ -17,7 +17,7 @@ public:
     std::string name;
     std::vector<Reference> references; 
 
-    explicit Field(const std::string& name, const std::vector<Reference>& references);
+    explicit Field(std::string  name, const std::vector<Reference>& references);
     void deserialize(const YAML::Node& node);
     Field() = default;
 };

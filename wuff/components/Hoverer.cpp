@@ -37,9 +37,6 @@ std::string Hoverer::hover(const std::string &docUri, uint32_t line, uint32_t ch
     }
 
     ts_query_cursor_delete(cursor);
-    ts_query_delete(queries[hoverableNodesQuery]);
-
-
     return analyzer->dialectManager->getDescription(nodeType, nodeText);
 }
 

@@ -17,7 +17,7 @@ public:
     MetaBlock metaBlock;
 
     DocumentPart() = default;
-    DocumentPart(const std::string& name, const std::string& description, const MetaBlock& metaBlock = MetaBlock());
+    DocumentPart(std::string  name, std::string  description, MetaBlock  metaBlock = MetaBlock());
     void deserialize(const YAML::Node& node);
 
     std::string getDescription() const override {

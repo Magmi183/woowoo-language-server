@@ -18,14 +18,14 @@ public:
     MetaBlock metaBlock;
 
     Wobject() = default;
-    Wobject(const std::string& name, const std::string& description, const MetaBlock& metaBlock = MetaBlock());
+    Wobject(std::string  name, std::string  description, MetaBlock  metaBlock = MetaBlock());
     void deserialize(const YAML::Node& node);
 
-    std::string getDescription() const override {
+    [[nodiscard]] std::string getDescription() const override {
         return description;
     }
 
-    std::string getName() const override {
+    [[nodiscard]] std::string getName() const override {
         return name;
     }
 

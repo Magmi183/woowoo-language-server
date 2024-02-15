@@ -4,9 +4,11 @@
 
 #include "InnerEnvironment.h"
 
+#include <utility>
 
-InnerEnvironment::InnerEnvironment(const std::string& name, const std::string& description, const std::vector<Reference>& references, const MetaBlock& metaBlock)
-        : name(name), description(description), references(references), metaBlock(metaBlock) {
+
+InnerEnvironment::InnerEnvironment(std::string  name, std::string  description, const std::vector<Reference>& references, MetaBlock  metaBlock)
+        : name(std::move(name)), description(std::move(description)), references(references), metaBlock(std::move(metaBlock)) {
 }
 
 void InnerEnvironment::deserialize(const YAML::Node& node) {

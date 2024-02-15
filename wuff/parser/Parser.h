@@ -25,7 +25,10 @@ public:
 private:
     TSParser* WooWooParser;
     TSParser* YAMLParser;
-    std::string extractStructureName(const TSNode & node, const std::string &source);
+    
+    void prepareQueries();
+    TSQuery * metaBlocksQuery;
+    static std::string extractStructureName(const TSNode & node, const std::string &source);
 };
 
 

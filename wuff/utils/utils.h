@@ -6,6 +6,7 @@
 #define WUFF_UTILS_H
 
 #include <string>
+#include "../document/WooWooDocument.h"
 
 namespace utils {
 
@@ -13,6 +14,7 @@ namespace utils {
     std::string uriToPathString(const std::string& uri);
     std::string pathToUri(const fs::path &documentPath);
     std::string getChildText(TSNode node, const char *childType, WooWooDocument *doc);
+    void reportQueryError(const std::string & queryName, uint32_t errorOffset, TSQueryError errorType);
 } // namespace utils
 
 

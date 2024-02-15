@@ -4,7 +4,9 @@
 
 #include "Field.h"
 
-Field::Field(const std::string& name, const std::vector<Reference>& references) : name(name), references(references) {
+#include <utility>
+
+Field::Field(std::string  name, const std::vector<Reference>& references) : name(std::move(name)), references(references) {
 }
 
 void Field::deserialize(const YAML::Node& node) {

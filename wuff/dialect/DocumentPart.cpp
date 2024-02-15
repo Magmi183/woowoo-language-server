@@ -4,8 +4,10 @@
 
 #include "DocumentPart.h"
 
-DocumentPart::DocumentPart(const std::string& name, const std::string& description, const MetaBlock& metaBlock)
-        : name(name), description(description), metaBlock(metaBlock) {
+#include <utility>
+
+DocumentPart::DocumentPart(std::string  name, std::string  description, MetaBlock  metaBlock)
+        : name(std::move(name)), description(std::move(description)), metaBlock(std::move(metaBlock)) {
 }
 
 void DocumentPart::deserialize(const YAML::Node& node) {

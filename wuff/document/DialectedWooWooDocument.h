@@ -28,11 +28,10 @@ public:
 
 private:
 
+    void index();
 
     void prepareQueries();
-    void index();
-    std::unordered_map<std::string, TSQuery *> fieldQueries;
-
+    TSQuery * fieldQuery;
     // given a typeName, get all nodes that can be referenced by that
     std::unordered_map<std::string, std::vector<std::pair<MetaContext *, TSNode>> > referencablesByNode;
     

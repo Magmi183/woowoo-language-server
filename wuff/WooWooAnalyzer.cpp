@@ -20,9 +20,8 @@
 
 #include "utils/utils.h"
 
-WooWooAnalyzer::WooWooAnalyzer() {
+WooWooAnalyzer::WooWooAnalyzer() : dialectManager(nullptr) {
     parser = new Parser();
-
     highlighter = new Highlighter(this);
     hoverer = new Hoverer(this);
     navigator = new Navigator(this);
@@ -171,7 +170,7 @@ void WooWooAnalyzer::renameDocument(const std::string &oldUri, const std::string
 
 
 
-bool WooWooAnalyzer::endsWith(const std::string &str, const std::string &suffix) const {
+bool WooWooAnalyzer::endsWith(const std::string &str, const std::string &suffix) {
     if (str.length() >= suffix.length()) {
         return (str.rfind(suffix) == (str.length() - suffix.length()));
     } else {
@@ -189,7 +188,7 @@ std::vector<int> WooWooAnalyzer::semanticTokens(const std::string &docUri) {
     return highlighter->semanticTokens(docUri);
 }
 
-Location WooWooAnalyzer::goToDefinition(DefinitionParams params) {
+Location WooWooAnalyzer::goToDefinition(const DefinitionParams& params) {
     return navigator->goToDefinition(params);
 }
 
@@ -220,7 +219,7 @@ void WooWooAnalyzer::openDocument(const TextDocumentIdentifier &tdi) {
 }
 
 
-void WooWooAnalyzer::setTokenTypes(std::vector<std::string> tokenTypes) { return highlighter->setTokenTypes(tokenTypes); }
-void WooWooAnalyzer::setTokenModifiers (std::vector<std::string> tokenModifiers) { return highlighter->setTokenModifiers(tokenModifiers); }
+void WooWooAnalyzer::setTokenTypes(std::vector<std::string> tokenTypes) { return highlighter->setTokenTypes(std::move(tokenTypes)); }
+void WooWooAnalyzer::setTokenModifiers (std::vector<std::string> tokenModifiers) { return highlighter->setTokenModifiers(std::move(tokenModifiers)); }
 
 // - - - - - - - - - - - - - - - - -

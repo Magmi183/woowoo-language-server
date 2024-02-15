@@ -5,37 +5,40 @@
 #include "Parser.h"
 #include <iostream>
 #include <cstring>
+#include "../utils/utils.h"
 
 
 Parser::Parser() : WooWooParser(ts_parser_new()), YAMLParser(ts_parser_new()) {
-    // Set the language for the parser to WooWoo
     ts_parser_set_language(WooWooParser, tree_sitter_woowoo());
     ts_parser_set_language(YAMLParser, tree_sitter_yaml());
+    prepareQueries();
 }
 
 Parser::~Parser() {
     ts_parser_delete(WooWooParser);
     ts_parser_delete(YAMLParser);
+    ts_query_delete(metaBlocksQuery);
 }
 
-
-std::vector<MetaContext *> Parser::parseMetas(TSTree *WooWooTree, const std::string &source) {
-    std::vector<MetaContext *> metaBlocks;
+void Parser::prepareQueries() {
 
     const char *queryString = "(meta_block) @metablock";
     uint32_t errorOffset;
     TSQueryError errorType;
 
-    TSQuery *query = ts_query_new(tree_sitter_woowoo(), queryString, strlen(queryString), &errorOffset, &errorType);
+    metaBlocksQuery = ts_query_new(tree_sitter_woowoo(), queryString, strlen(queryString), &errorOffset, &errorType);
 
-    if (errorType != TSQueryErrorNone) {
-        std::cerr << "Failed to compile query at offset " << errorOffset << " with error type " << errorType <<
-                std::endl;
-        // TODO: handle
+    if (!metaBlocksQuery) {
+        utils::reportQueryError("metaBlockQuery", errorOffset, errorType);
     }
 
+}
+
+std::vector<MetaContext *> Parser::parseMetas(TSTree *WooWooTree, const std::string &source) {
+
+    std::vector<MetaContext *> metaBlocks;
     TSQueryCursor *queryCursor = ts_query_cursor_new();
-    ts_query_cursor_exec(queryCursor, query, ts_tree_root_node(WooWooTree));
+    ts_query_cursor_exec(queryCursor, metaBlocksQuery, ts_tree_root_node(WooWooTree));
 
     TSQueryMatch match;
     uint32_t captureIndex;
@@ -61,10 +64,7 @@ std::vector<MetaContext *> Parser::parseMetas(TSTree *WooWooTree, const std::str
         metaBlocks.emplace_back(metaContext);
     }
 
-    // Cleanup
     ts_query_cursor_delete(queryCursor);
-    ts_query_delete(query);
-
     return metaBlocks;
 }
 

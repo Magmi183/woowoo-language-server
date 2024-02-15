@@ -20,7 +20,7 @@ public:
     std::vector<Reference> references; 
     MetaBlock metaBlock;
     InnerEnvironment() = default;
-    InnerEnvironment(const std::string& name, const std::string& description, const std::vector<Reference>& references = {}, const MetaBlock& metaBlock = MetaBlock());
+    InnerEnvironment(std::string  name, std::string  description, const std::vector<Reference>& references = {}, MetaBlock  metaBlock = MetaBlock());
     void deserialize(const YAML::Node& node);
 
     std::string getDescription() const override {
