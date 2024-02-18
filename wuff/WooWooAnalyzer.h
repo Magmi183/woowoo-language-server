@@ -67,13 +67,13 @@ public:
     
 private:
 
-    static static std::vector<fs::path> findProjectFolders(const fs::path& rootPath);
+    static std::vector<fs::path> findProjectFolders(const fs::path& rootPath);
     static std::optional<fs::path> findProjectFolder(const std::string& uri);
     
     void loadDocument(const fs::path& projectPath, const fs::path& documentPath);
     void handleDocumentChange(const TextDocumentIdentifier & tdi, std::string & source);
     static bool endsWith(const std::string &str, const std::string &suffix) ;
-    static static std::vector<fs::path> findAllWooFiles(const fs::path  & rootPath);
+    static std::vector<fs::path> findAllWooFiles(const fs::path  & rootPath);
 };
 
 

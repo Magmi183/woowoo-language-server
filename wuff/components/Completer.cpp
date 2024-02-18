@@ -89,8 +89,7 @@ void Completer::completeInclude(std::vector<CompletionItem> &completionItems, co
  * \param params 
  */
 void Completer::completeInnerEnvs(std::vector<CompletionItem> &completionItems, const CompletionParams &params) {
-    auto docPath = utils::uriToPathString(params.textDocument.uri);
-    auto document = analyzer->getDocument(docPath);
+    auto document = analyzer->getDocumentByUri(params.textDocument.uri);
 
     TSQueryCursor *cursor = ts_query_cursor_new();
     TSPoint start_point = {params.position.line, params.position.character};

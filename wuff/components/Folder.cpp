@@ -14,8 +14,7 @@ Folder::Folder(WooWooAnalyzer *analyzer) : Component(analyzer) {
 
 std::vector<FoldingRange> Folder::foldingRanges(const TextDocumentIdentifier &tdi) {
 
-    auto docPath = utils::uriToPathString(tdi.uri);
-    auto document = analyzer->getDocument(docPath);
+    auto document = analyzer->getDocumentByUri(tdi.uri);
 
     std::vector<FoldingRange> ranges;
 

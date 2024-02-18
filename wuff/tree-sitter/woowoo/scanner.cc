@@ -5,7 +5,6 @@
 #include <iostream>
 
 using std::vector;
-using std::iswspace;
 using std::memcpy;
 
 // order must match the externals array in grammar, actual names do not matter
@@ -640,7 +639,7 @@ struct Scanner {
         }
 
         // after operator, a lowercase letter must follow
-        if (islower(lexer->lookahead)) {
+        if (lexer->lookahead < 256 && islower(lexer->lookahead)) {
             advance(lexer);
             consumed++;
         } else {
@@ -648,7 +647,7 @@ struct Scanner {
         }
 
         // the rest of the type is a sequence of any-cased letters
-        while (isalpha(lexer->lookahead)) {
+        while (lexer->lookahead < 256 && isalpha(lexer->lookahead)) {
             advance(lexer);
             consumed++;
         }

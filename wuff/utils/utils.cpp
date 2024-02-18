@@ -11,18 +11,18 @@
 
 namespace utils {
     std::string percentDecode(const std::string &encoded) {
-        std::ostringstream decoded;
+        std::string decoded;
         for (size_t i = 0; i < encoded.length(); ++i) {
             if (encoded[i] == '%' && i + 2 < encoded.length()) {
                 std::string hex = encoded.substr(i + 1, 2);
-                char decodedChar = static_cast<char>(std::stoi(hex, nullptr, 16));
-                decoded << decodedChar;
+                char ch = static_cast<char>(std::stoi(hex, nullptr, 16));
+                decoded += ch;
                 i += 2; // Skip the next two characters
             } else {
-                decoded << encoded[i];
+                decoded += encoded[i];
             }
         }
-        return decoded.str();
+        return decoded;
     }
 
     std::string uriToPathString(const std::string &uri) {
@@ -30,31 +30,40 @@ namespace utils {
         if (uri.substr(0, 7) != "file://") {
             throw std::invalid_argument("URI does not start with 'file://'");
         }
+
         std::string path = uri.substr(7); // Remove 'file://'
 
+        path = percentDecode(path); // Decode any percent-encoded characters
+        std::transform(path.begin(), path.end(), path.begin(), ::tolower);
+
 #ifdef _WIN32
-        // Special handling for Windows paths that start with a drive letter
-    if (path.size() > 2 && path[2] == ':') {
-        path.erase(0, 1); // Remove the leading '/' if it exists
-    }
+        // Windows file URIs start with a '/', which should not be present in the final path
+        // Additionally, we need to handle drive letters (e.g., 'C:/')
+        if (path.size() > 1 && path[0] == '/' && path[2] == ':') {
+            path.erase(0, 1); // Remove the leading '/'
+        }
+#else
+        // On Unix-like systems, no additional processing is needed
 #endif
 
-        return percentDecode(path);
+        return fs::path(path).generic_string(); // Convert to generic path format
     }
+
 
     std::string pathToUri(const fs::path &documentPath) {
         std::string uri = "file://";
 
+        // On Windows, prepend with '/' to accommodate the drive letter and colon
 #ifdef _WIN32
-        // On Windows, include the drive letter in the host component
-        if (!documentPath.root_name().empty()) {
-            uri += "/";
-            uri += documentPath.root_name().string();
+        if (!documentPath.empty()) {
+            uri += '/';
+            // Use the generic string and replace backslashes with forward slashes
+            std::string pathStr = documentPath.generic_string();
+            uri += pathStr;
         }
+#else
+    uri += documentPath.generic_string();
 #endif
-
-        // Convert the path to a generic format, which uses '/' as the directory separator
-        uri += documentPath.generic_string();
 
         return uri;
     }
@@ -96,6 +105,4 @@ namespace utils {
 
         throw std::runtime_error(errorMessage);
     }
-
-
 } // namespace utils

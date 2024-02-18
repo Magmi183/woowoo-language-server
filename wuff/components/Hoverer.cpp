@@ -12,8 +12,7 @@ Hoverer::Hoverer(WooWooAnalyzer *analyzer) : Component(analyzer) {
 
 
 std::string Hoverer::hover(const std::string &docUri, uint32_t line, uint32_t character) {
-    auto docPath = utils::uriToPathString(docUri);
-    WooWooDocument *document = analyzer->getDocument(docPath);
+    WooWooDocument *document = analyzer->getDocumentByUri(docUri);
     auto pos = document->utfMappings->utf16ToUtf8(line, character);
     line = pos.first;
     character = pos.second;

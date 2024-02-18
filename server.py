@@ -60,7 +60,8 @@ class WooWooLanguageServer(LanguageServer):
         return analyzer
 
     def load_workspace(self, workspace: WorkspaceFolder):
-        self.analyzer.load_workspace(unquote(workspace.uri))
+        uri = unquote(workspace.uri)
+        self.analyzer.load_workspace(uri)
 
 
     def set_dialect(self, dialect_file_path):
@@ -111,7 +112,6 @@ def initiliaze(ls: WooWooLanguageServer, params: InitializeParams) -> None:
 @SERVER.feature(INITIALIZED)
 def initiliazed(_ls: WooWooLanguageServer, params: InitializedParams) -> None:
     logger.debug("[INITIALIZED] Connection was established.")
-
 
 @SERVER.feature(TEXT_DOCUMENT_DID_OPEN)
 def did_open(ls: WooWooLanguageServer, params: DidOpenTextDocumentParams):
