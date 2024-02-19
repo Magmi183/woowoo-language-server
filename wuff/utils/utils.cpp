@@ -3,7 +3,7 @@
 //
 
 #include <string>
-#include <sstream>
+#include <cstring>
 #include <tree_sitter/api.h>
 
 #include "../document/WooWooDocument.h"
