@@ -191,9 +191,9 @@ const std::unordered_map<std::string, std::pair<TSLanguage*, std::string>> Highl
 ;(document_part_title) @variable
 
 
-; Object
-;(object ["." ":"] @operator)
-;(object_type) @storage.type.struct
+; Wobject
+;(wobject ["." ":"] @operator)
+;(wobject_type) @storage.type.struct
 
 
 ; Block

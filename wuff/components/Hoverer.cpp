@@ -47,7 +47,7 @@ const std::string Hoverer::hoverableNodesQuery = "hoverableNodesQuery";
 const std::unordered_map <std::string, std::pair<TSLanguage *, std::string>> Hoverer::queryStringsByName = {
         {hoverableNodesQuery, std::make_pair(tree_sitter_woowoo(), R"(
 (document_part_type) @node
-(object_type) @node
+(wobject_type) @node
 (short_inner_environment_type) @node
 (verbose_inner_environment_type) @node
 (outer_environment_type) @node

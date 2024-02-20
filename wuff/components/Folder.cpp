@@ -47,6 +47,6 @@ const std::string Folder::foldableTypesQuery = "foldableTypesQuery";
 const std::unordered_map<std::string, std::pair<TSLanguage *, std::string>> Folder::queryStringsByName = {
         {foldableTypesQuery, std::make_pair(tree_sitter_woowoo(), R"(
 (document_part) @dp
-(object) @ob
+(wobject) @ob
 (block) @b
 )")}};

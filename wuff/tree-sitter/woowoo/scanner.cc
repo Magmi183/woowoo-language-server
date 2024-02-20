@@ -203,7 +203,7 @@ struct Scanner {
                 state->space_count = 0;
                 if (valid_symbols[EMPTY_LINE] || valid_symbols[MULTI_EMPTY_LINE]) {
                     // we could just be on an empty line and the indentation level will continue on next line
-                    // same for MULTI_EMPTY_LINE - in Objects could be confused with dedent
+                    // same for MULTI_EMPTY_LINE - in wobjects could be confused with dedent
                     // for example, if we are in the middle of a block (separated textblocks/envs), we must NOT interpret this as a dedent
                     mark_end(lexer);
 

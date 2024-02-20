@@ -146,7 +146,7 @@ const std::string Completer::shortInnerEnvironmentQuery = "shortInnerEnvironment
 const std::unordered_map<std::string, std::pair<TSLanguage *, std::string>> Completer::queryStringsByName = {
         {includeCollisionQuery,      std::make_pair(tree_sitter_woowoo(), R"(
 (block) @b
-(object) @ob
+(wobject) @ob
 )")},
         {shortInnerEnvironmentQuery, std::make_pair(tree_sitter_woowoo(), "(short_inner_environment_type) @siet")}
 };

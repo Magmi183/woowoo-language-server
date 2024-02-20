@@ -82,7 +82,7 @@ std::string DialectManager::getDescription(const std::string &type, const std::s
         description = scanForDescriptionByName(activeDialect->inner_environments, name);
     } else if (type == "document_part_type") {
         description = scanForDescriptionByName(activeDialect->document_parts, name);
-    } else if (type == "object_type") {
+    } else if (type == "wobject_type") {
         description = scanForDescriptionByName(activeDialect->wobjects, name);
     }
 

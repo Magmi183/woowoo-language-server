@@ -132,7 +132,7 @@ with open(path.join(this_directory, 'wuff/README.md'), encoding='utf-8') as f:
 # logic and declaration, and simpler if you include description/version in a file.
 setup(
     name="Wuff",
-    version="0.0.3",
+    version="0.0.4",
     author="Michal Janecek",
     author_email="michal.janecek@gmail.com",
     description="Analyzer tools for WooWoo projects",
@@ -142,6 +142,6 @@ setup(
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
     extras_require={"test": ["pytest>=6.0"]},
-    python_requires=">=3.9", 
+    python_requires=">=3.7",
 )
 

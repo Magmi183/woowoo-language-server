@@ -1,40 +1,16 @@
 import logging
-from pathlib import Path
 
 from pygls.server import LanguageServer
 
-import utils
 
 from constants import *
-from urllib.parse import urlparse, unquote
+from urllib.parse import unquote
 
 from Wuff import (
     WooWooAnalyzer,
-    CompletionParams as WuffCompletionParams,
     TextDocumentIdentifier as WuffTextDocumentIdentifier,
     Position as WuffPosition,
-    CompletionContext as WuffCompletionContext,
-    CompletionTriggerKind as WuffCompletionTriggerKind,
-    CompletionItem as WuffCompletionItem,
-    InsertTextFormat as WuffInsertTextFormat,
-    CompletionItemKind as WuffCompletionItemKind,
-    Diagnostic as WuffDiagnostic,
-    DiagnosticSeverity as WuffDiagnosticSeverity,
     DefinitionParams as WuffDefinitionParams,
-    TextDocumentPositionParams as WuffTextDocumentPositionParams
-)
-
-from lsprotocol.types import (
-    TEXT_DOCUMENT_COMPLETION,
-    CompletionParams as LSCompletionParams, DidOpenTextDocumentParams, DidChangeTextDocumentParams,
-    TEXT_DOCUMENT_DID_OPEN,
-    TEXT_DOCUMENT_DID_CHANGE,
-    CompletionOptions, INITIALIZED, TEXT_DOCUMENT_DEFINITION, TEXT_DOCUMENT_DID_SAVE,
-    DidSaveTextDocumentParams, TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL, SemanticTokensParams,
-    SemanticTokensLegend, InitializedParams, InitializeParams, INITIALIZE,
-    WorkspaceFolder, DefinitionParams, TEXT_DOCUMENT_FOLDING_RANGE, FoldingRangeParams, WORKSPACE_DID_RENAME_FILES,
-    RenameFilesParams, WORKSPACE_WILL_RENAME_FILES, TEXT_DOCUMENT_HOVER, TextDocumentPositionParams, MarkupContent,
-    MarkupKind, Hover, SemanticTokens, CompletionList
 )
 
 from convertors import *
@@ -157,7 +133,7 @@ def did_change(ls: WooWooLanguageServer, params: DidChangeTextDocumentParams):
 
 
 @SERVER.feature(TEXT_DOCUMENT_COMPLETION, CompletionOptions(trigger_characters=trigger_characters))
-def completions(ls: WooWooLanguageServer, params: LSCompletionParams):
+def completions(ls: WooWooLanguageServer, params: CompletionParams):
     logger.debug("[TEXT_DOCUMENT_COMPLETION] SERVER.feature called")
     params = completion_params_ls_to_wuff(params)
     completion_items_result = ls.analyzer.complete(params)

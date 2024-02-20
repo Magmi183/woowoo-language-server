@@ -88,8 +88,8 @@ std::string Parser::extractStructureName(const TSNode &node, const std::string &
         childWithNameType = "document_part_type";
     } else if (nodeType.find("outer_environment") != std::string::npos) {
         childWithNameType = "outer_environment_type";
-    } else if (nodeType == "object") {
-        childWithNameType = "object_type";
+    } else if (nodeType == "wobject") {
+        childWithNameType = "wobject_type";
     }
 
     if (childWithNameType.empty()) {

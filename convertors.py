@@ -90,7 +90,6 @@ def wuff_diagnostic_to_ls(wuff_diagnostic: WuffDiagnostic) -> Diagnostic:
     end_position = Position(line=wuff_diagnostic.range.end.line, character=wuff_diagnostic.range.end.character)
     diagnostic_range = Range(start=start_position, end=end_position)
 
-    # Map the severity (assuming WuffDiagnosticSeverity is similar to DiagnosticSeverity)
     severity = None
     if wuff_diagnostic.severity:
         severity_map = {
