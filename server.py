@@ -2,7 +2,7 @@ import logging
 
 from pygls.server import LanguageServer
 
-
+from convertors import *
 from constants import *
 from urllib.parse import unquote
 
@@ -13,7 +13,6 @@ from Wuff import (
     DefinitionParams as WuffDefinitionParams,
 )
 
-from convertors import *
 
 
 # TODO: Setup logging better.
@@ -126,8 +125,9 @@ def did_rename_files(ls: WooWooLanguageServer, params: RenameFilesParams):
 @SERVER.feature(TEXT_DOCUMENT_DID_CHANGE)
 def did_change(ls: WooWooLanguageServer, params: DidChangeTextDocumentParams):
     logger.debug("[TEXT_DOCUMENT_DID_CHANGE] SERVER.feature called")
+    # do not unquote before this function call!
+    doc = ls.workspace.get_document(params.text_document.uri)
     doc_uri = unquote(params.text_document.uri)
-    doc = ls.workspace.get_document(doc_uri)
     ls.analyzer.document_did_change(WuffTextDocumentIdentifier(doc_uri), doc.source)
     ls.diagnose(doc_uri)
 
