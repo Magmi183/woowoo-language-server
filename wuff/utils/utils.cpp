@@ -34,9 +34,9 @@ namespace utils {
         std::string path = uri.substr(7); // Remove 'file://'
 
         path = percentDecode(path); // Decode any percent-encoded characters
-        std::transform(path.begin(), path.end(), path.begin(), ::tolower);
 
 #ifdef _WIN32
+        std::transform(path.begin(), path.end(), path.begin(), ::tolower);
         // Windows file URIs start with a '/', which should not be present in the final path
         // Additionally, we need to handle drive letters (e.g., 'C:/')
         if (path.size() > 1 && path[0] == '/' && path[2] == ':') {

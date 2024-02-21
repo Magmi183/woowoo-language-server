@@ -1,7 +1,8 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.4...3.18)
 project(Wuff)
 
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # - - - YAML-CPP
 include(FetchContent)
@@ -9,7 +10,7 @@ include(FetchContent)
 FetchContent_Declare(
         yaml-cpp
         GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
-        GIT_TAG master # Can be a tag (yaml-cpp-x.x.x), a commit hash, or a branch name (master)
+        GIT_TAG 0.8.0
 )
 FetchContent_GetProperties(yaml-cpp)
 
@@ -23,7 +24,7 @@ endif ()
 FetchContent_Declare(
         tree_sitter
         GIT_REPOSITORY https://github.com/tree-sitter/tree-sitter.git
-        GIT_TAG master
+        GIT_TAG v0.20.9
 )
 FetchContent_GetProperties(tree_sitter)
 
@@ -46,15 +47,8 @@ set(YAML_SCANNER_SRC ${CMAKE_CURRENT_SOURCE_DIR}/tree-sitter/yaml/scanner.cc)
 
 # - - - - -
 
-FetchContent_Declare(
-        pybind11
-        GIT_REPOSITORY https://github.com/pybind/pybind11.git
-        GIT_TAG v2.11.1
-)
+add_subdirectory(pybind11)
 
-# Make pybind11 available for use
-FetchContent_MakeAvailable(pybind11)
-set(PYBIND11_PYTHON_VERSION "3.9")
 pybind11_add_module(${PROJECT_NAME}
         ${TREE_SITTER_SRC} # Add Tree-sitter lib.c source
         ${WOOWOO_PARSER_SRC}
@@ -90,8 +84,6 @@ pybind11_add_module(${PROJECT_NAME}
 )
 target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ${TREE_SITTER_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PUBLIC yaml-cpp::yaml-cpp)
-
-target_compile_definitions(${PROJECT_NAME} PRIVATE VERSION_INFO=${EXAMPLE_VERSION_INFO})
 
 # - - - WooWooTest
 if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp")

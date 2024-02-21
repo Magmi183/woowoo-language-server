@@ -8,6 +8,7 @@
 #include "WooWooDocument.h"
 #include "../dialect/DialectManager.h"
 #include <filesystem>
+#include <optional>
 #include "tree_sitter/api.h"
 
 namespace fs = std::filesystem;
