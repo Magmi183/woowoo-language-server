@@ -6,7 +6,7 @@ from convertors import *
 from constants import *
 from urllib.parse import unquote
 
-from Wuff import (
+from wuff import (
     WooWooAnalyzer,
     TextDocumentIdentifier as WuffTextDocumentIdentifier,
     Position as WuffPosition,

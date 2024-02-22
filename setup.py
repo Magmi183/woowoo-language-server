@@ -131,14 +131,14 @@ with open(path.join(this_directory, 'wuff/README.md'), encoding='utf-8') as f:
 # The information here can also be placed in setup.cfg - better separation of
 # logic and declaration, and simpler if you include description/version in a file.
 setup(
-    name="Wuff",
+    name="wuff",
     version="1.0.3",
     author="Michal Janecek",
     author_email="michal.janecek@gmail.com",
     description="Analyzer tools for WooWoo projects",
     long_description=long_description,
     long_description_content_type='text/markdown',
-    ext_modules=[CMakeExtension("Wuff")],
+    ext_modules=[CMakeExtension("wuff")],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
     extras_require={"test": ["pytest>=6.0"]},

@@ -1,4 +1,4 @@
-from Wuff import (
+from wuff import (
     WooWooAnalyzer,
     CompletionParams as WuffCompletionParams,
     TextDocumentIdentifier as WuffTextDocumentIdentifier,

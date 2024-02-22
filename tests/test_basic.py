@@ -1,4 +1,4 @@
-import Wuff as m
+import wuff as m
 
 
 def test_main():

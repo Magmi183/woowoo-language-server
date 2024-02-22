@@ -10,7 +10,7 @@
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(Wuff, m) {
+PYBIND11_MODULE(wuff, m) {
     py::class_<WooWooAnalyzer>(m, "WooWooAnalyzer")
             .def(py::init<>())
             .def("set_dialect", &WooWooAnalyzer::setDialect)
