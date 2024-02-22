@@ -1,3 +1,0 @@
-recursive-include wuff *
-prune wuff/cmake_*
-prune wuff/.idea

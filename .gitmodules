@@ -1,3 +1,0 @@
-[submodule "wuff/pybind11"]
-	path = wuff/pybind11
-	url = https://github.com/pybind/pybind11.git
