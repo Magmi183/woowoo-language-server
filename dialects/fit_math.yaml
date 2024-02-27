@@ -127,106 +127,104 @@ wobjects:
     meta_block: *default_meta
 
 
-outer_environments:
-  classic:
-    - name: enumerate
-      description: "An enumerated list."
-      meta_block:
-        required_fields: ~
-        optional_fields:
-          - name: type
+environments:
+    # - - - Environments mainly used in outer classic:
+  - name: enumerate
+    description: "An enumerated list."
+    meta_block:
+      required_fields: ~
+      optional_fields:
+        - name: type
 
-    - name: equation
-      description: "A simple math equation"
-      meta_block: &optional_label
-        required_fields: ~
-        optional_fields:
-          - name: label
+  - name: equation
+    description: "A simple math equation"
+    meta_block: &optional_label
+      required_fields: ~
+      optional_fields:
+        - name: label
 
-    - name: align
-      description: "AMSMath align environment. At the moment only the last equation is numbered."
-      meta_block: *optional_label
+  - name: align
+    description: "AMSMath align environment. At the moment only the last equation is numbered."
+    meta_block: *optional_label
 
-    - name: gather
-      description: "AMSMath gather environment."
-      meta_block: *optional_label
+  - name: gather
+    description: "AMSMath gather environment."
+    meta_block: *optional_label
 
-    - name: caption
-      description: "Caption of a Figure or Table float."
+  - name: caption
+    description: "Caption of a Figure or Table float."
 
-    - name: cell
-      description: "Table cell."
+  - name: cell
+    description: "Table cell."
 
-    - name: centered
-      description: "A row with a centered content."
+  - name: centered
+    description: "A row with a centered content."
 
-    - name: codeblock
-      description: "Code block typeset by the pygmentize package."
-      meta_block:
-        optional_fields:
-          - name: language
+  - name: codeblock
+    description: "Code block typeset by the pygmentize package."
+    meta_block:
+      optional_fields:
+        - name: language
 
-    - name: description
-      description: "Description list with custom bullets. Essentially the itemize environment."
+  - name: description
+    description: "Description list with custom bullets. Essentially the itemize environment."
 
-    - name: ditem
-      description: "A description item with a custom bullet."
-      meta_block:
-        required_fields:
-          - name: bullet
+  - name: ditem
+    description: "A description item with a custom bullet."
+    meta_block:
+      required_fields:
+        - name: bullet
 
-    - name: image
-      description: "Inclusion of an external image."
-      meta_block:
-        optional_fields:
-          - name: alt
-          - name: options
+  - name: image
+    description: "Inclusion of an external image."
+    meta_block:
+      optional_fields:
+        - name: alt
+        - name: options
 
-    - name: itemize
-      description: "A general unnumbered list."
+  - name: itemize
+    description: "A general unnumbered list."
 
-    - name: item
-      description: "A general list item."
+  - name: item
+    description: "A general list item."
 
-    - name: quote
-      description: "A quotation."
-      meta_block:
-        optional_fields:
-          - name: author
-          - name: link
+  - name: quote
+    description: "A quotation."
+    meta_block:
+      optional_fields:
+        - name: author
+        - name: link
 
-    - name: table
-      description: "Custom table environment composed of .rows, and optional .cells."
-      meta_block:
-        required_fields:
-          - name: columns
-        optional_fields:
-          - name: arraystretch
+  - name: table
+    description: "Custom table environment composed of .rows, and optional .cells."
+    meta_block:
+      required_fields:
+        - name: columns
+      optional_fields:
+        - name: arraystretch
 
-    - name: row
-      description: "A table row."
+  - name: row
+    description: "A table row."
 
-    - name: tabular
-      description: "Simple tables processed by pandoc."
-      meta_block:
-        optional_fields:
-          - name: arraystretch
-          - name: filename
+  - name: tabular
+    description: "Simple tables processed by pandoc."
+    meta_block:
+      optional_fields:
+        - name: arraystretch
+        - name: filename
 
+    # - - - Environments mainly used in outer fragile form:
+  - name: tikz
+    description: "A tikz picture environment."
+    fragile: true
+    meta_block:
+      required_fields:
+        - name: filename
+      optional_fields:
+        - name: options
+        - name: include_options
 
-
-  fragile:
-    - name: tikz
-      description: "A tikz picture environment."
-      meta_block:
-        required_fields:
-          - name: filename
-        optional_fields:
-          - name: options
-          - name: include_options
-
-
-inner_environments:
+    # - - - Environments mainly used in inner form:
   - name: quoted
     description: "A piece of quoted text, inline."
 
