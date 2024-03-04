@@ -275,9 +275,9 @@ environments:
 
 shorthands:
   hash:
-    description: "Clickable link to an equation or object."
+    description: "Clickable link to an equation or wobject."
     references:
-      - structure_type: object
+      - structure_type: wobject
         meta_key: label
       - structure_type: outer_environment
         structure_name: equation

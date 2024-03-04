@@ -1,5 +1,6 @@
 import logging
 
+from lsprotocol.types import TEXT_DOCUMENT_RENAME, RenameParams, TEXT_DOCUMENT_REFERENCES, ReferenceParams
 from pygls.server import LanguageServer
 
 from convertors import *
@@ -11,11 +12,10 @@ from wuff import (
     TextDocumentIdentifier as WuffTextDocumentIdentifier,
     Position as WuffPosition,
     DefinitionParams as WuffDefinitionParams,
+    RenameParams as WuffRenameParams,
+    ReferenceParams as WuffReferenceParams,
 )
 
-
-
-# TODO: Setup logging better.
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -37,7 +37,6 @@ class WooWooLanguageServer(LanguageServer):
     def load_workspace(self, workspace: WorkspaceFolder):
         uri = unquote(workspace.uri)
         self.analyzer.load_workspace(uri)
-
 
     def set_dialect(self, dialect_file_path):
         # TODO: better fallback mechanisms and error handling + handle default template better
@@ -65,7 +64,21 @@ class WooWooLanguageServer(LanguageServer):
 
         return wuff_location_to_ls(self.analyzer.go_to_definition(wuff_params))
 
+    def references(self, params: ReferenceParams):
 
+        wuff_params = WuffReferenceParams(WuffTextDocumentIdentifier(params.text_document.uri),
+                                          WuffPosition(params.position.line, params.position.character),
+                                          params.context.include_declaration)
+
+        return [wuff_location_to_ls(loc) for loc in self.analyzer.references(wuff_params)]
+
+    def rename(self, params: RenameParams):
+
+        wuff_params = WuffRenameParams(WuffTextDocumentIdentifier(params.text_document.uri),
+                                       WuffPosition(params.position.line, params.position.character),
+                                       params.new_name)
+
+        return wuff_workspace_edit_to_ls(self.analyzer.rename(wuff_params))
 
 
 SERVER = WooWooLanguageServer('woowoo-language-SERVER', 'v0.1')
@@ -87,6 +100,7 @@ def initiliaze(ls: WooWooLanguageServer, params: InitializeParams) -> None:
 @SERVER.feature(INITIALIZED)
 def initiliazed(_ls: WooWooLanguageServer, params: InitializedParams) -> None:
     logger.debug("[INITIALIZED] Connection was established.")
+
 
 @SERVER.feature(TEXT_DOCUMENT_DID_OPEN)
 def did_open(ls: WooWooLanguageServer, params: DidOpenTextDocumentParams):
@@ -164,6 +178,20 @@ def definition(ls: WooWooLanguageServer, params: DefinitionParams):
     logger.debug("[TEXT_DOCUMENT_DEFINITION] SERVER.feature called")
 
     return ls.go_to_definition(params)
+
+
+@SERVER.feature(TEXT_DOCUMENT_REFERENCES)
+def rename(ls: WooWooLanguageServer, params: ReferenceParams):
+    logger.debug("[TEXT_DOCUMENT_REFERENCES] SERVER.feature called")
+
+    return ls.references(params)
+
+
+@SERVER.feature(TEXT_DOCUMENT_RENAME)
+def rename(ls: WooWooLanguageServer, params: RenameParams):
+    logger.debug("[TEXT_DOCUMENT_RENAME] SERVER.feature called")
+
+    return ls.rename(params)
 
 
 @SERVER.feature(TEXT_DOCUMENT_FOLDING_RANGE)

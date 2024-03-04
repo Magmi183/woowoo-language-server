@@ -1,8 +1,11 @@
+from pygls.workspace import Workspace
 from wuff import (
     WooWooAnalyzer,
     CompletionParams as WuffCompletionParams,
     TextDocumentIdentifier as WuffTextDocumentIdentifier,
     Position as WuffPosition,
+    WorkspaceEdit as WuffWorkspaceEdit,
+    TextEdit as WuffTextEdit,
     CompletionContext as WuffCompletionContext,
     CompletionTriggerKind as WuffCompletionTriggerKind,
     CompletionItem as WuffCompletionItem,
@@ -27,7 +30,8 @@ from lsprotocol.types import (
     WorkspaceFolder, DefinitionParams, TEXT_DOCUMENT_FOLDING_RANGE, FoldingRangeParams, WORKSPACE_DID_RENAME_FILES,
     RenameFilesParams, WORKSPACE_WILL_RENAME_FILES, TEXT_DOCUMENT_HOVER, TextDocumentPositionParams, MarkupContent,
     MarkupKind, Hover, SemanticTokens, CompletionList, CompletionParams, CompletionItem, CompletionItemKind,
-    InsertTextFormat, Diagnostic, Range, Position, DiagnosticSeverity, FoldingRange, FoldingRangeKind, Location
+    InsertTextFormat, Diagnostic, Range, Position, DiagnosticSeverity, FoldingRange, FoldingRangeKind, Location,
+    WorkspaceEdit, TextEdit
 )
 
 
@@ -109,6 +113,18 @@ def wuff_diagnostic_to_ls(wuff_diagnostic: WuffDiagnostic) -> Diagnostic:
     )
 
 
+def wuff_workspace_edit_to_ls(wuff_workspace_edit: WuffWorkspaceEdit) -> WorkspaceEdit:
+    ls_changes = {}
+    changes = wuff_workspace_edit.changes
+    for uri, change_list in changes.items():
+        ls_change_list = [wuff_text_edit_to_ls(te) for te in change_list]
+        ls_changes[uri] = ls_change_list
+    return WorkspaceEdit(changes=ls_changes)
+
+def wuff_text_edit_to_ls(wuff_text_edit: WuffTextEdit) -> TextEdit:
+
+    return TextEdit(wuff_range_to_ls(wuff_text_edit.range), wuff_text_edit.new_text)
+
 def wuff_folding_range_to_ls(wuff_folding_range: WuffFoldingRange) -> FoldingRange:
     return FoldingRange(start_line=wuff_folding_range.start_line,
                         start_character=wuff_folding_range.start_character,
@@ -120,7 +136,7 @@ def wuff_folding_range_to_ls(wuff_folding_range: WuffFoldingRange) -> FoldingRan
 def wuff_location_to_ls(wuff_location: WuffLocation):
     if wuff_location.uri == "":
         return None
-    
+
     return Location(
         uri=wuff_location.uri,
         range=wuff_range_to_ls(wuff_location.range)
