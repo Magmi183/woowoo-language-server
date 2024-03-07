@@ -9,6 +9,8 @@ description: |-
 
 implicit_outer_environment: "equation"
 
+# meta block fields common for all wobjects/docparts
+
 document_parts:
   - name: "Chapter"
     description: "A single page with the chapter's textual content and list of sections."
@@ -16,6 +18,8 @@ document_parts:
       required_fields:
         - name: label
       optional_fields:
+        - name: skip # string or [string]
+        - name: only # string or [string]
         - name: short_title
         - name: pdf_string
         - name: index
@@ -33,7 +37,9 @@ wobjects:
   - name: "Algorithm"
     description: "Environment with a textual description of an algorithm."
     meta_block: &default_meta
-      required_fields:
+      optional_fields:
+        - name: skip
+        - name: only
         - name: title
         - name: english
         - name: label
@@ -50,10 +56,14 @@ wobjects:
   - name: "Example"
     description: "Environment intended for examples."
     meta_block: &default_with_star
-      <<: *default_meta
       optional_fields:
-        - name: star
-          #type: boolean # Starred examples are considered to be harder.
+        - name: skip
+        - name: only
+        - name: title
+        - name: english
+        - name: label
+        - name: index
+        - name: star  # boolean => Starred examples are considered to be harder.
 
   - name: "Exercise"
     description: "Environment intended for exercises."
@@ -62,8 +72,9 @@ wobjects:
   - name: "Figure"
     description: "Analogue of the LaTeX figure float environment."
     meta_block:
-      required_fields: ~
       optional_fields:
+        - name: skip
+        - name: only
         - name: options
         - name: glue
         - name: vertical
@@ -86,8 +97,9 @@ wobjects:
   - name: "Question"
     description: "Environment for questions with possible solutions summarized at the end of the document."
     meta_block:
-      required_fields: ~
       optional_fields:
+        - name: skip
+        - name: only
         - name: label
         - name: solution
 
@@ -98,12 +110,12 @@ wobjects:
   - name: "Proof"
     description: "A mathematical proof."
     meta_block: &math_result
-      required_fields: ~
       optional_fields:
+        - name: skip
+        - name: only
         - name: title
         - name: label
         - name: show
-    # Content: Should contain !tabular or ,table and a .caption.
 
   - name: "Solution"
     description: "Environment containing a solution."
@@ -112,8 +124,9 @@ wobjects:
   - name: "Table"
     description: "Equivalent of the LaTeX table float environment."
     meta_block:
-      required_fields: ~
       optional_fields:
+        - name: skip
+        - name: only
         - name: label
         - name: options
     # Content: Should contain !tabular or ,table and a .caption
@@ -132,14 +145,12 @@ environments:
   - name: enumerate
     description: "An enumerated list."
     meta_block:
-      required_fields: ~
       optional_fields:
         - name: type
 
   - name: equation
     description: "A simple math equation"
     meta_block: &optional_label
-      required_fields: ~
       optional_fields:
         - name: label
 
@@ -224,6 +235,9 @@ environments:
         - name: options
         - name: include_options
 
+  - name: sage
+    description: "A sage cell (note: WIP)."
+
     # - - - Environments mainly used in inner form:
   - name: quoted
     description: "A piece of quoted text, inline."
@@ -238,6 +252,9 @@ environments:
     description: | 
       Render a pop up hint in math equation (relies on a JS from custom.js).
       Ignored in PDF (mainly do to lack of PDF viewers support).
+    meta_block:
+      required_fields:
+        - name: hint
 
   - name: notion
     description: "An introduction of a new notion."
@@ -273,6 +290,12 @@ environments:
   - name: code
     description: "Inline code with no highlighting."
 
+  - name: small
+    description: "Text typeset in smaller font size."
+
+  - name: underline
+    description: "An underlined text."
+
 shorthands:
   hash:
     description: "Clickable link to an equation or wobject."
@@ -287,10 +310,8 @@ shorthands:
 
 
 # SOURCES:
+# This dialect is compiled from the listed sources.
+# The information was combined.
 # 1) https://gitlab.fit.cvut.cz/woowoo/fit-html
-#   - TODO: full_reference, math, sage (not found anywhere)
-#         small, underline (they are both classic + short, wait for merge/not merge)
+#    - full_reference not added yet
 # 2) https://gitlab.fit.cvut.cz/woowoo/fit-pdf
-#   - almost the same as fit-html
-#   - I merged descriptions of some items
-#   - merged information, for example meta fields in image (different in both)
