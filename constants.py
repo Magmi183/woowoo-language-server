@@ -1,3 +1,5 @@
+from lsprotocol.types import FileOperationRegistrationOptions, FileOperationFilter, FileOperationPattern
+
 token_types = [
     'namespace',
     'type',
@@ -39,3 +41,12 @@ token_modifiers = [
 ]
 
 trigger_characters = ['.', ':', '#', '@']
+
+# filter which does not filter anything
+no_filter = FileOperationRegistrationOptions(
+                    filters=[
+                        FileOperationFilter(
+                            pattern=FileOperationPattern(glob="**/*"),
+                        )
+                    ]
+                )

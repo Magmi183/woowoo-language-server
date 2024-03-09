@@ -1,4 +1,3 @@
-from pygls.workspace import Workspace
 from wuff import (
     WooWooAnalyzer,
     CompletionParams as WuffCompletionParams,
@@ -19,17 +18,7 @@ from wuff import (
     Range as WuffRange
 )
 
-from lsprotocol.types import (
-    TEXT_DOCUMENT_COMPLETION,
-    DidOpenTextDocumentParams, DidChangeTextDocumentParams,
-    TEXT_DOCUMENT_DID_OPEN,
-    TEXT_DOCUMENT_DID_CHANGE,
-    CompletionOptions, INITIALIZED, TEXT_DOCUMENT_DEFINITION, TEXT_DOCUMENT_DID_SAVE,
-    DidSaveTextDocumentParams, TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL, SemanticTokensParams,
-    SemanticTokensLegend, InitializedParams, InitializeParams, INITIALIZE,
-    WorkspaceFolder, DefinitionParams, TEXT_DOCUMENT_FOLDING_RANGE, FoldingRangeParams, WORKSPACE_DID_RENAME_FILES,
-    RenameFilesParams, WORKSPACE_WILL_RENAME_FILES, TEXT_DOCUMENT_HOVER, TextDocumentPositionParams, MarkupContent,
-    MarkupKind, Hover, SemanticTokens, CompletionList, CompletionParams, CompletionItem, CompletionItemKind,
+from lsprotocol.types import ( CompletionParams, CompletionItem, CompletionItemKind,
     InsertTextFormat, Diagnostic, Range, Position, DiagnosticSeverity, FoldingRange, FoldingRangeKind, Location,
     WorkspaceEdit, TextEdit
 )

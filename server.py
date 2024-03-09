@@ -1,6 +1,16 @@
 import logging
 
-from lsprotocol.types import TEXT_DOCUMENT_RENAME, RenameParams, TEXT_DOCUMENT_REFERENCES, ReferenceParams
+from lsprotocol.types import WorkspaceFolder, DefinitionParams, ReferenceParams, RenameParams, INITIALIZE, \
+    InitializeParams, \
+    INITIALIZED, InitializedParams, TEXT_DOCUMENT_DID_OPEN, DidOpenTextDocumentParams, TEXT_DOCUMENT_DID_SAVE, \
+    DidSaveTextDocumentParams, RenameFilesParams, WORKSPACE_DID_RENAME_FILES, \
+    WORKSPACE_DID_DELETE_FILES, DeleteFilesParams, TEXT_DOCUMENT_DID_CHANGE, DidChangeTextDocumentParams, \
+    TEXT_DOCUMENT_COMPLETION, CompletionOptions, CompletionList, TEXT_DOCUMENT_HOVER, TextDocumentPositionParams, \
+    MarkupKind, MarkupContent, Hover, TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL, SemanticTokensLegend, SemanticTokensParams, \
+    SemanticTokens, TEXT_DOCUMENT_DEFINITION, TEXT_DOCUMENT_REFERENCES, TEXT_DOCUMENT_RENAME, \
+    TEXT_DOCUMENT_FOLDING_RANGE, FoldingRangeParams, FileOperationRegistrationOptions, FileOperationFilter, \
+    FileOperationPattern, WORKSPACE_DID_CHANGE_WATCHED_FILES, DidChangeWatchedFilesRegistrationOptions, \
+    FileSystemWatcher, DidChangeWatchedFilesParams
 from pygls.server import LanguageServer
 
 from convertors import *
@@ -117,24 +127,32 @@ def did_save(ls: WooWooLanguageServer, params: DidSaveTextDocumentParams) -> Non
     ls.diagnose(unquote(params.text_document.uri))
 
 
-@SERVER.feature(WORKSPACE_WILL_RENAME_FILES)
-def will_rename_files(ls: WooWooLanguageServer, params: RenameFilesParams):
-    logger.debug("[WORKSPACE_WILL_RENAME_FILES] SERVER.feature called")
-
-    # TODO: Refactor file references to the new name (like in .include statements)
-    # https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#renameFilesParams
-
-
-@SERVER.feature(WORKSPACE_DID_RENAME_FILES)
+@SERVER.feature(WORKSPACE_DID_RENAME_FILES, no_filter)
 def did_rename_files(ls: WooWooLanguageServer, params: RenameFilesParams):
     logger.debug("[WORKSPACE_DID_RENAME_FILES] notification received")
-    # TODO: Test  (analyzer).
     for file_rename in params.files:
         old_uri, new_uri = file_rename.old_uri, file_rename.new_uri
         ls.analyzer.rename_document(old_uri, new_uri)
 
 
-# TODO: Handle file deletion!
+@SERVER.feature(WORKSPACE_DID_DELETE_FILES, no_filter)
+def did_delete_files(ls: WooWooLanguageServer, params: DeleteFilesParams):
+    logger.debug("[WORKSPACE_DID_DELETE_FILES] notification received")
+
+    deleted_files_uris = [file_delete.uri for file_delete in params.files]
+    ls.analyzer.did_delete_files(deleted_files_uris)
+
+"""
+# https://github.com/openlawlibrary/pygls/issues/376
+
+@SERVER.feature(WORKSPACE_DID_CHANGE_WATCHED_FILES, DidChangeWatchedFilesRegistrationOptions(
+    watchers=[FileSystemWatcher(glob_pattern="**/*")]
+))
+def did_change_watched_files(ls: WooWooLanguageServer, params: DidChangeWatchedFilesParams):
+    
+    pass
+"""
+
 
 @SERVER.feature(TEXT_DOCUMENT_DID_CHANGE)
 def did_change(ls: WooWooLanguageServer, params: DidChangeTextDocumentParams):
