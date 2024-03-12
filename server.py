@@ -10,7 +10,7 @@ from lsprotocol.types import WorkspaceFolder, DefinitionParams, ReferenceParams,
     SemanticTokens, TEXT_DOCUMENT_DEFINITION, TEXT_DOCUMENT_REFERENCES, TEXT_DOCUMENT_RENAME, \
     TEXT_DOCUMENT_FOLDING_RANGE, FoldingRangeParams, FileOperationRegistrationOptions, FileOperationFilter, \
     FileOperationPattern, WORKSPACE_DID_CHANGE_WATCHED_FILES, DidChangeWatchedFilesRegistrationOptions, \
-    FileSystemWatcher, DidChangeWatchedFilesParams
+    FileSystemWatcher, DidChangeWatchedFilesParams, WORKSPACE_WILL_RENAME_FILES
 from pygls.server import LanguageServer
 
 from convertors import *
@@ -127,13 +127,16 @@ def did_save(ls: WooWooLanguageServer, params: DidSaveTextDocumentParams) -> Non
     ls.diagnose(unquote(params.text_document.uri))
 
 
-@SERVER.feature(WORKSPACE_DID_RENAME_FILES, no_filter)
+@SERVER.feature(WORKSPACE_WILL_RENAME_FILES, no_filter)
 def did_rename_files(ls: WooWooLanguageServer, params: RenameFilesParams):
-    logger.debug("[WORKSPACE_DID_RENAME_FILES] notification received")
-    for file_rename in params.files:
-        old_uri, new_uri = file_rename.old_uri, file_rename.new_uri
-        ls.analyzer.rename_document(old_uri, new_uri)
+    logger.debug("[WORKSPACE_WILL_RENAME_FILES] notification received")
 
+    renames = []
+    # build parameters for wuff
+    for file_rename in params.files:
+        renames.append((file_rename.old_uri, file_rename.new_uri))
+
+    return wuff_workspace_edit_to_ls(ls.analyzer.rename_files(renames))
 
 @SERVER.feature(WORKSPACE_DID_DELETE_FILES, no_filter)
 def did_delete_files(ls: WooWooLanguageServer, params: DeleteFilesParams):
