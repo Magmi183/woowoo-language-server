@@ -1,74 +1,66 @@
-# WooWoo LSP
+# WooWoo Language Server
 
-TODO description
+The `woowoo-language-server` is an implementation of the [Language Server Protocol](https://microsoft.github.io/language-server-protocol/) for the WooWoo language.
+It uses the [pygls](https://github.com/openlawlibrary/pygls) LSP framework and the [wuff](https://github.com/Magmi183/wuff) Python package, written in C++, as backend for analysis.
+
+### Requirements
+
+- `Python >=3.8`
+- `wuff` Python package [(available on PyPI)](https://pypi.org/project/wuff/)
+  - `pip install wuff`
+
+
+## Dialect
+
+As the language support in WooWoo is highly dependent on the dialect which is being used by the author, the dialect has to be specified in the initialization stage. More specifically, the server expects `dialectFilePath` field in the `InitializeParams` parameters sent by the client. The value of the field should be an absolute path to the dialect file. If a dialect is not specified by this way, the server defaults to using the `FIT-Math` dialect, which is defined in [dialects/fit_math.yaml](dialects/fit_math.yaml) file.
 
 ## Features
 
-Please keep in mind that the LSP is in a very early stage of development.
-Even features that are working now (marked as done ✅) will very likely be subjected to major changes in the near future, due to refactoring and algorithmic improvements.
-
-**Legend**:
-- ✅ feature is done
-- 🚧 feature is in progress or in very early stage (working but needs major improvements)
-- 🔲 feature is yet to be done, work not even started
-
+The language server provides the following features.
 
 ### Hover
 
-1. **Template specific keywords** 🚧
-   - hints for `Chapter`, `Section`, `Subsection` etc.
+- **Hints for dialect-specific keywords**
+  - types of document parts, environments, wobjects
 
 ### Code Linting
 
-1. **Invalid syntax detection** 🚧
-2. Checking if file used in the `.include` statement exists 🔲
-3. More TBD
+- **Syntax error detection**
 
 ### Auto-completion
 
-1. **`.include` statement** ✅
-   - auto-complete the `.include` statement
-   - suggest files to include (all `.woo` files in the current workspace)
-2. **Template specific keywords** 🔲
-   - `Chapter`, `Section`, `Subsection` etc.
-3. **Environment** types 🔲
-
-### (Semantic) Highlighting ✅
-
-Currently, the server is using the _Semantic Tokens_ feature to do **all** highlighting.
-That means that no highlighting logic has to be present on the client (like TextMate grammars).
-Note that this may change in the future.
-
-All highlighting logic is done using the [Tree-Sitter queries](https://tree-sitter.github.io/tree-sitter/using-parsers#pattern-matching-with-queries).
-See `queries/highlights.scm` (WooWoo without metablocks) and `queries/yaml-highlights.scm` (for the yaml meta-blocks).
-
-
+- **References**
+  - where possible for inner environments, suggest possible references
+  - dialect-specific
+- **`.include` statement** 
+  - auto-complete the `.include` statement
+  - suggest files to include (`.woo` files from the same _project_)
 
 ### Code Folding
 
-1. `Document part` folding ✅
-2. `Object` folding ✅
-3. `Block` folding ✅
-4. `Outer environment` folding ✅
+- **Region folding** of document parts, blocks, and wobjects 
 
 ### Find References
 
-1. Find references of an `Object`, `Document part` or `Outer environment` (or any _labelable_ type) 🔲 
-   - based on `label` meta information
+- **Find All References** of any referencable meta-block field
 
-### Go to definition
+### Go to Definition
 
-1. Go to file used in the `.include` statement ✅
-2. Go to definition of `Object`, `Document part` or `Outer environment` 🔲
-   - based on `label` meta information
+- **Go to definition** of any referencable meta-block field.
+  - can be executed on referencing short inner environment, environment shorthands or referencing meta-block fields
+- **Go to file** included from the `.include` statement
 
-### Renaming 
+### Symbol Renaming
 
-1. Workspace-wide renaming of symbols 🔲
-   - todo (describe what can be renamed)
-   
-   
-### On Type Formatting
+- **Project-wide rename** of symbols
+  - can be executed on any referencable meta-block field to rename all its references
+  - similar to _find all references_, but in addition, it performs the rename
 
-1. Automatic indentation 🔲
-   - automatically indent after outer environment is used
+### File Renaming
+
+- **Project-wide rename** of files
+  - refactors all `.include` statements to reflect the filename changes
+
+### Semantic Highlighting
+
+The server is capable of handling all aspects of highlighting, but currently, it limits this functionality to just meta-blocks. This is due to the efficiency of client-side highlighting using TextMate grammars for the rest. Meta-blocks, which are highly dependent on context, cannot be accurately captured by these grammars.

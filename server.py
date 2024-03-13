@@ -49,7 +49,6 @@ class WooWooLanguageServer(LanguageServer):
         self.analyzer.load_workspace(uri)
 
     def set_dialect(self, dialect_file_path):
-        # TODO: better fallback mechanisms and error handling + handle default template better
         if dialect_file_path != "":
             self.analyzer.set_dialect(dialect_file_path)
         else:
