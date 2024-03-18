@@ -1,39 +1,61 @@
 import logging
 from typing import List, Optional
-
-from lsprotocol.types import WorkspaceFolder, DefinitionParams, ReferenceParams, RenameParams, INITIALIZE, \
-    InitializeParams, \
-    INITIALIZED, InitializedParams, TEXT_DOCUMENT_DID_OPEN, DidOpenTextDocumentParams, TEXT_DOCUMENT_DID_SAVE, \
-    DidSaveTextDocumentParams, RenameFilesParams, WORKSPACE_DID_RENAME_FILES, \
-    WORKSPACE_DID_DELETE_FILES, DeleteFilesParams, TEXT_DOCUMENT_DID_CHANGE, DidChangeTextDocumentParams, \
-    TEXT_DOCUMENT_COMPLETION, CompletionOptions, CompletionList, TEXT_DOCUMENT_HOVER, TextDocumentPositionParams, \
-    MarkupKind, MarkupContent, Hover, TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL, SemanticTokensLegend, SemanticTokensParams, \
-    SemanticTokens, TEXT_DOCUMENT_DEFINITION, TEXT_DOCUMENT_REFERENCES, TEXT_DOCUMENT_RENAME, \
-    TEXT_DOCUMENT_FOLDING_RANGE, FoldingRangeParams, FileOperationRegistrationOptions, FileOperationFilter, \
-    FileOperationPattern, WORKSPACE_DID_CHANGE_WATCHED_FILES, DidChangeWatchedFilesRegistrationOptions, \
-    FileSystemWatcher, DidChangeWatchedFilesParams, WORKSPACE_WILL_RENAME_FILES, HoverParams
-from pygls.server import LanguageServer
-
-
 from urllib.parse import unquote
 
+from lsprotocol.types import (
+    CompletionList,
+    CompletionParams,
+    DefinitionParams,
+    DeleteFilesParams,
+    FoldingRange,
+    FoldingRangeParams,
+    Hover,
+    InitializeParams,
+    Location,
+    MarkupContent,
+    MarkupKind,
+    ReferenceParams,
+    RenameFilesParams,
+    RenameParams,
+    SemanticTokens,
+    SemanticTokensParams,
+    TextDocumentPositionParams,
+    WorkspaceEdit,
+    WorkspaceFolder,
+)
+from pygls.server import LanguageServer
 from pygls.workspace import TextDocument
 from wuff import (
-    WooWooAnalyzer,
-    TextDocumentIdentifier as WuffTextDocumentIdentifier,
-    Position as WuffPosition,
     DefinitionParams as WuffDefinitionParams,
-    RenameParams as WuffRenameParams,
+)
+from wuff import (
+    Position as WuffPosition,
+)
+from wuff import (
     ReferenceParams as WuffReferenceParams,
 )
+from wuff import (
+    RenameParams as WuffRenameParams,
+)
+from wuff import (
+    TextDocumentIdentifier as WuffTextDocumentIdentifier,
+)
+from wuff import (
+    WooWooAnalyzer,
+)
 
-from convertors import *
-from constants import *
+from constants import token_modifiers, token_types
+from convertors import (
+    completion_params_ls_to_wuff,
+    wuff_completion_item_to_ls,
+    wuff_diagnostic_to_ls,
+    wuff_folding_range_to_ls,
+    wuff_location_to_ls,
+    wuff_workspace_edit_to_ls,
+)
 
-import logging
 
 class WooWooLanguageServer(LanguageServer):
-
     def __init__(self, name: str, version: str):
         self.logger = logging.getLogger(__name__)
         self.logger.debug("Constructing WooWooLanguageServer.")
@@ -41,9 +63,10 @@ class WooWooLanguageServer(LanguageServer):
         self.analyzer = self.initialize_analyzer()
 
     def initialize(self, params: InitializeParams):
-
         if len(params.workspace_folders) != 1:
-            self.logger.error("Exactly one workspace has to be opened. No other options are supported for now.")
+            self.logger.error(
+                "Exactly one workspace has to be opened. No other options are supported for now."
+            )
 
         # default: ""
         self.set_dialect(params.initialization_options["dialectFilePath"])
@@ -64,6 +87,7 @@ class WooWooLanguageServer(LanguageServer):
             self.analyzer.set_dialect(dialect_file_path)
         else:
             import utils
+
             self.analyzer.set_dialect(utils.get_absolute_path("dialects/fit_math.yaml"))
 
     def diagnose(self, doc_uri: str):
@@ -78,28 +102,32 @@ class WooWooLanguageServer(LanguageServer):
         self.publish_diagnostics(doc_uri, lsdiagnostics)
 
     def go_to_definition(self, params: DefinitionParams) -> Optional[Location]:
-
-        wuff_params = WuffDefinitionParams(WuffTextDocumentIdentifier(params.text_document.uri),
-                                           WuffPosition(params.position.line, params.position.character))
+        wuff_params = WuffDefinitionParams(
+            WuffTextDocumentIdentifier(params.text_document.uri),
+            WuffPosition(params.position.line, params.position.character),
+        )
 
         return wuff_location_to_ls(self.analyzer.go_to_definition(wuff_params))
 
     def references(self, params: ReferenceParams) -> List[Location]:
+        wuff_params = WuffReferenceParams(
+            WuffTextDocumentIdentifier(params.text_document.uri),
+            WuffPosition(params.position.line, params.position.character),
+            params.context.include_declaration,
+        )
 
-        wuff_params = WuffReferenceParams(WuffTextDocumentIdentifier(params.text_document.uri),
-                                          WuffPosition(params.position.line, params.position.character),
-                                          params.context.include_declaration)
-
-        return [wuff_location_to_ls(loc) for loc in self.analyzer.references(wuff_params)]
+        return [
+            wuff_location_to_ls(loc) for loc in self.analyzer.references(wuff_params)
+        ]
 
     def rename(self, params: RenameParams) -> WorkspaceEdit:
-
-        wuff_params = WuffRenameParams(WuffTextDocumentIdentifier(params.text_document.uri),
-                                       WuffPosition(params.position.line, params.position.character),
-                                       params.new_name)
+        wuff_params = WuffRenameParams(
+            WuffTextDocumentIdentifier(params.text_document.uri),
+            WuffPosition(params.position.line, params.position.character),
+            params.new_name,
+        )
 
         return wuff_workspace_edit_to_ls(self.analyzer.rename(wuff_params))
-
 
     def open_document(self, document_uri: str):
         self.analyzer.open_document(WuffTextDocumentIdentifier(unquote(document_uri)))
@@ -117,7 +145,9 @@ class WooWooLanguageServer(LanguageServer):
         self.analyzer.did_delete_files(deleted_files_uris)
 
     def document_did_change(self, document: TextDocument) -> None:
-        self.analyzer.document_did_change(WuffTextDocumentIdentifier(document.uri), document.source)
+        self.analyzer.document_did_change(
+            WuffTextDocumentIdentifier(document.uri), document.source
+        )
 
     def completion(self, params: CompletionParams) -> CompletionList:
         params = completion_params_ls_to_wuff(params)
@@ -127,7 +157,9 @@ class WooWooLanguageServer(LanguageServer):
 
     def hover(self, params: TextDocumentPositionParams) -> Hover:
         doc_uri = unquote(params.text_document.uri)
-        result = self.analyzer.hover(doc_uri, params.position.line, params.position.character)
+        result = self.analyzer.hover(
+            doc_uri, params.position.line, params.position.character
+        )
         content = MarkupContent(MarkupKind.Markdown, value=result)
         return Hover(contents=content)
 
@@ -136,5 +168,7 @@ class WooWooLanguageServer(LanguageServer):
         return SemanticTokens(data=data)
 
     def folding_range(self, params: FoldingRangeParams) -> List[FoldingRange]:
-        folding_ranges = self.analyzer.folding_ranges(WuffTextDocumentIdentifier(unquote(params.text_document.uri)))
+        folding_ranges = self.analyzer.folding_ranges(
+            WuffTextDocumentIdentifier(unquote(params.text_document.uri))
+        )
         return [wuff_folding_range_to_ls(item) for item in folding_ranges]

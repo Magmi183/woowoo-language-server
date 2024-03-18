@@ -1,8 +1,9 @@
+import os
 from pathlib import Path
-from urllib.parse import urlparse, unquote
-import os, platform, sys
+from urllib.parse import unquote, urlparse
 
-def get_absolute_path(relative_path):
+
+def get_absolute_path(relative_path: str):
     script_dir = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(script_dir, relative_path)
 
@@ -13,7 +14,7 @@ def uri_to_path(uri: str) -> Path:
     path = unquote(path)
 
     # If running on Windows and the path contains a colon (drive letter), remove the leading '/'
-    if ':' in path:
-        path = path.lstrip('/')
+    if ":" in path:
+        path = path.lstrip("/")
 
     return Path(path)

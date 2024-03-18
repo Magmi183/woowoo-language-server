@@ -1,27 +1,53 @@
 import logging
 from typing import List, Optional
 
-from lsprotocol.types import WorkspaceFolder, DefinitionParams, ReferenceParams, RenameParams, INITIALIZE, \
-    InitializeParams, \
-    INITIALIZED, InitializedParams, TEXT_DOCUMENT_DID_OPEN, DidOpenTextDocumentParams, TEXT_DOCUMENT_DID_SAVE, \
-    DidSaveTextDocumentParams, RenameFilesParams, WORKSPACE_DID_RENAME_FILES, \
-    WORKSPACE_DID_DELETE_FILES, DeleteFilesParams, TEXT_DOCUMENT_DID_CHANGE, DidChangeTextDocumentParams, \
-    TEXT_DOCUMENT_COMPLETION, CompletionOptions, CompletionList, TEXT_DOCUMENT_HOVER, TextDocumentPositionParams, \
-    MarkupKind, MarkupContent, Hover, TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL, SemanticTokensLegend, SemanticTokensParams, \
-    SemanticTokens, TEXT_DOCUMENT_DEFINITION, TEXT_DOCUMENT_REFERENCES, TEXT_DOCUMENT_RENAME, \
-    TEXT_DOCUMENT_FOLDING_RANGE, FoldingRangeParams, FileOperationRegistrationOptions, FileOperationFilter, \
-    FileOperationPattern, WORKSPACE_DID_CHANGE_WATCHED_FILES, DidChangeWatchedFilesRegistrationOptions, \
-    FileSystemWatcher, DidChangeWatchedFilesParams, WORKSPACE_WILL_RENAME_FILES, WorkspaceEdit, CompletionParams, \
-    Location, FoldingRange
+from lsprotocol.types import (
+    INITIALIZE,
+    INITIALIZED,
+    TEXT_DOCUMENT_COMPLETION,
+    TEXT_DOCUMENT_DEFINITION,
+    TEXT_DOCUMENT_DID_CHANGE,
+    TEXT_DOCUMENT_DID_OPEN,
+    TEXT_DOCUMENT_DID_SAVE,
+    TEXT_DOCUMENT_FOLDING_RANGE,
+    TEXT_DOCUMENT_HOVER,
+    TEXT_DOCUMENT_REFERENCES,
+    TEXT_DOCUMENT_RENAME,
+    TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
+    WORKSPACE_DID_DELETE_FILES,
+    WORKSPACE_WILL_RENAME_FILES,
+    CompletionList,
+    CompletionOptions,
+    CompletionParams,
+    DefinitionParams,
+    DeleteFilesParams,
+    DidChangeTextDocumentParams,
+    DidOpenTextDocumentParams,
+    DidSaveTextDocumentParams,
+    FoldingRange,
+    FoldingRangeParams,
+    Hover,
+    InitializedParams,
+    InitializeParams,
+    Location,
+    ReferenceParams,
+    RenameFilesParams,
+    RenameParams,
+    SemanticTokens,
+    SemanticTokensLegend,
+    SemanticTokensParams,
+    TextDocumentPositionParams,
+    WorkspaceEdit,
+)
 
-from constants import no_filter, trigger_characters, token_types, token_modifiers
+from constants import no_filter, token_modifiers, token_types, trigger_characters
 from woowoo_language_server import WooWooLanguageServer
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-SERVER = WooWooLanguageServer('WooWoo Language Server', 'v0.1')
+SERVER = WooWooLanguageServer("WooWoo Language Server", "v0.1")
 
 
 @SERVER.feature(INITIALIZE)
@@ -52,7 +78,9 @@ def did_save(ls: WooWooLanguageServer, params: DidSaveTextDocumentParams) -> Non
 
 
 @SERVER.feature(WORKSPACE_WILL_RENAME_FILES, no_filter)
-def did_rename_files(ls: WooWooLanguageServer, params: RenameFilesParams) -> WorkspaceEdit:
+def did_rename_files(
+    ls: WooWooLanguageServer, params: RenameFilesParams
+) -> WorkspaceEdit:
     logger.debug("[WORKSPACE_WILL_RENAME_FILES] notification received")
 
     return ls.rename_files(params)
@@ -63,6 +91,7 @@ def did_delete_files(ls: WooWooLanguageServer, params: DeleteFilesParams) -> Non
     logger.debug("[WORKSPACE_DID_DELETE_FILES] notification received")
 
     ls.did_delete_files(params)
+
 
 """
 # https://github.com/openlawlibrary/pygls/issues/376
@@ -85,7 +114,9 @@ def did_change(ls: WooWooLanguageServer, params: DidChangeTextDocumentParams) ->
     ls.diagnose(doc.uri)
 
 
-@SERVER.feature(TEXT_DOCUMENT_COMPLETION, CompletionOptions(trigger_characters=trigger_characters))
+@SERVER.feature(
+    TEXT_DOCUMENT_COMPLETION, CompletionOptions(trigger_characters=trigger_characters)
+)
 def completions(ls: WooWooLanguageServer, params: CompletionParams) -> CompletionList:
     logger.debug("[TEXT_DOCUMENT_COMPLETION] SERVER.feature called")
 
@@ -99,17 +130,22 @@ def on_hover(ls: WooWooLanguageServer, params: TextDocumentPositionParams) -> Ho
     return ls.hover(params)
 
 
-@SERVER.feature(TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
-                SemanticTokensLegend(token_types=token_types,
-                                     token_modifiers=token_modifiers))
-def semantic_tokens(ls: WooWooLanguageServer, params: SemanticTokensParams) -> SemanticTokens:
+@SERVER.feature(
+    TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
+    SemanticTokensLegend(token_types=token_types, token_modifiers=token_modifiers),
+)
+def semantic_tokens(
+    ls: WooWooLanguageServer, params: SemanticTokensParams
+) -> SemanticTokens:
     logger.debug("[TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL] SERVER.feature called")
 
     return ls.semantic_tokens(params)
 
 
 @SERVER.feature(TEXT_DOCUMENT_DEFINITION)
-def definition(ls: WooWooLanguageServer, params: DefinitionParams) -> Optional[Location]:
+def definition(
+    ls: WooWooLanguageServer, params: DefinitionParams
+) -> Optional[Location]:
     logger.debug("[TEXT_DOCUMENT_DEFINITION] SERVER.feature called")
 
     return ls.go_to_definition(params)
@@ -130,7 +166,9 @@ def rename(ls: WooWooLanguageServer, params: RenameParams) -> WorkspaceEdit:
 
 
 @SERVER.feature(TEXT_DOCUMENT_FOLDING_RANGE)
-def folding_range(ls: WooWooLanguageServer, params: FoldingRangeParams) -> List[FoldingRange]:
+def folding_range(
+    ls: WooWooLanguageServer, params: FoldingRangeParams
+) -> List[FoldingRange]:
     logger.debug("[TEXT_DOCUMENT_FOLDING_RANGE] SERVER.feature called")
 
     return ls.folding_range(params)
