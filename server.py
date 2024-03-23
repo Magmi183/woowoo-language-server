@@ -152,7 +152,7 @@ def definition(
 
 
 @SERVER.feature(TEXT_DOCUMENT_REFERENCES)
-def rename(ls: WooWooLanguageServer, params: ReferenceParams) -> List[Location]:
+def references(ls: WooWooLanguageServer, params: ReferenceParams) -> List[Location]:
     logger.debug("[TEXT_DOCUMENT_REFERENCES] SERVER.feature called")
 
     return ls.references(params)
