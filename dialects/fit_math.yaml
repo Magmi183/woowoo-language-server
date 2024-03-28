@@ -13,7 +13,7 @@ implicit_outer_environment: "equation"
 
 document_parts:
   - name: "Chapter"
-    description: "A single page with the chapter's textual content and list of sections."
+    description: "Top-level document part with the chapter's textual content and list of sections."
     meta_block: &doc_part_meta
       required_fields:
         - name: label
@@ -25,7 +25,7 @@ document_parts:
         - name: index
 
   - name: "Section"
-    description: "A single page with the section's textual content and list of subsections."
+    description: "Second-level document part with the section's textual content and list of subsections."
     meta_block: *doc_part_meta
 
   - name: "Subsection"
