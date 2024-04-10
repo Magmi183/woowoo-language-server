@@ -47,7 +47,7 @@ logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-SERVER = WooWooLanguageServer("WooWoo Language Server", "v0.1")
+SERVER = WooWooLanguageServer("WooWoo Language Server", "v1.0")
 
 
 @SERVER.feature(INITIALIZE)
