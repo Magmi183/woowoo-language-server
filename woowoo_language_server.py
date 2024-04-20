@@ -51,7 +51,7 @@ from convertors import (
     wuff_diagnostic_to_ls,
     wuff_folding_range_to_ls,
     wuff_location_to_ls,
-    wuff_workspace_edit_to_ls,
+    wuff_workspace_edit_to_ls, text_document_position_ls_to_wuff,
 )
 
 
@@ -157,15 +157,14 @@ class WooWooLanguageServer(LanguageServer):
         return CompletionList(is_incomplete=False, items=items)
 
     def hover(self, params: TextDocumentPositionParams) -> Hover:
-        doc_uri = unquote(params.text_document.uri)
-        result = self.analyzer.hover(
-            doc_uri, params.position.line, params.position.character
-        )
+        result = self.analyzer.hover(text_document_position_ls_to_wuff(params))
         content = MarkupContent(MarkupKind.Markdown, value=result)
         return Hover(contents=content)
 
     def semantic_tokens(self, params: SemanticTokensParams) -> SemanticTokens:
-        data = self.analyzer.semantic_tokens(unquote(params.text_document.uri))
+        data = self.analyzer.semantic_tokens(
+            WuffTextDocumentIdentifier(unquote(params.text_document.uri))
+        )
         return SemanticTokens(data=data)
 
     def folding_range(self, params: FoldingRangeParams) -> List[FoldingRange]:

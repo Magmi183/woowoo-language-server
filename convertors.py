@@ -1,4 +1,5 @@
 from typing import Optional
+from urllib.parse import unquote
 
 from lsprotocol.types import (
     CompletionItem,
@@ -12,6 +13,7 @@ from lsprotocol.types import (
     Location,
     Position,
     Range,
+    TextDocumentPositionParams,
     TextEdit,
     WorkspaceEdit,
 )
@@ -28,39 +30,9 @@ from wuff import Location as WuffLocation
 from wuff import Position as WuffPosition
 from wuff import Range as WuffRange
 from wuff import TextDocumentIdentifier as WuffTextDocumentIdentifier
+from wuff import TextDocumentPositionParams as WuffTextDocumentPositionParams
 from wuff import TextEdit as WuffTextEdit
 from wuff import WorkspaceEdit as WuffWorkspaceEdit
-
-
-def completion_params_ls_to_wuff(ls_params: CompletionParams) -> WuffCompletionParams:
-    uri = ls_params.text_document.uri
-    line = ls_params.position.line
-    character = ls_params.position.character
-
-    text_document = WuffTextDocumentIdentifier(uri)
-    position = WuffPosition(line, character)
-
-    context = None
-    if hasattr(ls_params, "context") and ls_params.context is not None:
-        trigger_kind = ls_params.context.trigger_kind
-        trigger_character = (
-            ls_params.context.trigger_character
-            if hasattr(ls_params.context, "trigger_character")
-            else None
-        )
-
-        if trigger_kind == 1:
-            my_trigger_kind = WuffCompletionTriggerKind.Invoked
-        elif trigger_kind == 2:
-            my_trigger_kind = WuffCompletionTriggerKind.TriggerCharacter
-        elif trigger_kind == 3:
-            my_trigger_kind = WuffCompletionTriggerKind.TriggerForIncompleteCompletions
-        else:
-            raise ValueError("Unknown trigger kind")
-
-        context = WuffCompletionContext(my_trigger_kind, trigger_character)
-
-    return WuffCompletionParams(text_document, position, context)
 
 
 def wuff_completion_item_to_ls(wuff_item: WuffCompletionItem) -> CompletionItem:
@@ -161,3 +133,45 @@ def wuff_range_to_ls(wuff_range: WuffRange) -> Range:
         start=wuff_position_to_ls(wuff_range.start),
         end=wuff_position_to_ls(wuff_range.end),
     )
+
+
+def text_document_position_ls_to_wuff(
+    ls_params: TextDocumentPositionParams,
+) -> WuffTextDocumentPositionParams:
+    doc_uri = unquote(ls_params.text_document.uri)
+
+    return WuffTextDocumentPositionParams(
+        WuffTextDocumentIdentifier(doc_uri),
+        WuffPosition(ls_params.position.line, ls_params.position.character),
+    )
+
+
+def completion_params_ls_to_wuff(ls_params: CompletionParams) -> WuffCompletionParams:
+    doc_uri = unquote(ls_params.text_document.uri)
+    line = ls_params.position.line
+    character = ls_params.position.character
+
+    text_document = WuffTextDocumentIdentifier(doc_uri)
+    position = WuffPosition(line, character)
+
+    context = None
+    if hasattr(ls_params, "context") and ls_params.context is not None:
+        trigger_kind = ls_params.context.trigger_kind
+        trigger_character = (
+            ls_params.context.trigger_character
+            if hasattr(ls_params.context, "trigger_character")
+            else None
+        )
+
+        if trigger_kind == 1:
+            my_trigger_kind = WuffCompletionTriggerKind.Invoked
+        elif trigger_kind == 2:
+            my_trigger_kind = WuffCompletionTriggerKind.TriggerCharacter
+        elif trigger_kind == 3:
+            my_trigger_kind = WuffCompletionTriggerKind.TriggerForIncompleteCompletions
+        else:
+            raise ValueError("Unknown trigger kind")
+
+        context = WuffCompletionContext(my_trigger_kind, trigger_character)
+
+    return WuffCompletionParams(text_document, position, context)
