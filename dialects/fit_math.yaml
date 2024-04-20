@@ -9,7 +9,6 @@ description: |-
 
 implicit_outer_environment: "equation"
 
-# meta block fields common for all wobjects/docparts
 
 document_parts:
   - name: "Chapter"
