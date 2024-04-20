@@ -68,8 +68,10 @@ class WooWooLanguageServer(LanguageServer):
                 "Exactly one workspace has to be opened. No other options are supported for now."
             )
 
-        # default: ""
-        self.set_dialect(params.initialization_options["dialectFilePath"])
+        # default: "" --> FIT-Math
+        dialect_path = params.initialization_options.get('dialectFilePath', "")
+        self.set_dialect(dialect_path)
+
         self.load_workspace(params.workspace_folders[0])
 
     def initialize_analyzer(self) -> WooWooAnalyzer:
@@ -87,7 +89,6 @@ class WooWooLanguageServer(LanguageServer):
             self.analyzer.set_dialect(dialect_file_path)
         else:
             import utils
-
             self.analyzer.set_dialect(utils.get_absolute_path("dialects/fit_math.yaml"))
 
     def diagnose(self, doc_uri: str):
